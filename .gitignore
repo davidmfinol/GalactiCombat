@@ -1,0 +1,58 @@
+ompiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Cmake Files
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Specific to results of ./buildit
+.deps/
+Makefile.in
+GalactiCombat
+GalactiCombatServer
+aclocal.m4
+autom4te.cache/
+config.guess
+config.h
+config.h.in
+config.status
+config.sub
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+missing
+stamp-h1
+
+# Text editor temp files
+*~
