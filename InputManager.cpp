@@ -218,10 +218,8 @@ bool InputManager::keyPressed(const OIS::KeyEvent& arg)
             break;
     }
     
-    /*FIXME:
     if(mNetworkMgr->isOnline())
         mNetworkMgr->sendPlayerInput(this);
-    */
     
     return true;
 }
@@ -271,10 +269,8 @@ bool InputManager::keyReleased( const OIS::KeyEvent &arg )
         mGUIMgr->setMultiplayerInput(newString);
     }
     
-    /*FIXME:
     if(mNetworkMgr->isOnline())
         mNetworkMgr->sendPlayerInput(this);
-    */
     
     return true;
 }
@@ -308,10 +304,8 @@ bool InputManager::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID 
             break;
     }
     
-    /*FIXME:
     if(mNetworkMgr->isOnline())
         mNetworkMgr->sendPlayerInput(this);
-    */
     
     return true;
 }
@@ -328,10 +322,9 @@ bool InputManager::mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID
         default:
             break;
     }
-    /*FIXME:
+    
     if(mNetworkMgr->isOnline())
         mNetworkMgr->sendPlayerInput(this);
-    */
     
     return true;
 }

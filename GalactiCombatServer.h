@@ -41,8 +41,8 @@ protected:
     void serverLoop();
     void listenForConnections();
     void receiveData(const Packet& incoming, int i);
-    void sendMineral(Mineral* mineral);
-    void sendSpaceShip(SpaceShip* spaceShip);
+    void sendMineral(Mineral* mineral, int i);
+    void sendSpaceShip(SpaceShip* spaceShip, int i);
     //--------------------------------------------------------------------------
     /*
      *        addClient(TCPsocket, char*):

@@ -25,6 +25,7 @@
 #define READY 15
 #define WALL 16
 #define NUMBER_OF_PACKETS 17
+#define STATE 18
 
 typedef struct{
     int type;

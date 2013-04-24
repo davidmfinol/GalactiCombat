@@ -192,9 +192,22 @@ void NetworkManagerClient::quit()
 
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundManager* sound, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::vector<GameObject*>& walls)
 {
+    Packet outgoing;
+    outgoing.type = STATE;
+    outgoing.message = "";
+    char *out = PacketToCharArray(outgoing);
+    if(!TCPSend(serverSock, out))
+    {
+        connected = false;
+        return;
+    }
+    
     char* incoming;
     if(!TCPReceive(serverSock, &incoming))
+    {
         connected = false;
+        return;
+    }
     Packet numPackets = charArrayToPacket(incoming);
     int packs = atoi(numPackets.message);
     std::cout << "We are expecting to receive " << packs << " number of packets" << std::endl;

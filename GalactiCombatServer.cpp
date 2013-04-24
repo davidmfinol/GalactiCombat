@@ -319,27 +319,9 @@ void GalactiCombatServer::serverLoop(void)
                 Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(spaceShips[i]);
                 std::cout << "Player is at " << pos.x << " " << pos.y << " " << pos.z << std::endl;
             }
-            
-            //inform the clients of the status of the game
-            
-            Packet out;
-            out.type = NUMBER_OF_PACKETS;
-            std::stringstream ss;
-            ss << (minerals.size() + spaceShips.size());
-            out.message = const_cast<char*>(ss.str().c_str());
-            char* outMsg = PacketToCharArray(out);
-            sendToAll(outMsg, true);
-            
-            std::cout << "Sending Minerals" << std::endl;
-            for(i = 0; i < minerals.size(); i++)
-                sendMineral(minerals[i]);
-            std::cout << "Sending Spaceships" << std::endl;
-            for(i = 0; i < spaceShips.size(); ++i)
-                sendSpaceShip(spaceShips[i]);
-            std::cout << "Players Updated" << std::endl;
         }
     }//end loop
-    printf("Shutting down.\n");
+    std::cout << "Shutting down." << std::endl;
 }
 
 void GalactiCombatServer::listenForConnections() 
@@ -457,9 +439,23 @@ void GalactiCombatServer::receiveData(const Packet &incoming, int i)
             state = PLAY;
         }
     }
+    else if(incoming.type == STATE) {
+        Packet out;
+        out.type = NUMBER_OF_PACKETS;
+        std::stringstream ss;
+        ss << (minerals.size() + spaceShips.size());
+        out.message = const_cast<char*>(ss.str().c_str());
+        char* outMsg = PacketToCharArray(out);
+        TCPSend(clients[i]->sock, outMsg);
+        
+        for(int m = 0 ; m < minerals.size() ; ++m)
+            sendMineral(minerals[m], i);
+        for(int s = 0 ; s < spaceShips.size() ; ++s)
+            sendSpaceShip(spaceShips[s], i);
+    }
 }
 
-void GalactiCombatServer::sendMineral(Mineral* mineral)
+void GalactiCombatServer::sendMineral(Mineral* mineral, int cindex)
 {
     Packet outgoing;
     outgoing.type = MINERAL;
@@ -474,10 +470,10 @@ void GalactiCombatServer::sendMineral(Mineral* mineral)
     sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, radius);
     outgoing.message = buffer;
     char* out = PacketToCharArray(outgoing);
-    sendToAll(out, true);
+    TCPSend(clients[cindex]->sock, out);
 }
 
-void GalactiCombatServer::sendSpaceShip(SpaceShip* spaceShip)
+void GalactiCombatServer::sendSpaceShip(SpaceShip* spaceShip, int cindex)
 {
     Packet outgoing;
     outgoing.type = SPACESHIP;
@@ -493,7 +489,7 @@ void GalactiCombatServer::sendSpaceShip(SpaceShip* spaceShip)
     sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, size);
     outgoing.message = buffer;
     char* out = PacketToCharArray(outgoing);
-    sendToAll(out, true);
+    TCPSend(clients[cindex]->sock, out);
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
