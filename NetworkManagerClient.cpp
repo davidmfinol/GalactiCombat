@@ -194,20 +194,24 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
 {
     Packet outgoing;
     outgoing.type = STATE;
-    outgoing.message = "";
+    outgoing.message = "NONE";
     char *out = PacketToCharArray(outgoing);
+    std::cout << "We are sending state request" << std::endl;
     if(!TCPSend(serverSock, out))
     {
         connected = false;
         return;
     }
+    std::cout << "Request Sent" << std::endl;
     
     char* incoming;
+    std::cout << "Waiting for response." << std::endl;
     if(!TCPReceive(serverSock, &incoming))
     {
         connected = false;
         return;
     }
+    std::cout << "Received initial response." << std::endl;
     Packet numPackets = charArrayToPacket(incoming);
     int packs = atoi(numPackets.message);
     std::cout << "We are expecting to receive " << packs << " number of packets" << std::endl;
