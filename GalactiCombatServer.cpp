@@ -194,7 +194,6 @@ void GalactiCombatServer::startServer(long portNo)
     IPaddress ip; //32-bit IPv4 host, 16-bit port
     //	char *message = NULL;
     const char *host = NULL;
-    Uint32 ipaddr;
     Uint16 port;
     
     port = (Uint16)portNo;
@@ -207,8 +206,8 @@ void GalactiCombatServer::startServer(long portNo)
         exit(3);
     }
     
-    ipaddr = SDL_SwapBE32(ip.host);
-    
+    Uint32 ipaddr;
+    //ipaddr = SDL_SwapBE32(ip.host);
     //printf("IP Address: %d.%d.%d.%d\n",
     //       ipaddr>>24,
     //       (ipaddr>>16)&0xff,
@@ -278,10 +277,10 @@ void GalactiCombatServer::serverLoop(void)
         //for each connection, receive data
         for(i = 0; numReady && i < clients.size(); i++)
         {
-            //printf("Checking sockets\n");
+            //std::cout << "Checking sockets" << std::endl;
             if(SDLNet_SocketReady(clients[i]->sock))
             {
-                //printf("%s's socket is read!\n", clients[i]->name);
+                //std::cout << clients[i]->name << "'s socket is read!" << std::endl;
                 char *msg = NULL;
                 std::string score;
                 if(TCPReceive(clients[i]->sock, &msg))
@@ -297,7 +296,7 @@ void GalactiCombatServer::serverLoop(void)
                 
             } else {
                 //FIXME: THIS SHOULD CHECK FOR DISCONNECTS, BUT DOESN'T WORK:
-                //printf("Client disconnected.\n");
+                //std::cerr << "Client disconnected." << std::endl;
                 //this->removeClient(i);
             }
         }
@@ -308,17 +307,19 @@ void GalactiCombatServer::serverLoop(void)
         lastFrameTime = currentTime;
         if(state == PLAY)
         {
-            std::cout << "Running the Game loop" << std::endl;
+            //std::cout << "Running the Game loop" << std::endl;
             gameLoop(elapsedTime);
-            std::cout << "Game loop has been run" << std::endl;
+            //std::cout << "Game loop has been run" << std::endl;
             
             // Debugging
+            /*
             std::cout << "There are " << spaceShips.size() << " SpaceShips in the scene" << std::endl;
             for(i = 0; i < spaceShips.size(); i++)
             {
                 Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(spaceShips[i]);
                 std::cout << "Player is at " << pos.x << " " << pos.y << " " << pos.z << std::endl;
             }
+            */
         }
     }//end loop
     std::cout << "Shutting down." << std::endl;
@@ -336,7 +337,7 @@ void GalactiCombatServer::listenForConnections()
             Client *client;
             Packet pack = charArrayToPacket(msg);
             
-            if(pack.type != CONNECTION)
+            if(pack.type != CONNECTION) //FIXME: THIS SOMETIMES GET CALLED INCORRECTLY
             {
                 std::cerr << "Connection Error. Someone sent something other than a CONNECTION packet as a new socket." << std::endl;
                 return;
@@ -344,7 +345,7 @@ void GalactiCombatServer::listenForConnections()
             
             //add the client
             std::string name = pack.message;
-            // TODO: add some checks for repeated names. Could cause crash
+            // TODO: FIXME: add some checks for repeated names. Could cause crash
             client = this->addClient( TCPsock, const_cast<char*>(name.c_str()) );
             
             printf("%s has logged in.\n", const_cast<char*>(client->name.c_str()));
