@@ -88,26 +88,24 @@ void GalactiCombatServer::removeClient(int i)
  *                At the time this comment was written, UDPSend has not been written, so 
  *                always set this to true.
  */
-//send_all() from tcpmultiserver.c in the SDLNet demos
 void GalactiCombatServer::sendToAll(char *buf, bool TCP)
 {
-    int cindex;
     TCP = true;	//NOTE: temporary
     
     if(!buf || !clients.size())
         return;
     
-    cindex = 0;
-    while(cindex < clients.size())
+    for(int cindex = 0; cindex < clients.size(); )
     {
         if(TCP)
         {
             if(TCPSend(clients[cindex]->sock, buf))
                 cindex++;
-            else {
-                std::cerr << "Failed to send message to " << clients[cindex]->name << std::endl;
+            else
+            {
+                std::cerr << "Failed to send message" << buf << "to " << clients[cindex]->name << std::endl;
                 this->removeClient(cindex);
-                std::cerr << << "Disconnected" << std::endl;
+                std::cerr << "Disconnected" << std::endl;
             }
         }
         else //UDP
@@ -119,12 +117,8 @@ void GalactiCombatServer::sendToAll(char *buf, bool TCP)
 
 
 
-/*
- *			createSocketSet():
- *			This method returns an SDLNet_SocketSet containing the server
- *			socket and all the client sockets.
- */
-//create_sockset() from tcpmultiserver.c in the SDLnet demos
+
+// This method returns an SDLNet_SocketSet containing the server socket and all the client sockets.
 SDLNet_SocketSet GalactiCombatServer::createSockSet()
 {
     static SDLNet_SocketSet set = NULL;
@@ -134,7 +128,7 @@ SDLNet_SocketSet GalactiCombatServer::createSockSet()
         SDLNet_FreeSocketSet(set);
     set = SDLNet_AllocSocketSet(clients.size() + 1);
     if(!set){
-        printf("SDLNet_AllocSocketSet done goofed: %s\n", SDLNet_GetError());
+        std::cerr << "SDLNet_AllocSocketSet done goofed: " << SDLNet_GetError() << std::endl;
         exit(1);
     }
     SDLNet_TCP_AddSocket(set, TCPServerSock);
@@ -142,13 +136,6 @@ SDLNet_SocketSet GalactiCombatServer::createSockSet()
         SDLNet_TCP_AddSocket(set, clients[i]->sock);
     return set;
 }
-
-/*
- *        createServerBalls():
- *        This method is copy-pasted from GalactiCombat.cpp to create the random balls around
- *        the level server-side. The difference is that these balls aren't associated
- *        with any mesh or Entity since the server doesn't need to graphically render anything.
- */
 
 void GalactiCombatServer::createServerMinerals()
 {
@@ -168,16 +155,9 @@ void GalactiCombatServer::createServerMinerals()
         physicsSimulator->addGameObject(minerals[i], RESTITUTION);
         physicsSimulator->setGameObjectVelocity(minerals[i], Ogre::Vector3(vel_x, vel_y, vel_z));
     }
-    printf("Minerals created.\n");
+    std::cout << "Minerals created." << std::endl;
 }
 
-/*
- *        createServerRoom():
- *        This method builds the room in which the players and the balls bounce around in and
- *        adds the walls, floor, and ceiling to the physics simulator. It's basically
- *        createRoom() from GalactiCombat.cpp. The difference is that the server doesn't need
- *        meshes because it's not graphically rendering anything.
- */
 void GalactiCombatServer::createServerRoom()
 {
     // create ground
@@ -204,10 +184,9 @@ void GalactiCombatServer::createServerRoom()
     walls[5] = new GameObject ("right", mSceneMgr->getRootSceneNode(), NULL, ROOM_HIGH/2, ROOM_SIZE/2, 0, 0, "NEGATIVE_UNIT_Z");
     physicsSimulator->addGameObject(walls[5]);
     
-    printf("Room built.\n");
+    std::cout << "Room built." << std::endl;
 }
 
-//main method from tcpmultiserver.c in the SDLNet demos
 void GalactiCombatServer::startServer(long portNo)
 {
     IPaddress ip; //32-bit IPv4 host, 16-bit port
@@ -375,7 +354,7 @@ void GalactiCombatServer::listenForConnections()
             client = this->addClient( TCPsock, const_cast<char*>(name.c_str()) );
             
             printf("%s has logged in.\n", const_cast<char*>(client->name.c_str()));
-            printf("%d players have logged in.\n", clients.size()); //FIXME:warning
+            printf("%d players have logged in.\n", (int)clients.size());
         }
         else
         {
