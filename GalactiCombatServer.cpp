@@ -336,12 +336,15 @@ void GalactiCombatServer::serverLoop(void)
             }
             
             //inform the clients of the status of the game
+/*
             std::cout << "Sending Minerals" << std::endl;
             for(i = 0; i < minerals.size(); i++)
                 sendMineral(minerals[i]);
             std::cout << "Sending Spaceships" << std::endl;
             for(i = 0; i < spaceShips.size(); ++i)
                 sendSpaceShip(spaceShips[i]);
+            std::cout << "Players Updated" << std::endl;
+*/
             std::cout << "Players Updated" << std::endl;
         }
     }//end loop
@@ -439,11 +442,8 @@ void GalactiCombatServer::receiveData(const Packet &incoming, int i)
             }
             
             if((readyCount == clients.size()) && (clients.size() != 1))
-                state = PLAY;
-            else
-                state = PAUSE;
-            
-            if (state == PLAY) result += "\nAll players ready, game is starting in:\n";
+                result += "\nAll players ready, game is starting in:\n";
+
             char* out = const_cast<char*>(result.c_str());
             if(TCPSend(clients[i]->sock, out))
                 printf("Sent back lobby list: %s\n", out);
@@ -459,7 +459,11 @@ void GalactiCombatServer::receiveData(const Packet &incoming, int i)
         else if(!strcmp(incoming.message, "RESET")) {
             for (int count = 0; count < clients.size(); count++) {
                 clients[count]->ready = false;
+                state = PAUSE;
             }
+        }
+        else if(!strcmp(incoming.message, "START")) {
+            state = PLAY;
         }
     }
 }
