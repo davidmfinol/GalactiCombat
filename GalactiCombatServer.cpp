@@ -336,15 +336,12 @@ void GalactiCombatServer::serverLoop(void)
             }
             
             //inform the clients of the status of the game
-/*
             std::cout << "Sending Minerals" << std::endl;
             for(i = 0; i < minerals.size(); i++)
                 sendMineral(minerals[i]);
             std::cout << "Sending Spaceships" << std::endl;
             for(i = 0; i < spaceShips.size(); ++i)
                 sendSpaceShip(spaceShips[i]);
-            std::cout << "Players Updated" << std::endl;
-*/
             std::cout << "Players Updated" << std::endl;
         }
     }//end loop
