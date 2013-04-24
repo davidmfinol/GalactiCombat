@@ -260,6 +260,7 @@ void GUIManager::updateLobbyList(int i)
         mTrayMgr->hideCursor();   
         char* request = const_cast<char*>("15START");
         TCPSend(mNetworkMgr->getSocket(), request);
+        std::cout << "Player sent start message to server" << std::endl;
     }
     else {
         std::stringstream ss;
@@ -273,7 +274,7 @@ void GUIManager::startCountingDown(void)
 {
     mTrayMgr->destroyWidget(lobbyReadyButton); lobbyReadyButton = 0;
     mTrayMgr->destroyWidget(lobbyQuitButton); lobbyQuitButton = 0; 
-    countdown = true;     
+    countdown = true;
 }
 
 void GUIManager::readyPressed(void)
@@ -281,6 +282,7 @@ void GUIManager::readyPressed(void)
     if (!isReady) {
         char* request = const_cast<char*>("15READY");
         TCPSend(mNetworkMgr->getSocket(), request);
+        std::cout << "Player sent ready message to server" << std::endl;
         lobbyReadyButton->setCaption("Cancel");
     }
     else {
