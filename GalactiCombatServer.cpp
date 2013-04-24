@@ -99,11 +99,13 @@ void GalactiCombatServer::sendToAll(char *buf, bool TCP)
     {
         if(TCP)
         {
-            if(TCPSend(clients[cindex]->sock, buf))
+            if(TCPSend(clients[cindex]->sock, buf)) {
+                std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
                 cindex++;
+            }
             else
             {
-                std::cerr << "Failed to send message" << buf << "to " << clients[cindex]->name << std::endl;
+                std::cerr << "Failed to send message '" << buf << "' to " << clients[cindex]->name << std::endl;
                 this->removeClient(cindex);
                 std::cerr << "Disconnected" << std::endl;
             }
