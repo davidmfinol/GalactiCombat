@@ -258,6 +258,8 @@ void GUIManager::updateLobbyList(int i)
         initialState = false;    
         multiPlayerMenu = false;
         mTrayMgr->hideCursor();   
+        char* request = const_cast<char*>("15START");
+        TCPSend(mNetworkMgr->getSocket(), request);
     }
     else {
         std::stringstream ss;
