@@ -104,9 +104,11 @@ void GalactiCombatServer::sendToAll(char *buf, bool TCP)
         {
             if(TCPSend(clients[cindex]->sock, buf))
                 cindex++;
-            //FIXME: should disconnect clients?
-            //else
-            //    this->removeClient(cindex);
+            else {
+                std::cerr << "Failed to send message to " << clients[cindex]->name << std::endl;
+                this->removeClient(cindex);
+                std::cerr << << "Disconnected" << std::endl;
+            }
         }
         else //UDP
             {
