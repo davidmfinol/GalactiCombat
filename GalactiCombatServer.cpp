@@ -203,7 +203,7 @@ void GalactiCombatServer::startServer(long portNo)
     
     if(SDLNet_ResolveHost(&ip, NULL, port) == -1)
     {
-        std::cer << "SDLNet_ResolveHost done goofed: " << SDLNet_GetError() << std::endl;
+        std::cerr << "SDLNet_ResolveHost done goofed: " << SDLNet_GetError() << std::endl;
         exit(3);
     }
     
@@ -327,7 +327,8 @@ void GalactiCombatServer::serverLoop(void)
             std::stringstream ss;
             ss << (minerals.size() + spaceShips.size());
             out.message = const_cast<char*>(ss.str().c_str());
-            sendToAll(out, true);
+            char* outMsg = PacketToCharArray(out);
+            sendToAll(outMsg, true);
             
             std::cout << "Sending Minerals" << std::endl;
             for(i = 0; i < minerals.size(); i++)
@@ -355,7 +356,7 @@ void GalactiCombatServer::listenForConnections()
             
             if(pack.type != CONNECTION)
             {
-                std::cerr << "Connection Error. Someone sent something other than a CONNECTION packet as a new socket." << std::endl);
+                std::cerr << "Connection Error. Someone sent something other than a CONNECTION packet as a new socket." << std::endl;
                 return;
             }
             

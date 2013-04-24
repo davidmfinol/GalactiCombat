@@ -193,7 +193,10 @@ void NetworkManagerClient::quit()
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundManager* sound, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::vector<GameObject*>& walls)
 {
     char* incoming;
-    for(int i = 0; i < 82; ++i) //FIXME
+    if(!TCPReceive(serverSock, &incoming))
+        connected = false;
+    Packet numPackets = charArrayToPacket(incoming);
+    for(int i = 0; i < atoi(numPackets.message); ++i)
     {
         if(!TCPReceive(serverSock, &incoming)) {
             connected = false; break;}

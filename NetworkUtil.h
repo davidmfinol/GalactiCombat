@@ -23,7 +23,8 @@
 #define MINERAL 13
 #define SPACESHIP 14
 #define READY 15
-#define NUMBER_OF_PACKETS 16
+#define WALL 16
+#define NUMBER_OF_PACKETS 17
 
 typedef struct{
     int type;
