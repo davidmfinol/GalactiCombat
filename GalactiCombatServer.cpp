@@ -323,26 +323,26 @@ void GalactiCombatServer::serverLoop(void)
         lastFrameTime = currentTime;
         if(state == PLAY)
         {
-            printf("Running the Game loop\n");
+            std::cout << "Running the Game loop" << std::endl;
             gameLoop(elapsedTime);
-            printf("Game loop has been runned.\n");
+            std::cout << "Game loop has been run" << std::endl;
             
             // Debugging
-            printf("There are %d spaceShips in the game\n", spaceShips.size());
+            std::cout << "There are " << spaceShips.size() << "SpaceShips in the scene" << std::endl;
             for(i = 0; i < spaceShips.size(); i++)
             {
                 Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(spaceShips[i]);
-                printf("Player %d is at %f, %f, %f\n", i, pos.x, pos.y,pos.z);
+                std::cout << "Player is at" << pos.x << " " << pos.y << " " << pos.z << std::endl;
             }
             
             //inform the clients of the status of the game
-            printf("Sending minerals\n");
+            std::cout << "Sending Minerals" << std::endl;
             for(i = 0; i < minerals.size(); i++)
                 sendMineral(minerals[i]);
-            printf("Sending spaceShips\n");
+            std::cout << "Sending Spaceships" << std::endl;
             for(i = 0; i < spaceShips.size(); ++i)
                 sendSpaceShip(spaceShips[i]);
-            printf("Players updated\n");
+            std::cout << "Players Updated" << std::endl;
         }
     }//end loop
     printf("Shutting down.\n");
