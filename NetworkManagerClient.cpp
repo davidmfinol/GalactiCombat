@@ -103,38 +103,6 @@ int NetworkManagerClient::TCPConnect(char *host, long portNo, char *name)
     connected = true;
 }
 
-void NetworkManagerClient::sendPlayerScore(double score)
-{
-    Packet outgoing;
-    std::stringstream ss;
-    std::string s;
-    ss << score;
-    s = ss.str();
-    outgoing.type = SCORE;
-    outgoing.message = const_cast<char*>(s.c_str());
-    
-    char *incoming = NULL;
-    char *out = PacketToCharArray(outgoing);
-    //printf("Sending: %s\n", out);
-    if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
-        printf("Receving: %s\n", incoming);
-        Packet pack = charArrayToPacket(incoming);
-        if(pack.type != SCORE)
-        {
-            printf("Error in sendPlayerScore() in NetworkManagerClient.cpp. Score not received from server.\n");
-            scores = "";
-        }
-        else{
-            printf("Received message: %s\n", pack.message);
-            scores = pack.message;
-        }
-    }
-    else {
-        connected = false;
-        scores = "";
-    }
-}
-
 std::string NetworkManagerClient::getPlayerScores()
 {
     return scores; //"name,score;"
@@ -190,31 +158,55 @@ void NetworkManagerClient::quit()
     connected = false;
 }
 
+void NetworkManagerClient::sendPlayerScore(double score)
+{
+    std::stringstream ss;
+    std::string s;
+    ss << score;
+    s = ss.str();
+ 
+    Packet outgoing;
+    outgoing.type = SCORE;
+    outgoing.message = const_cast<char*>(s.c_str());   
+    char *incoming = NULL;
+    char *out = PacketToCharArray(outgoing);
+    if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
+        printf("Receving: %s\n", incoming);
+        Packet pack = charArrayToPacket(incoming);
+        if(pack.type != SCORE)
+        {
+            printf("Error in sendPlayerScore() in NetworkManagerClient.cpp. Score not received from server.\n");
+            scores = "";
+        }
+        else{
+            printf("Received message: %s\n", pack.message);
+            scores = pack.message;
+        }
+    }
+    else {
+        connected = false;
+        scores = "";
+    }
+}
+
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundManager* sound, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::vector<GameObject*>& walls)
 {
     Packet outgoing;
     outgoing.type = STATE;
     outgoing.message = "NONE";
+    char* incoming = NULL;
     char *out = PacketToCharArray(outgoing);
-    std::cout << "We are sending state request" << std::endl;
-    if(!TCPSend(serverSock, out))
-    {
+    std::cout << "We are sending state request and trying to receive initial response." << std::endl;
+    if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
+        std::cout << "Received initial response." << std::endl;
+        Packet numPackets = charArrayToPacket(incoming);
+        int packs = atoi(numPackets.message);
+        std::cout << "We are expecting to receive " << packs << " number of packets" << std::endl;
+    }
+    else {
         connected = false;
         return;
     }
-    std::cout << "Request Sent" << std::endl;
-    
-    char* incoming;
-    std::cout << "Waiting for response." << std::endl;
-    if(!TCPReceive(serverSock, &incoming))
-    {
-        connected = false;
-        return;
-    }
-    std::cout << "Received initial response." << std::endl;
-    Packet numPackets = charArrayToPacket(incoming);
-    int packs = atoi(numPackets.message);
-    std::cout << "We are expecting to receive " << packs << " number of packets" << std::endl;
     
     for(int i = 0; i < packs; ++i)
     {
