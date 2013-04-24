@@ -23,7 +23,7 @@
 #define MINERAL 13
 #define SPACESHIP 14
 #define READY 15
-#define WALL 16
+#define NUMBER_OF_PACKETS 16
 
 typedef struct{
     int type;
@@ -82,6 +82,7 @@ static char *PacketToCharArray(Packet pack)
     
     char* charArray = (char*)malloc(2 + messageLength);
     //sprintf(charArray, "%2d", pack.type);
+    //TODO: may want to fix, division is expensive
     char digit1 = pack.type/10 + 48;
     char digit2 = pack.type%10 + 48;
     memmove(charArray, &digit1, 1);

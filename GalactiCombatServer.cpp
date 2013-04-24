@@ -203,50 +203,51 @@ void GalactiCombatServer::startServer(long portNo)
     
     if(SDLNet_ResolveHost(&ip, NULL, port) == -1)
     {
-        printf("SDLNet_ResolveHost done goofed: %s\n", SDLNet_GetError());
+        std::cer << "SDLNet_ResolveHost done goofed: " << SDLNet_GetError() << std::endl;
         exit(3);
     }
     
     ipaddr = SDL_SwapBE32(ip.host);
     
-    printf("IP Address: %d.%d.%d.%d\n",
-           ipaddr>>24,
-           (ipaddr>>16)&0xff,
-           (ipaddr>>8)&0xff,
-           ipaddr&0xff);
+    //printf("IP Address: %d.%d.%d.%d\n",
+    //       ipaddr>>24,
+    //       (ipaddr>>16)&0xff,
+    //       (ipaddr>>8)&0xff,
+    //       ipaddr&0xff);
     //printf("Port: %d\n", port);
+    
     host = SDLNet_ResolveIP(&ip);
     if(host == NULL)
-        printf("Host: N/A\n");
+        std::cout << "Host: N/A" << std::endl;
     else
-        printf("Host: %s\n", host);
+        std::cout << "Host: " << host << std::endl;
     
     TCPServerSock = SDLNet_TCP_Open(&ip);
     if(!TCPServerSock)
     {
-        printf("SDLNet_TCP_Open done goofed: %s\n", SDLNet_GetError());
+        std::cout << "SDLNet_TCP_Open done goofed: " << SDLNet_GetError() << std::endl;
         exit(4);
     }
     
     //set up the game environment
-    printf("Setting up game....\n");
-    printf("Creating OgreRoot.\n");
+    std::cout << "Setting up game...." << std::endl;
+    std::cout << "Creating OgreRoot." << std::endl;
     mRoot = new Ogre::Root();
-    printf("Choosing Scene Manager.\n");
+    std::cout << "Choosing Scene Manager." << std::endl;
     chooseSceneManager();
-    printf("Creating Room.\n");
+    std::cout << "Creating Room." << std::endl;
     this->createServerRoom();
-    printf("Creating Minerals.\n");
+    std::cout << "Creating Minerals." << std::endl;
     this->createServerMinerals();
     
-    printf("Ready for connections.\n");
+    std::cout << "Ready for connections." << std::endl;
     
     serverLoop();
 }
 
 void GalactiCombatServer::serverLoop(void)
 {
-    printf("Starting server loop.\n");
+    std::cout << "Starting server loop." << std::endl;
     TCPsocket TCPsock;
     UDPsocket UDPsock;
     UDPpacket *out, *in;
@@ -260,7 +261,7 @@ void GalactiCombatServer::serverLoop(void)
         numReady = SDLNet_CheckSockets(set, (Uint32) - 1);
         if(numReady == -1)
         {
-            printf("SDLNet_CheckSockets done goofed: %s\n", SDLNet_GetError());
+            std::cerr << "SDLNet_CheckSockets done goofed: " << SDLNet_GetError() << std::endl;
             break;
         }
         
@@ -285,11 +286,11 @@ void GalactiCombatServer::serverLoop(void)
                 std::string score;
                 if(TCPReceive(clients[i]->sock, &msg))
                 {
-                    printf("Received message from client %s\n", const_cast<char*>(clients[i]->name.c_str()));
+                    std::cout << "Received message from client " << clients[i]->name;
                     numReady--;
                     Packet incoming = charArrayToPacket(msg);
                     this->receiveData(incoming, i);
-                    printf("Message processed  from %s\n", const_cast<char*>(clients[i]->name.c_str()));
+                    std::cout << "Message processed  from " << clients[i]->name;
                 }
                 free(msg);
                 msg = NULL;
@@ -320,6 +321,14 @@ void GalactiCombatServer::serverLoop(void)
             }
             
             //inform the clients of the status of the game
+            
+            Packet out;
+            out.type = NUMBER_OF_PACKETS;
+            std::stringstream ss;
+            ss << (minerals.size() + spaceShips.size());
+            out.message = const_cast<char*>(ss.str().c_str());
+            sendToAll(out, true);
+            
             std::cout << "Sending Minerals" << std::endl;
             for(i = 0; i < minerals.size(); i++)
                 sendMineral(minerals[i]);
@@ -340,13 +349,13 @@ void GalactiCombatServer::listenForConnections()
         char *msg = NULL;
         if(TCPReceive(TCPsock, &msg))
         {
-            printf("Received a message: %s\n", msg);
+            std::cout << "Received a message: " <<  msg << std::endl;
             Client *client;
             Packet pack = charArrayToPacket(msg);
             
             if(pack.type != CONNECTION)
             {
-                printf("Connection Error. Someone sent something other than a CONNECTION packet as a new socket.\n");
+                std::cerr << "Connection Error. Someone sent something other than a CONNECTION packet as a new socket." << std::endl);
                 return;
             }
             
