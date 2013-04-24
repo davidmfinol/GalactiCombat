@@ -237,6 +237,7 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
+    mNetworkMgr->sendPlayerInput(mInputMgr); //FIXME: THIS IS BAD
     //mNetworkMgr->receiveData(mSceneMgr, mSoundMgr, minerals,spaceShips,walls);
     //vector<Mineral*> newMinerals = mInputMgr->receiveMinerals();
     //vector<SpaceShip*> newSpaceShips = mInputMgr->receiveSpaceShips();

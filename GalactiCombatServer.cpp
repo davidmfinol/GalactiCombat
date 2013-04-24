@@ -328,11 +328,11 @@ void GalactiCombatServer::serverLoop(void)
             std::cout << "Game loop has been run" << std::endl;
             
             // Debugging
-            std::cout << "There are " << spaceShips.size() << "SpaceShips in the scene" << std::endl;
+            std::cout << "There are " << spaceShips.size() << " SpaceShips in the scene" << std::endl;
             for(i = 0; i < spaceShips.size(); i++)
             {
                 Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(spaceShips[i]);
-                std::cout << "Player is at" << pos.x << " " << pos.y << " " << pos.z << std::endl;
+                std::cout << "Player is at " << pos.x << " " << pos.y << " " << pos.z << std::endl;
             }
             
             //inform the clients of the status of the game
