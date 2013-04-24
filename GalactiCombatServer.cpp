@@ -286,11 +286,11 @@ void GalactiCombatServer::serverLoop(void)
                 std::string score;
                 if(TCPReceive(clients[i]->sock, &msg))
                 {
-                    std::cout << "Received message from client " << clients[i]->name;
+                    std::cout << "Received message from client " << clients[i]->name << std::endl;
                     numReady--;
                     Packet incoming = charArrayToPacket(msg);
                     this->receiveData(incoming, i);
-                    std::cout << "Message processed  from " << clients[i]->name;
+                    std::cout << "Message processed  from " << clients[i]->name << std::endl;
                 }
                 free(msg);
                 msg = NULL;

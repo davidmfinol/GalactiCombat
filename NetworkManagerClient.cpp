@@ -196,7 +196,9 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
     if(!TCPReceive(serverSock, &incoming))
         connected = false;
     Packet numPackets = charArrayToPacket(incoming);
-    for(int i = 0; i < atoi(numPackets.message); ++i)
+    int packs = atoi(numPackets.message);
+    std::cout << "We are expecting to received " << packs << " number of packets" << std::endl;
+    for(int i = 0; i < packs; ++i)
     {
         if(!TCPReceive(serverSock, &incoming)) {
             connected = false; break;}
