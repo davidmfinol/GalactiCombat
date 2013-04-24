@@ -175,7 +175,7 @@ static int TCPSend(TCPsocket sock, char *buf)
     result=SDLNet_TCP_Send(sock,&len,sizeof(len));
 
     if(result<sizeof(len)) {
-        printf("SDLNet_TCP_Send done goofed:\n");
+        printf("SDLNet_TCP_Send done goofed1:\n");
         if(SDLNet_GetError() && strlen(SDLNet_GetError())) // sometimes blank!
             printf("\t- %s\n", SDLNet_GetError());
         return(0);
@@ -188,7 +188,7 @@ static int TCPSend(TCPsocket sock, char *buf)
     result=SDLNet_TCP_Send(sock,buf,len);
 
     if(result<len) {
-        printf("SDLNet_TCP_Send done goofed:\n");
+        printf("SDLNet_TCP_Send done goofed2:\n");
         if(SDLNet_GetError() && strlen(SDLNet_GetError())) // sometimes blank!
             printf("\t- %s\n", SDLNet_GetError());
         return(0);

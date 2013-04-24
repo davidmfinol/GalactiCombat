@@ -104,8 +104,9 @@ void GalactiCombatServer::sendToAll(char *buf, bool TCP)
         {
             if(TCPSend(clients[cindex]->sock, buf))
                 cindex++;
-            else
-                this->removeClient(cindex);
+            //FIXME: should disconnect clients?
+            //else
+            //    this->removeClient(cindex);
         }
         else //UDP
             {
@@ -372,7 +373,7 @@ void GalactiCombatServer::listenForConnections()
             client = this->addClient( TCPsock, const_cast<char*>(name.c_str()) );
             
             printf("%s has logged in.\n", const_cast<char*>(client->name.c_str()));
-            printf("%d players have logged in.\n", clients.size());
+            printf("%d players have logged in.\n", clients.size()); //FIXME:warning
         }
         else
         {
