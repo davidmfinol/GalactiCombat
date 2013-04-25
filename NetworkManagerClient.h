@@ -6,6 +6,7 @@
 #include "SoundManager.h"
 #include "NetworkUtil.h"
 #include "ISpaceShipController.h"
+#include "ClientSpaceShipController.h"
 #include "Mineral.h"
 #include "GameObject.h"
 #include "SpaceShip.h"
@@ -34,8 +35,8 @@ public:
     void receiveData(Ogre::SceneManager*, SoundManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::vector<GameObject*>&);
     
 protected:
-    
     TCPsocket serverSock;
+    std::string mName;
     std::string scores;
     bool connected;
 };

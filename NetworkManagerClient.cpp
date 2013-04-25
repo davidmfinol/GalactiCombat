@@ -99,7 +99,8 @@ int NetworkManagerClient::TCPConnect(char *host, long portNo, char *name)
         exit(8);
     }
     
-    printf("Logged in as %s\n",name);
+    mName = name;
+    std::cout << "Logged in as " << mName << std::endl;
     connected = true;
 }
 
@@ -271,6 +272,57 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
         else if(in.type == SPACESHIP)
         {
             //std::cout << "It was a spaceship." << std::endl;
+            std::string message(in.message);
+            std::string name = message.substr(0, message.find(","));
+            message = message.substr(message.find(",") + 1);
+            double pos_x = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double pos_y = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double pos_z = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double vel_x = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double vel_y = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double vel_z = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_w = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_x = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_y = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_z = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double size = atof(message.substr(0, message.find(",")).c_str());
+            
+            // FIXME: THIS IS BAD, oh well
+            bool found = false;
+            if(name == mName)
+            {
+                spaceships[0]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                spaceships[0]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
+                break;
+            }
+            for(int j = 1; j < spaceships.size(); ++j)
+            {
+                if(spaceships[j]->getName() == name)
+                {
+                    found = true;
+                    spaceships[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                    spaceships[j]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
+                    break;
+                }
+            }
+            if(!found)
+            {
+                ISpaceShipController* controller = new ClientSpaceShipController();
+                spaceships.push_back(new SpaceShip(name, sound, controller, sceneManager->getRootSceneNode()->createChildSceneNode(),size));
+                spaceships.back()->getSceneNode()->getParentSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                spaceships.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
+            }
+            //std::cout << "Got the SpaceShip!" << std::endl;
         }
         else if(in.type == WALL)
         {
