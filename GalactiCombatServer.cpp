@@ -495,25 +495,44 @@ void GalactiCombatServer::receiveData(int i)
         }
     }
     else if(incoming.type == STATE) {
-        ////std::cout << "Received request to update game state" << std::endl;
+        std::cout << "Beginning of STATE" << std::endl << std::endl;
         Packet out;
-        out.type = NUMBER_OF_PACKETS;
+        out.type = INFO;
         std::stringstream ss;
-        ss << (minerals.size() + spaceShips.size());
-        out.message = const_cast<char*>(ss.str().c_str());
-        char* outMsg = PacketToCharArray(out);
-        //std::cout << "Sending number of game objects" << std::endl;
-        TCPSend(clients[i]->sock, outMsg);
-        //std::cout << "Sent information on number of game objects" << std::endl;
-        
-        //std::cout << "About to send information about minerals" << std::endl;
-        for(int m = 0 ; m < minerals.size() ; ++m)
-            sendMineral(minerals[m], i);
-        //std::cout << "Sent information on minerals" << std::endl;
-        //std::cout << "About to send information about spaceShips" << std::endl;
-        for(int s = 0 ; s < spaceShips.size() ; ++s)
-            sendSpaceShip(spaceShips[s], i);
-        //std::cout << "Sent information on spaceShips" << std::endl;
+
+        ss << "minerals:" << minerals.size() << ",";
+        for (int in = 0; in < minerals.size(); in++) {
+            std::string name = minerals[in]->getName();
+            Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(minerals[in]);
+            Ogre::Vector3 vel = physicsSimulator->getGameObjectVelocity(minerals[in]);
+            Ogre::Quaternion rot = physicsSimulator->getGameObjectOrientation(minerals[in]);
+            double radius = minerals[in]->getRadius();
+            char buffer[100];
+            sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, radius);
+            ss << buffer;
+        }
+
+        ss << "spaceships:" << spaceShips.size() << ",";
+        for (int in = 0; in < spaceShips.size(); in++) {
+            std::string name = spaceShips[in]->getName();
+            Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(spaceShips[in]);
+            Ogre::Vector3 vel = physicsSimulator->getGameObjectVelocity(spaceShips[in]);
+            Ogre::Quaternion rot = physicsSimulator->getGameObjectOrientation(spaceShips[in]);
+            double size = spaceShips[in]->getSize();
+            char buffer[100];
+            sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, size);
+            ss << buffer;
+        }
+
+        std::string sss("short");
+        out.message = const_cast<char*>(sss.c_str());
+
+        std::cout << clients[i]->name << "     " << out.message << std::endl << std::endl;
+        if(TCPSend(clients[i]->sock, PacketToCharArray(out)))
+            std::cout << "Sent back info to " << clients[i]->name << std::endl;
+        else
+            std::cout << "Didn't send back info to " << clients[i]->name << std::endl;
+        std::cout << "End of STATE" << std::endl << std::endl;
     }
 }
 

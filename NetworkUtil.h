@@ -29,6 +29,7 @@
 #define WALL 16
 #define NUMBER_OF_PACKETS 17
 #define STATE 18
+#define INFO 19
 
 typedef struct{
     int type;
