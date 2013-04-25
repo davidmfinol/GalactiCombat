@@ -248,8 +248,10 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
             bool found = false;
             for(int j = 0; j < minerals.size(); ++i)
             {
+                std::cout << "Checking to see if " << name << " already exists." << std::endl;
                 if(minerals[j]->getName() == name)
                 {
+                    std::cout << "Exists." << std::endl;
                     found = true;
                     minerals[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
                     minerals[j]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
@@ -258,6 +260,7 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
             }
             if(!found)
             {
+                std::cout << "Doesn't exist, create it." << std::endl;
                 minerals.push_back(new Mineral(name, sound, sceneManager->getRootSceneNode(), pos_x, pos_y, pos_z, radius));
                 minerals.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
             }
