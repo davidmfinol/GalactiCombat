@@ -41,12 +41,13 @@ Client* GalactiCombatServer::findClientByName(std::string name)
         return 0;
 }
 
-Client* GalactiCombatServer::addClient(TCPsocket sock, std::string name)
+Client* GalactiCombatServer::addClient(TCPsocket sock, int channel, std::string name)
 {
     printf("Adding client %s\n", const_cast<char*>(name.c_str()));
     
     clients.push_back(new Client());
     clients.back()->sock = sock;
+	clients.back()->channel = channel;
     clients.back()->name = name;
     clients.back()->inputController = new ClientSpaceShipController();
     clients.back()->ready = false;
@@ -71,6 +72,9 @@ void GalactiCombatServer::removeClient(int i)
     delete spaceShips[i];
     spaceShips.erase(spaceShips.begin() + i);
     
+	//Unbind the UDP socket
+	SDLNet_UDP_Unbind(UDPServerSock, clients[i]->channel);
+
     // Remove it from our list of clients
     SDLNet_TCP_Close(clients[i]->sock);
     delete clients[i]->inputController;
@@ -88,16 +92,20 @@ void GalactiCombatServer::removeClient(int i)
  *                At the time this comment was written, UDPSend has not been written, so 
  *                always set this to true.
  */
-void GalactiCombatServer::sendToAll(char *buf, bool TCP)
+void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
 {
-    TCP = true;	//NOTE: temporary
-    
+    useTCP = true;	//NOTE: temporary
+	UDPpacket *UDPPack;
+    if(!useTCP)
+	{
+		UDPPack = SDLNet_AllocPacket(65535);
+	}
     if(!buf || !clients.size())
         return;
     
     for(int cindex = 0; cindex < clients.size(); )
     {
-        if(TCP)
+        if(useTCP)
         {
             if(TCPSend(clients[cindex]->sock, buf)) {
                 std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
@@ -110,14 +118,19 @@ void GalactiCombatServer::sendToAll(char *buf, bool TCP)
                 std::cerr << "Disconnected" << std::endl;
             }
         }
-        else //UDP
+        else //using UDP
             {
-                //TODO: implement UDPSend
+                UDPPack = SDLNet_AllocPacket(65535);
+
+				UDPPack->channel = clients[cindex]->channel;
+				UDPPack->data = (Uint8*)buf;
+				UDPPack->len = strlen(buf) + 1;
+				UDPSend(UDPServerSock, UDPPack);
+
+				SDLNet_FreePacket(UDPPack);
             }
     }
 }
-
-
 
 
 // This method returns an SDLNet_SocketSet containing the server socket and all the client sockets.
@@ -229,6 +242,13 @@ void GalactiCombatServer::startServer(long portNo)
         exit(4);
     }
     
+	UDPServerSock = SDLNet_UDP_Open(UDP_PORT);
+	if(!UDPServerSock)
+	{
+		std::cout << "SDLNet_UDP_Open done goofed: " << SDLNet_GetError() << std::endl;
+		exit(4);
+	}
+
     //set up the game environment
     std::cout << "Setting up game...." << std::endl;
     std::cout << "Creating OgreRoot." << std::endl;
@@ -249,8 +269,6 @@ void GalactiCombatServer::serverLoop(void)
 {
     std::cout << "Starting server loop." << std::endl;
     TCPsocket TCPsock;
-    UDPsocket UDPsock;
-    UDPpacket *out, *in;
     SDLNet_SocketSet set;
     
     //main loop
@@ -359,11 +377,18 @@ void GalactiCombatServer::listenForConnections()
                 std::cerr << "Connection Error. Someone sent something other than a CONNECTION packet as a new socket." << std::endl;
                 return;
             }
-            
+			IPaddress *clientIP = SDLNet_TCP_GetPeerAddress(TCPsock);
+            int channel = SDLNet_UDP_Bind(UDPServerSock, -1, clientIP);
+			if(channel == -1)
+			{
+				std::cerr << "SDLNet_UDP_Bind done goofed: " << SDLNet_GetError() << std::endl;
+				exit(4);
+			}
+
             //add the client
             std::string name = pack.message;
             // TODO: add some checks for repeated names. Could cause crash
-            client = this->addClient( TCPsock, const_cast<char*>(name.c_str()) );
+            client = this->addClient( TCPsock, channel, const_cast<char*>(name.c_str()) );
             
             printf("%s has logged in.\n", const_cast<char*>(client->name.c_str()));
             printf("%d players have logged in.\n", (int)clients.size());
@@ -512,7 +537,7 @@ extern "C" {
     #endif
     {   
         GalactiCombatServer *server = new GalactiCombatServer();
-        server->startServer(5172);
+        server->startServer(TCP_PORT);
         server->~GalactiCombatServer();
         return 0;
     }   

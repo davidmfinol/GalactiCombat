@@ -32,7 +32,7 @@ NetworkManagerClient::~NetworkManagerClient(void)
 }
 
 //main method from tcpmulticlient.c in the SDLNet demos
-int NetworkManagerClient::TCPConnect(char *host, long portNo, char *name)
+int NetworkManagerClient::TCPConnect(char *host, char *name)
 {
     IPaddress ip;
     //	TCPsocket sock;
@@ -43,8 +43,8 @@ int NetworkManagerClient::TCPConnect(char *host, long portNo, char *name)
     int result;
     char *str;
     struct timeval tv;
-    Uint16 port = (Uint16)portNo;
-    
+//    Uint16 port = (Uint16)5172;
+  	Uint16 port = (Uint16) TCP_PORT;  
     Packet pack;
     
     set = SDLNet_AllocSocketSet(1);

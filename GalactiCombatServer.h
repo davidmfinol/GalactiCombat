@@ -11,6 +11,7 @@
 
 typedef struct {
     TCPsocket sock;
+	int channel;
     std::string name;
     ClientSpaceShipController* inputController;
     bool ready;
@@ -29,7 +30,8 @@ public:
     
 protected:
     std::vector<Client*> clients;        // all clients connected
-    TCPsocket TCPServerSock;            //server socket
+    TCPsocket TCPServerSock;            //server socket for TCP messages
+	UDPsocket UDPServerSock;			//server socket for UDP messages
     std::string scoreboard;             //of the format "Name,Score;"
     int state;
     double lastFrameTime;
@@ -55,7 +57,7 @@ protected:
      * 
      *        returns: a pointer the Client object associated with this client
      */
-    Client *addClient(TCPsocket sock, std::string name);
+    Client *addClient(TCPsocket sock, int channel, std::string name);
     //--------------------------------------------------------------------------
     /*
      *        removeClient(int):

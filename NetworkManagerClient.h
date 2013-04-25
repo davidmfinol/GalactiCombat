@@ -19,7 +19,7 @@ public:
     virtual ~NetworkManagerClient();
     
     // Connection Data
-    int TCPConnect(char *host, long port, char *name);
+    int TCPConnect(char *host, char *name);
     bool isOnline();
     void resetReadyState();
     void quit();  

@@ -16,6 +16,9 @@
 #define ERROR 0xff
 #define TIMEOUT 5000 //five seconds
 
+#define TCP_PORT 5172
+#define UDP_PORT 6172
+
 // Used for the Packet struct
 #define CONNECTION 10
 #define SCORE 11
@@ -200,80 +203,44 @@ static int TCPSend(TCPsocket sock, char *buf)
     return(result);
 }
 
-
 /*
- *		UDPSend(UDPsocket, int, UDPpacket, UDPpacket, Uint32, Uint8, int):
- *		Sends information throught a network using UDP.
+ *		UDPSend(UDPsocket, UDPpacket*):
+ *		Wrapper function for SDLNet_UDP_Send.
  *
  *		-sock: The UDPsocket to send the packet through.
- *		-channel: The channel to send packets through. Set to -1 if not using channels.
- *		-out: The outgoing UDPpacket.
- *		-in: The incoming UDPpacket.
- *		-delay: Number of milliseconds to wait if packet received is empty.
- *		-expect: I'm not sure what this does (NOTE)
- *		-timeout: Number of milliseconds to wait before declaring a timeout.
+ *		-outgoing: The UDPpacket to send.
  */
-static int UDPSend(UDPsocket sock, int channel, UDPpacket *out, UDPpacket *in, Uint32 delay, Uint8 expect, int timeout)
+static int UDPSend(UDPsocket sock, UDPpacket *outgoing)
 {
-    Uint32 t,t2;
-    int err;
-
-    in->data[0] = 0;
-    t = SDL_GetTicks();
-    do
-    {
-        t2 = SDL_GetTicks();
-        if(t2-t>(Uint32)timeout)
-        {
-            printf("UDPSend timed out.\n");
-            return(0);
-        }   
-        if(!SDLNet_UDP_Send(sock, channel, out))
-        {   
-            printf("SDLNet_UDP_Send: %s\n",SDLNet_GetError());
-            exit(1);
-        }   
-        err = SDLNet_UDP_Recv(sock, in);
-        if(!err)
-            SDL_Delay(delay);
-    } while(!err || (in->data[0] != expect && in->data[0] != ERROR));
-    if(in->data[0] == ERROR)
-        printf("UDPSend received error code.\n");
-    return(in->data[0] == ERROR? -1:1);	//returns -1 on error
+	int numSent = SDLNet_UDP_Send(sock, outgoing->channel, outgoing);
+	if(!numSent)
+	{
+		std::cerr << "SDLNet_UDP_Send done goofed: " << SDLNet_GetError() << std::endl;
+		exit(4);
+	}
+	return numSent;
 }
 
 /*
  *		UDPReceive(UDPsocket, UDPpacket, Uint32, Uint8, int):
- *		Receives packets through UDP.
+ *		Wrapper function for SDLNet_UDP_Recv.
  *
  *		-sock: The UDPsocket to listen on.
  *		-in: The incoming UDPpacket.
- *		-delay: Number of milliseconds to wait when receiving an empty packet.
- *		-expect: I'm not sure what this does (NOTE)
- *		-timeout: Number of milliseconds to wait until declaring a timeout.
  */
-static int UDPReceive(UDPsocket sock, UDPpacket *in, Uint32 delay, Uint8 expect, int timeout)
+static int UDPReceive(UDPsocket sock, UDPpacket *in)
 {
-    Uint32 t,t2;
-    int err;
-    
-    in->data[0] = 0;
-    t = SDL_GetTicks();
-    do  
-    {   
-        t2 = SDL_GetTicks();
-        if(t2-t>(Uint32)timeout)
-        {
-            printf("timed out\n");
-            return(0);
-        }
-        err = SDLNet_UDP_Recv(sock, in);
-        if(!err)
-            SDL_Delay(delay);
-    } while(!err || (in->data[0] != expect && in->data[0] != ERROR));
-    if(in->data[0] == ERROR)
-        printf("received error code\n");
-    return(in->data[0] == ERROR?-1:1);
+	int received = SDLNet_UDP_Recv(sock, in);
+	if(received > 0)
+	{
+		std::cerr << "SDLNet_UDP_Recv done goofed: " << SDLNet_GetError() << std::endl;
+		exit(4);
+	}
+	if(received == 0)
+	{
+		std::cout << "UDPReceive: No packets received." << std::endl;
+	}
+	return received;
 }
 
 #endif //#ifndef __NetworkUtil_h
