@@ -220,6 +220,7 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
         {
             std::cout << "It was a mineral." << std::endl;
             std::string message(in.message);
+            std::cout << "The mineral's message is " << message << std::endl;
             std::string name = message.substr(0, message.find(","));
             message = message.substr(message.find(",") + 1);
             double pos_x = atof(message.substr(0, message.find(",")).c_str());
@@ -243,6 +244,7 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
             double rot_z = atof(message.substr(0, message.find(",")).c_str());
             message = message.substr(message.find(",") + 1);
             double radius = atof(message.substr(0, message.find(",")).c_str());
+            std::cout << "We parsed that message." << message << std::endl;
             
             // FIXME: THIS IS BAD, oh well
             bool found = false;
