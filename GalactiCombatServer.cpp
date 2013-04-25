@@ -217,9 +217,9 @@ void GalactiCombatServer::startServer(long portNo)
     
     host = SDLNet_ResolveIP(&ip);
     if(host == NULL)
-        //std::cout << "Host: N/A" << std::endl;
+        std::cout << "Host: N/A" << std::endl;
     else
-        //std::cout << "Host: " << host << std::endl;
+        std::cout << "Host: " << host << std::endl;
     
     TCPServerSock = SDLNet_TCP_Open(&ip);
     if(!TCPServerSock)
