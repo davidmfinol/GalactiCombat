@@ -96,10 +96,7 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
 {
     useTCP = true;	//NOTE: temporary
 	UDPpacket *UDPPack;
-    if(!useTCP)
-	{
-		UDPPack = SDLNet_AllocPacket(65535);
-	}
+
     if(!buf || !clients.size())
         return;
     
