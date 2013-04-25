@@ -105,7 +105,7 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
         if(useTCP)
         {
             if(TCPSend(clients[cindex]->sock, buf)) {
-                std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
+                //std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
                 cindex++;
             }
             else
@@ -128,6 +128,8 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
             }
     }
 }
+
+
 
 
 // This method returns an SDLNet_SocketSet containing the server socket and all the client sockets.
@@ -167,7 +169,7 @@ void GalactiCombatServer::createServerMinerals()
         physicsSimulator->addGameObject(minerals[i], RESTITUTION);
         physicsSimulator->setGameObjectVelocity(minerals[i], Ogre::Vector3(vel_x, vel_y, vel_z));
     }
-    std::cout << "Minerals created." << std::endl;
+    //std::cout << "Minerals created." << std::endl;
 }
 
 void GalactiCombatServer::createServerRoom()
@@ -196,7 +198,7 @@ void GalactiCombatServer::createServerRoom()
     walls[5] = new GameObject ("right", mSceneMgr->getRootSceneNode(), NULL, ROOM_HIGH/2, ROOM_SIZE/2, 0, 0, "NEGATIVE_UNIT_Z");
     physicsSimulator->addGameObject(walls[5]);
     
-    std::cout << "Room built." << std::endl;
+    //std::cout << "Room built." << std::endl;
 }
 
 void GalactiCombatServer::startServer(long portNo)
@@ -204,7 +206,7 @@ void GalactiCombatServer::startServer(long portNo)
     IPaddress ip; //32-bit IPv4 host, 16-bit port
     //	char *message = NULL;
     const char *host = NULL;
-    Uint32 ipaddr;
+    
     Uint16 port;
     
     port = (Uint16)portNo;
@@ -217,8 +219,8 @@ void GalactiCombatServer::startServer(long portNo)
         exit(3);
     }
     
-    ipaddr = SDL_SwapBE32(ip.host);
-    
+    Uint32 ipaddr;
+    //ipaddr = SDL_SwapBE32(ip.host);
     //printf("IP Address: %d.%d.%d.%d\n",
     //       ipaddr>>24,
     //       (ipaddr>>16)&0xff,
@@ -235,7 +237,7 @@ void GalactiCombatServer::startServer(long portNo)
     TCPServerSock = SDLNet_TCP_Open(&ip);
     if(!TCPServerSock)
     {
-        std::cout << "SDLNet_TCP_Open done goofed: " << SDLNet_GetError() << std::endl;
+        //std::cout << "SDLNet_TCP_Open done goofed: " << SDLNet_GetError() << std::endl;
         exit(4);
     }
     
@@ -247,25 +249,26 @@ void GalactiCombatServer::startServer(long portNo)
 	}
 
     //set up the game environment
-    std::cout << "Setting up game...." << std::endl;
-    std::cout << "Creating OgreRoot." << std::endl;
+    //std::cout << "Setting up game...." << std::endl;
+    //std::cout << "Creating OgreRoot." << std::endl;
     mRoot = new Ogre::Root();
-    std::cout << "Choosing Scene Manager." << std::endl;
+    //std::cout << "Choosing Scene Manager." << std::endl;
     chooseSceneManager();
-    std::cout << "Creating Room." << std::endl;
+    //std::cout << "Creating Room." << std::endl;
     this->createServerRoom();
-    std::cout << "Creating Minerals." << std::endl;
+    //std::cout << "Creating Minerals." << std::endl;
     this->createServerMinerals();
     
-    std::cout << "Ready for connections." << std::endl;
+    //std::cout << "Ready for connections." << std::endl;
     
     serverLoop();
 }
 
 void GalactiCombatServer::serverLoop(void)
 {
-    std::cout << "Starting server loop." << std::endl;
+    //std::cout << "Starting server loop." << std::endl;
     TCPsocket TCPsock;
+    
     SDLNet_SocketSet set;
     
     //main loop
@@ -293,26 +296,26 @@ void GalactiCombatServer::serverLoop(void)
         //for each connection, receive data
         for(i = 0; numReady && i < clients.size(); i++)
         {
-            //printf("Checking sockets\n");
+            ////std::cout << "Checking sockets" << std::endl;
             if(SDLNet_SocketReady(clients[i]->sock))
             {
-                //printf("%s's socket is read!\n", clients[i]->name);
+                ////std::cout << clients[i]->name << "'s socket is read!" << std::endl;
                 char *msg = NULL;
                 std::string score;
                 if(TCPReceive(clients[i]->sock, &msg))
                 {
-                    std::cout << "Received message from client " << clients[i]->name << std::endl;
+                    //std::cout << "Received message from client " << clients[i]->name << std::endl;
                     numReady--;
                     Packet incoming = charArrayToPacket(msg);
                     this->receiveData(incoming, i);
-                    std::cout << "Message processed  from " << clients[i]->name << std::endl;
+                    //std::cout << "Message processed  from " << clients[i]->name << std::endl;
                 }
                 free(msg);
                 msg = NULL;
                 
             } else {
                 //FIXME: THIS SHOULD CHECK FOR DISCONNECTS, BUT DOESN'T WORK:
-                //printf("Client disconnected.\n");
+                //std::cerr << "Client disconnected." << std::endl;
                 //this->removeClient(i);
             }
         }
@@ -323,38 +326,22 @@ void GalactiCombatServer::serverLoop(void)
         lastFrameTime = currentTime;
         if(state == PLAY)
         {
-            std::cout << "Running the Game loop" << std::endl;
+            ////std::cout << "Running the Game loop" << std::endl;
             gameLoop(elapsedTime);
-            std::cout << "Game loop has been run" << std::endl;
+            ////std::cout << "Game loop has been run" << std::endl;
             
             // Debugging
-            std::cout << "There are " << spaceShips.size() << " SpaceShips in the scene" << std::endl;
+            /*
+            //std::cout << "There are " << spaceShips.size() << " SpaceShips in the scene" << std::endl;
             for(i = 0; i < spaceShips.size(); i++)
             {
                 Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(spaceShips[i]);
-                std::cout << "Player is at " << pos.x << " " << pos.y << " " << pos.z << std::endl;
+                //std::cout << "Player is at " << pos.x << " " << pos.y << " " << pos.z << std::endl;
             }
-            
-            //inform the clients of the status of the game
-            
-            Packet out;
-            out.type = NUMBER_OF_PACKETS;
-            std::stringstream ss;
-            ss << (minerals.size() + spaceShips.size());
-            out.message = const_cast<char*>(ss.str().c_str());
-            char* outMsg = PacketToCharArray(out);
-            sendToAll(outMsg, true);
-            
-            std::cout << "Sending Minerals" << std::endl;
-            for(i = 0; i < minerals.size(); i++)
-                sendMineral(minerals[i]);
-            std::cout << "Sending Spaceships" << std::endl;
-            for(i = 0; i < spaceShips.size(); ++i)
-                sendSpaceShip(spaceShips[i]);
-            std::cout << "Players Updated" << std::endl;
+            */
         }
     }//end loop
-    printf("Shutting down.\n");
+    //std::cout << "Shutting down." << std::endl;
 }
 
 void GalactiCombatServer::listenForConnections() 
@@ -365,11 +352,11 @@ void GalactiCombatServer::listenForConnections()
         char *msg = NULL;
         if(TCPReceive(TCPsock, &msg))
         {
-            std::cout << "Received a message: " <<  msg << std::endl;
+            //std::cout << "Received a message: " <<  msg << std::endl;
             Client *client;
             Packet pack = charArrayToPacket(msg);
             
-            if(pack.type != CONNECTION)
+            if(pack.type != CONNECTION) //FIXME: THIS SOMETIMES GET CALLED INCORRECTLY
             {
                 std::cerr << "Connection Error. Someone sent something other than a CONNECTION packet as a new socket." << std::endl;
                 return;
@@ -384,8 +371,8 @@ void GalactiCombatServer::listenForConnections()
 
             //add the client
             std::string name = pack.message;
-            // TODO: add some checks for repeated names. Could cause crash
-            client = this->addClient( TCPsock, channel, const_cast<char*>(name.c_str()) );
+            // TODO: FIXME: add some checks for repeated names. Could cause crash
+            client = this->addClient( TCPsock, const_cast<char*>(name.c_str()) );
             
             printf("%s has logged in.\n", const_cast<char*>(client->name.c_str()));
             printf("%d players have logged in.\n", (int)clients.size());
@@ -479,9 +466,30 @@ void GalactiCombatServer::receiveData(const Packet &incoming, int i)
             state = PLAY;
         }
     }
+    else if(incoming.type == STATE) {
+        ////std::cout << "Received request to update game state" << std::endl;
+        Packet out;
+        out.type = NUMBER_OF_PACKETS;
+        std::stringstream ss;
+        ss << (minerals.size() + spaceShips.size());
+        out.message = const_cast<char*>(ss.str().c_str());
+        char* outMsg = PacketToCharArray(out);
+        //std::cout << "Sending number of game objects" << std::endl;
+        TCPSend(clients[i]->sock, outMsg);
+        //std::cout << "Sent information on number of game objects" << std::endl;
+        
+        //std::cout << "About to send information about minerals" << std::endl;
+        for(int m = 0 ; m < minerals.size() ; ++m)
+            sendMineral(minerals[m], i);
+        //std::cout << "Sent information on minerals" << std::endl;
+        //std::cout << "About to send information about spaceShips" << std::endl;
+        for(int s = 0 ; s < spaceShips.size() ; ++s)
+            sendSpaceShip(spaceShips[s], i);
+        //std::cout << "Sent information on spaceShips" << std::endl;
+    }
 }
 
-void GalactiCombatServer::sendMineral(Mineral* mineral)
+void GalactiCombatServer::sendMineral(Mineral* mineral, int cindex)
 {
     Packet outgoing;
     outgoing.type = MINERAL;
@@ -496,10 +504,12 @@ void GalactiCombatServer::sendMineral(Mineral* mineral)
     sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, radius);
     outgoing.message = buffer;
     char* out = PacketToCharArray(outgoing);
-    sendToAll(out, true);
+    //std::cout << "Sending mineral" << std::endl;
+    TCPSend(clients[cindex]->sock, out);
+    //std::cout << "Sent mineral" << std::endl;
 }
 
-void GalactiCombatServer::sendSpaceShip(SpaceShip* spaceShip)
+void GalactiCombatServer::sendSpaceShip(SpaceShip* spaceShip, int cindex)
 {
     Packet outgoing;
     outgoing.type = SPACESHIP;
@@ -515,7 +525,9 @@ void GalactiCombatServer::sendSpaceShip(SpaceShip* spaceShip)
     sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, size);
     outgoing.message = buffer;
     char* out = PacketToCharArray(outgoing);
-    sendToAll(out, true);
+    //std::cout << "Sending spaceShip" << std::endl;
+    TCPSend(clients[cindex]->sock, out);
+    //std::cout << "Sent spaceShip" << std::endl;
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32

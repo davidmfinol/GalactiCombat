@@ -99,40 +99,9 @@ int NetworkManagerClient::TCPConnect(char *host, char *name)
         exit(8);
     }
     
-    printf("Logged in as %s\n",name);
+    mName = name;
+    std::cout << "Logged in as " << mName << std::endl;
     connected = true;
-}
-
-void NetworkManagerClient::sendPlayerScore(double score)
-{
-    Packet outgoing;
-    std::stringstream ss;
-    std::string s;
-    ss << score;
-    s = ss.str();
-    outgoing.type = SCORE;
-    outgoing.message = const_cast<char*>(s.c_str());
-    
-    char *incoming = NULL;
-    char *out = PacketToCharArray(outgoing);
-    //printf("Sending: %s\n", out);
-    if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
-        printf("Receving: %s\n", incoming);
-        Packet pack = charArrayToPacket(incoming);
-        if(pack.type != SCORE)
-        {
-            printf("Error in sendPlayerScore() in NetworkManagerClient.cpp. Score not received from server.\n");
-            scores = "";
-        }
-        else{
-            printf("Received message: %s\n", pack.message);
-            scores = pack.message;
-        }
-    }
-    else {
-        connected = false;
-        scores = "";
-    }
 }
 
 std::string NetworkManagerClient::getPlayerScores()
@@ -190,24 +159,69 @@ void NetworkManagerClient::quit()
     connected = false;
 }
 
+void NetworkManagerClient::sendPlayerScore(double score)
+{
+    std::stringstream ss;
+    std::string s;
+    ss << score;
+    s = ss.str();
+ 
+    Packet outgoing;
+    outgoing.type = SCORE;
+    outgoing.message = const_cast<char*>(s.c_str());   
+    char *incoming = NULL;
+    char *out = PacketToCharArray(outgoing);
+    if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
+        printf("Receving: %s\n", incoming);
+        Packet pack = charArrayToPacket(incoming);
+        if(pack.type != SCORE)
+        {
+            printf("Error in sendPlayerScore() in NetworkManagerClient.cpp. Score not received from server.\n");
+            scores = "";
+        }
+        else{
+            printf("Received message: %s\n", pack.message);
+            scores = pack.message;
+        }
+    }
+    else {
+        connected = false;
+        scores = "";
+    }
+}
+
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundManager* sound, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::vector<GameObject*>& walls)
 {
-    char* incoming;
-    if(!TCPReceive(serverSock, &incoming))
+    int packs;
+    Packet outgoing;
+    outgoing.type = STATE;
+    outgoing.message = "NONE";
+    char* incoming = NULL;
+    char *out = PacketToCharArray(outgoing);
+    ////std::cout << "We are sending state request and trying to receive initial response." << std::endl;
+    if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
+        ////std::cout << "Received initial response." << std::endl;
+        Packet numPackets = charArrayToPacket(incoming);
+        packs = atoi(numPackets.message);
+        ////std::cout << "We are expecting to receive " << packs << " number of packets" << std::endl;
+    }
+    else {
         connected = false;
-    Packet numPackets = charArrayToPacket(incoming);
-    int packs = atoi(numPackets.message);
-    std::cout << "We are expecting to receive " << packs << " number of packets" << std::endl;
+        return;
+    }
     
     for(int i = 0; i < packs; ++i)
     {
-        std::cout << "We are processing packet number " << i << "." << std::endl;
+        //std::cout << "We are about to receive packet number " << i << "." << std::endl;
         if(!TCPReceive(serverSock, &incoming)) {
             connected = false; break;}
+        //std::cout << "We received packet number " << i << "." << std::endl;
         Packet in = charArrayToPacket(incoming);
         if(in.type == MINERAL)
         {
+            //std::cout << "It was a mineral." << std::endl;
             std::string message(in.message);
+            //std::cout << "The mineral's message is " << message << std::endl;
             std::string name = message.substr(0, message.find(","));
             message = message.substr(message.find(",") + 1);
             double pos_x = atof(message.substr(0, message.find(",")).c_str());
@@ -231,13 +245,16 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
             double rot_z = atof(message.substr(0, message.find(",")).c_str());
             message = message.substr(message.find(",") + 1);
             double radius = atof(message.substr(0, message.find(",")).c_str());
+            //std::cout << "We parsed that message." << message << std::endl;
             
             // FIXME: THIS IS BAD, oh well
             bool found = false;
-            for(int j = 0; j < minerals.size(); ++i)
+            for(int j = 0; j < minerals.size(); ++j)
             {
+                //std::cout << "Checking to see if " << name << " already exists." << std::endl;
                 if(minerals[j]->getName() == name)
                 {
+                    //std::cout << "Exists." << std::endl;
                     found = true;
                     minerals[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
                     minerals[j]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
@@ -246,17 +263,70 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
             }
             if(!found)
             {
+                //std::cout << "Doesn't exist, create it." << std::endl;
                 minerals.push_back(new Mineral(name, sound, sceneManager->getRootSceneNode(), pos_x, pos_y, pos_z, radius));
                 minerals.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
             }
+            //std::cout << "Got the Mineral!" << std::endl;
         }
         else if(in.type == SPACESHIP)
         {
+            //std::cout << "It was a spaceship." << std::endl;
+            std::string message(in.message);
+            std::string name = message.substr(0, message.find(","));
+            message = message.substr(message.find(",") + 1);
+            double pos_x = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double pos_y = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double pos_z = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double vel_x = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double vel_y = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double vel_z = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_w = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_x = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_y = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_z = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double size = atof(message.substr(0, message.find(",")).c_str());
             
+            // FIXME: THIS IS BAD, oh well
+            bool found = false;
+            if(name == mName)
+            {
+                spaceships[0]->getSceneNode()->getParentSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                spaceships[0]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
+                break;
+            }
+            for(int j = 1; j < spaceships.size(); ++j)
+            {
+                if(spaceships[j]->getName() == name)
+                {
+                    found = true;
+                    spaceships[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                    spaceships[j]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
+                    break;
+                }
+            }
+            if(!found)
+            {
+                ISpaceShipController* controller = new ClientSpaceShipController();
+                spaceships.push_back(new SpaceShip(name, sound, controller, sceneManager->getRootSceneNode()->createChildSceneNode(),size));
+                spaceships.back()->getSceneNode()->getParentSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                spaceships.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
+            }
+            //std::cout << "Got the SpaceShip!" << std::endl;
         }
         else if(in.type == WALL)
         {
-            
+            //std::cout << "It was a wall." << std::endl;
         }
     }
 }
