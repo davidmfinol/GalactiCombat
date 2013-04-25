@@ -192,23 +192,22 @@ void NetworkManagerClient::sendPlayerScore(double score)
 
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundManager* sound, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::vector<GameObject*>& walls)
 {
-    //std::cout << "Beginning of receiveData" << std::endl << std::endl;
+    std::cout << "Beginning of receiveData" << std::endl << std::endl;
     static int iii = 0;
     Packet outgoing;
     outgoing.type = STATE;
     outgoing.message = "NONE";
     char* incoming = NULL;
     char* out = PacketToCharArray(outgoing);
-    //std::cout << "End of receiveData" << std::endl << std::endl;
-
+    std::cout << "About to request data" << std::endl << std::endl;
     if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
         Packet infoPacket = charArrayToPacket(incoming);
         std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
     }
     else {
         connected = false;
-       return;
     }
+    std::cout << "End of receiveData" << std::endl << std::endl;
 
                         /*
                         for(int i = 0; i < packs; ++i)

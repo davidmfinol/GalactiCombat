@@ -467,7 +467,7 @@ void GalactiCombatServer::receiveData(const Packet &incoming, int i)
         }
     }
     else if(incoming.type == STATE) {
-        //std::cout << "Beginning of STATE" << std::endl << std::endl;
+        std::cout << "Beginning of STATE" << std::endl << std::endl;
         Packet out;
         out.type = INFO;
         std::stringstream ss;
@@ -496,10 +496,15 @@ void GalactiCombatServer::receiveData(const Packet &incoming, int i)
             ss << buffer;
         }
 
-        out.message = const_cast<char*>(ss.str().c_str());
-        //std::cout << clients[i]->name << "     " << out.message << std::endl << std::endl;
-        //std::cout << "End of STATE" << std::endl << std::endl;
-        TCPSend(clients[i]->sock, PacketToCharArray(out));
+        std::string sss("short");
+        out.message = const_cast<char*>(sss.c_str());
+
+        std::cout << clients[i]->name << "     " << out.message << std::endl << std::endl;
+        if(TCPSend(clients[i]->sock, PacketToCharArray(out)))
+            std::cout << "Sent back info to " << clients[i]->name << std::endl;
+        else
+            std::cout << "Didn't send back info to " << clients[i]->name << std::endl;
+        std::cout << "End of STATE" << std::endl << std::endl;
     }
 }
 
