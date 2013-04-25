@@ -301,7 +301,7 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
             bool found = false;
             if(name == mName)
             {
-                spaceships[0]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                spaceships[0]->getSceneNode()->getParentSceneNode()->setPosition(pos_x, pos_y, pos_z);
                 spaceships[0]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
                 break;
             }
