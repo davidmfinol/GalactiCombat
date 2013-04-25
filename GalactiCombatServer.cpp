@@ -372,7 +372,7 @@ void GalactiCombatServer::listenForConnections()
             //add the client
             std::string name = pack.message;
             // TODO: FIXME: add some checks for repeated names. Could cause crash
-            client = this->addClient( TCPsock, const_cast<char*>(name.c_str()) );
+            client = this->addClient( TCPsock, channel, const_cast<char*>(name.c_str()) );
             
             printf("%s has logged in.\n", const_cast<char*>(client->name.c_str()));
             printf("%d players have logged in.\n", (int)clients.size());
