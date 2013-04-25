@@ -56,3 +56,11 @@ stamp-h1
 
 # Text editor temp files
 *~
+
+# Visual Studio files
+*.sdf
+*.sln
+*.suo
+*.vcx*
+ipch/
+Debug/
