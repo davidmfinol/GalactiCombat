@@ -219,7 +219,7 @@ void GalactiCombatServer::startServer(long portNo)
         exit(3);
     }
     
-    Uint32 ipaddr;
+	//Uint32 ipaddr;
     //ipaddr = SDL_SwapBE32(ip.host);
     //printf("IP Address: %d.%d.%d.%d\n",
     //       ipaddr>>24,
@@ -228,16 +228,11 @@ void GalactiCombatServer::startServer(long portNo)
     //       ipaddr&0xff);
     //printf("Port: %d\n", port);
     
-    host = SDLNet_ResolveIP(&ip);
-    if(host == NULL)
-        std::cout << "Host: N/A" << std::endl;
-    else
-        std::cout << "Host: " << host << std::endl;
     
     TCPServerSock = SDLNet_TCP_Open(&ip);
     if(!TCPServerSock)
     {
-        //std::cout << "SDLNet_TCP_Open done goofed: " << SDLNet_GetError() << std::endl;
+        std::cout << "SDLNet_TCP_Open done goofed: " << SDLNet_GetError() << std::endl;
         exit(4);
     }
     
@@ -258,9 +253,14 @@ void GalactiCombatServer::startServer(long portNo)
     this->createServerRoom();
     //std::cout << "Creating Minerals." << std::endl;
     this->createServerMinerals();
-    
-    //std::cout << "Ready for connections." << std::endl;
-    
+
+    host = SDLNet_ResolveIP(&ip);
+    if(host == NULL)
+        std::cout << "Host: N/A" << std::endl;
+    else
+        std::cout << "Host: " << host << std::endl;
+
+    std::cout << "Ready for connections." << std::endl;
     serverLoop();
 }
 
@@ -296,10 +296,10 @@ void GalactiCombatServer::serverLoop(void)
         //for each connection, receive data
         for(i = 0; numReady && i < clients.size(); i++)
         {
-            ////std::cout << "Checking sockets" << std::endl;
+            //std::cout << "Checking sockets" << std::endl;
             if(SDLNet_SocketReady(clients[i]->sock))
             {
-                ////std::cout << clients[i]->name << "'s socket is read!" << std::endl;
+                //std::cout << clients[i]->name << "'s socket is read!" << std::endl;
                 char *msg = NULL;
                 std::string score;
                 if(TCPReceive(clients[i]->sock, &msg))
@@ -326,9 +326,9 @@ void GalactiCombatServer::serverLoop(void)
         lastFrameTime = currentTime;
         if(state == PLAY)
         {
-            ////std::cout << "Running the Game loop" << std::endl;
+            //std::cout << "Running the Game loop" << std::endl;
             gameLoop(elapsedTime);
-            ////std::cout << "Game loop has been run" << std::endl;
+            //std::cout << "Game loop has been run" << std::endl;
             
             // Debugging
             /*
@@ -341,7 +341,7 @@ void GalactiCombatServer::serverLoop(void)
             */
         }
     }//end loop
-    //std::cout << "Shutting down." << std::endl;
+	std::cout << "Shutting down." << std::endl;
 }
 
 void GalactiCombatServer::listenForConnections() 
@@ -560,7 +560,8 @@ extern "C" {
     #endif
     {   
         GalactiCombatServer *server = new GalactiCombatServer();
-        server->startServer(TCP_PORT);
+//		server->startServer(5172);
+		server->startServer(TCP_PORT);
         server->~GalactiCombatServer();
         return 0;
     }   

@@ -43,8 +43,8 @@ int NetworkManagerClient::TCPConnect(char *host, char *name)
     int result;
     char *str;
     struct timeval tv;
-//    Uint16 port = (Uint16)5172;
-  	Uint16 port = (Uint16) TCP_PORT;  
+//	Uint16 port = (Uint16)5172;
+ 	Uint16 port = (Uint16) TCP_PORT;  
     Packet pack;
     
     set = SDLNet_AllocSocketSet(1);
