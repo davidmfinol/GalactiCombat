@@ -20,11 +20,11 @@ public:
     virtual ~NetworkManagerClient();
     
     // Connection Data
-    int TCPConnect(char *host, char *name);
+    int connect(char *host, char *name);
     bool isOnline();
     void resetReadyState();
     void quit();  
-    TCPsocket& getSocket() {return this->serverSock;}
+    TCPsocket& getSocket() {return this->TCPServerSock;}
     
     // Scores
     void sendPlayerScore(double score);
@@ -35,7 +35,9 @@ public:
     void receiveData(Ogre::SceneManager*, SoundManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::vector<GameObject*>&);
     
 protected:
-    TCPsocket serverSock;
+    TCPsocket TCPServerSock;
+	UDPsocket UDPServerSock;
+	IPaddress serverIP;
     std::string mName;
     std::string scores;
     bool connected;
