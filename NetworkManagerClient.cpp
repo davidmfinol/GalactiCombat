@@ -227,7 +227,7 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
     char* incoming = NULL;
     char* out = PacketToCharArray(outgoing);
     std::cout << "About to request data" << std::endl << std::endl;
-    if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
+    if(TCPSend(TCPServerSock, out) && TCPReceive(TCPServerSock, &incoming)) {
         Packet infoPacket = charArrayToPacket(incoming);
         std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
     }
