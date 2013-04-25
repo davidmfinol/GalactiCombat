@@ -441,18 +441,25 @@ void GalactiCombatServer::receiveData(const Packet &incoming, int i)
         }
     }
     else if(incoming.type == STATE) {
+        std::cout << "Received request to update game state" << std::endl;
         Packet out;
         out.type = NUMBER_OF_PACKETS;
         std::stringstream ss;
         ss << (minerals.size() + spaceShips.size());
         out.message = const_cast<char*>(ss.str().c_str());
         char* outMsg = PacketToCharArray(out);
+        std::cout << "Sending number of game objects" << std::endl;
         TCPSend(clients[i]->sock, outMsg);
+        std::cout << "Sent information on number of game objects" << std::endl;
         
+        std::cout << "About to send information about minerals" << std::endl;
         for(int m = 0 ; m < minerals.size() ; ++m)
             sendMineral(minerals[m], i);
+        std::cout << "Sent information on minerals" << std::endl;
+        std::cout << "About to send information about spaceShips" << std::endl;
         for(int s = 0 ; s < spaceShips.size() ; ++s)
             sendSpaceShip(spaceShips[s], i);
+        std::cout << "Sent information on spaceShips" << std::endl;
     }
 }
 
@@ -471,7 +478,9 @@ void GalactiCombatServer::sendMineral(Mineral* mineral, int cindex)
     sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, radius);
     outgoing.message = buffer;
     char* out = PacketToCharArray(outgoing);
+    std::cout << "Sending mineral" << std::endl;
     TCPSend(clients[cindex]->sock, out);
+    std::cout << "Sent mineral" << std::endl;
 }
 
 void GalactiCombatServer::sendSpaceShip(SpaceShip* spaceShip, int cindex)
@@ -490,7 +499,9 @@ void GalactiCombatServer::sendSpaceShip(SpaceShip* spaceShip, int cindex)
     sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, size);
     outgoing.message = buffer;
     char* out = PacketToCharArray(outgoing);
+    std::cout << "Sending spaceShip" << std::endl;
     TCPSend(clients[cindex]->sock, out);
+    std::cout << "Sent spaceShip" << std::endl;
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32

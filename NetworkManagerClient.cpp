@@ -191,6 +191,7 @@ void NetworkManagerClient::sendPlayerScore(double score)
 
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundManager* sound, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::vector<GameObject*>& walls)
 {
+    int packs;
     Packet outgoing;
     outgoing.type = STATE;
     outgoing.message = "NONE";
@@ -200,7 +201,7 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
     if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
         std::cout << "Received initial response." << std::endl;
         Packet numPackets = charArrayToPacket(incoming);
-        int packs = atoi(numPackets.message);
+        packs = atoi(numPackets.message);
         std::cout << "We are expecting to receive " << packs << " number of packets" << std::endl;
     }
     else {
@@ -210,12 +211,14 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
     
     for(int i = 0; i < packs; ++i)
     {
-        std::cout << "We are processing packet number " << i << "." << std::endl;
+        std::cout << "We are about to receive packet number " << i << "." << std::endl;
         if(!TCPReceive(serverSock, &incoming)) {
             connected = false; break;}
+        std::cout << "We received packet number " << i << "." << std::endl;
         Packet in = charArrayToPacket(incoming);
         if(in.type == MINERAL)
         {
+            std::cout << "It was a mineral." << std::endl;
             std::string message(in.message);
             std::string name = message.substr(0, message.find(","));
             message = message.substr(message.find(",") + 1);
@@ -258,14 +261,15 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
                 minerals.push_back(new Mineral(name, sound, sceneManager->getRootSceneNode(), pos_x, pos_y, pos_z, radius));
                 minerals.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
             }
+            std::cout << "Got the Mineral!" << std::endl;
         }
         else if(in.type == SPACESHIP)
         {
-            
+            std::cout << "It was a spaceship." << std::endl;
         }
         else if(in.type == WALL)
         {
-            
+            std::cout << "It was a wall." << std::endl;
         }
     }
 }
