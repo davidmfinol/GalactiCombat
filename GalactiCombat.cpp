@@ -7,20 +7,19 @@
 #include "GalactiCombat.h"
 
 //-------------------------------------------------------------------------------------
-GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), spaceShips(0), walls(6), isServer(false)
+GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), spaceShips(0), walls(6), isServer(false), startTime(0)
 {
     physicsSimulator = new PhysicsSimulator(Mineral::MIN_RADIUS, Mineral::MAX_RADIUS);
     mSoundMgr = new SoundManager();
     mGUIMgr = new GUIManager(SpaceShip::MIN_ENERGY, SpaceShip::MAX_ENERGY);
     mNetworkMgr = new NetworkManagerClient();
     mInputMgr = new InputManager(mNetworkMgr);
-    startTime = std::time(0);
 }
 //-------------------------------------------------------------------------------------
 GalactiCombat::~GalactiCombat(void)
 {
-    delete mNetworkMgr;
     delete mInputMgr;
+    delete mNetworkMgr;
     delete mGUIMgr;
     delete mSoundMgr;
     delete physicsSimulator;
@@ -199,7 +198,7 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
         if (!mGUIMgr->lobbyCountingDown()) {
             char* request = const_cast<char*>("15LIST_REQUEST");
             char *list = NULL;
-            if(TCPSend(mNetworkMgr->getSocket(), request) && TCPReceive(mNetworkMgr->getSocket(), &list)) {
+            if(NetworkUtil::TCPSend(mNetworkMgr->getSocket(), request) && NetworkUtil::TCPReceive(mNetworkMgr->getSocket(), &list)) {
                 mGUIMgr->setLobbyList(list);
                 std::string allReady(list);
                 if (allReady.find("All players ready") != std::string::npos) {

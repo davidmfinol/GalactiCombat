@@ -259,7 +259,7 @@ void GUIManager::updateLobbyList(int i)
         multiPlayerMenu = false;
         mTrayMgr->hideCursor();   
         char* request = const_cast<char*>("15START");
-        TCPSend(mNetworkMgr->getSocket(), request);
+        NetworkUtil::TCPSend(mNetworkMgr->getSocket(), request);
     }
     else {
         std::stringstream ss;
@@ -280,12 +280,12 @@ void GUIManager::readyPressed(void)
 {
     if (!isReady) {
         char* request = const_cast<char*>("15READY");
-        TCPSend(mNetworkMgr->getSocket(), request);
+        NetworkUtil::TCPSend(mNetworkMgr->getSocket(), request);
         lobbyReadyButton->setCaption("Cancel");
     }
     else {
         char* request = const_cast<char*>("15PREPARING");
-        TCPSend(mNetworkMgr->getSocket(), request);
+        NetworkUtil::TCPSend(mNetworkMgr->getSocket(), request);
         lobbyReadyButton->setCaption("Ready");        
     }
     isReady = !isReady;

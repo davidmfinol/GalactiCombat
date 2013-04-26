@@ -21,14 +21,10 @@ public:
     
     // Connection Data
     int TCPConnect(char *host, char *name);
+    TCPsocket& getSocket();
     bool isOnline();
     void resetReadyState();
-    void quit();  
-    TCPsocket& getSocket() {return this->serverSock;}
-    
-    // Scores
-    void sendPlayerScore(double score);
-    std::string getPlayerScores();
+    void quit();
     
     // Game Logic Transaction
     void sendPlayerInput(ISpaceShipController* controller);
@@ -37,7 +33,6 @@ public:
 protected:
     TCPsocket serverSock;
     std::string mName;
-    std::string scores;
     bool connected;
 };
 #endif //#ifndef __NetworkManagerClient_h_

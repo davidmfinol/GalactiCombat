@@ -13,16 +13,16 @@
 
 #endif
 
-NetworkManagerClient::NetworkManagerClient(void) : connected(false), scores()
+NetworkManagerClient::NetworkManagerClient(void) : connected(false)
 {
-    if(SDL_Init(0) != 0){
-        printf("SDL_Init done goofed: %s\n", SDL_GetError());
+    if(SDL_Init(0) != 0)
+    {
+        std::cerr << "SDL_Init done goofed: " << SDL_GetError() << std::endl;
         exit(1);
     }
     
-    if(SDLNet_Init() != 0){
-        printf("SDLNet_Init done goofed: %s\n",SDLNet_GetError());
-    }
+    if(SDLNet_Init() != 0)
+        std::cerr << "SDLNet_Init done goofed: " << SDLNet_GetError() << std::endl;
 }
 
 NetworkManagerClient::~NetworkManagerClient(void)
@@ -31,47 +31,36 @@ NetworkManagerClient::~NetworkManagerClient(void)
     SDL_Quit();
 }
 
-//main method from tcpmulticlient.c in the SDLNet demos
 int NetworkManagerClient::TCPConnect(char *host, char *name)
 {
-    IPaddress ip;
-    //	TCPsocket sock;
-    char message[MAXLEN];
-    int numready;
-    SDLNet_SocketSet set;
-    fd_set fdset;
-    int result;
-    char *str;
-    struct timeval tv;
-//	Uint16 port = (Uint16)5172;
- 	Uint16 port = (Uint16) TCP_PORT;  
-    Packet pack;
+    //std::cout << "Entering TCPConnect" << std::endl << std::endl;
+    Uint16 port = (Uint16) TCP_PORT;
     
-    set = SDLNet_AllocSocketSet(1);
+    SDLNet_SocketSet set = SDLNet_AllocSocketSet(1);
     if(!set)
     {
-        printf("SDLNet_AllocSocketSet done goofed: %s\n", SDLNet_GetError());
+        std::cerr << "SDLNet_AllocSocketSet done goofed: " << SDLNet_GetError() << std::endl;
         SDLNet_Quit();
         SDL_Quit();
         exit(4); /*most of the time this is a major error, but do what you want. */
     }
     
-    
     /* Resolve the argument into an IPaddress type */
-    printf("Connecting to %s port %d\n", host, port);
+    std::cout << "Connecting to " << host << " port " << port << std::endl;
+    IPaddress ip;
     if(SDLNet_ResolveHost(&ip, host, port)==-1)
     {
-        printf("SDLNet_ResolveHost done goofed: %s\n",SDLNet_GetError());
+        std::cerr << "SDLNet_ResolveHost done goofed: " << SDLNet_GetError() << std::endl;
         std::string exception = "fail_to_connect";
         throw exception;
     }
     
-    printf("Opening server socket.\n");
     /* open the server socket */
+    std::cout << "Opening server socket." << std::endl;
     serverSock = SDLNet_TCP_Open(&ip);
     if(!serverSock)
     {
-        printf("SDLNet_TCP_Open done goofed: %s\n",SDLNet_GetError());
+        std::cerr << "SDLNet_TCP_Open done goofed: " << SDLNet_GetError() << std::endl;
         SDLNet_Quit();
         SDL_Quit();
         std::string exception = "fail_to_connect";
@@ -81,19 +70,19 @@ int NetworkManagerClient::TCPConnect(char *host, char *name)
     
     if(SDLNet_TCP_AddSocket(set,serverSock) == -1)
     {
-        printf("SDLNet_TCP_AddSocket done goofed: %s\n",SDLNet_GetError());
+        std::cerr << "SDLNet_TCP_AddSocket done goofed: " << SDLNet_GetError() << std::endl;
         SDLNet_Quit();
         SDL_Quit();
         exit(7);
     }
     
-    
-    pack.type = CONNECTION;
-    pack.message = name;
     /* login with a name */
-    char* out = PacketToCharArray(pack);
-    printf("Sent %s\n", out);
-    if(!TCPSend(serverSock, out))
+    Packet pack;
+    pack.type = CONNECTION;
+    pack.message = name; // FIXME: SHOULD USE? :char message[MAXLEN];
+    char* out = NetworkUtil::PacketToCharArray(pack);
+    std::cout << "Sent " << out << std::endl;
+    if(!NetworkUtil::TCPSend(serverSock, out))
     {
         SDLNet_TCP_Close(serverSock);
         exit(8);
@@ -102,23 +91,43 @@ int NetworkManagerClient::TCPConnect(char *host, char *name)
     mName = name;
     std::cout << "Logged in as " << mName << std::endl;
     connected = true;
+    //std::cout << "Exiting TCPConnect" << std::endl << std::endl;
 }
 
-std::string NetworkManagerClient::getPlayerScores()
+TCPsocket& NetworkManagerClient::getSocket()
 {
-    return scores; //"name,score;"
+    return this->serverSock;
+}
+
+bool NetworkManagerClient::isOnline()
+{
+    return connected;
 }
 
 void NetworkManagerClient::resetReadyState()
 {
+    //std::cout << "Entering resetReadyState" << std::endl << std::endl;
     Packet outgoing;
     outgoing.type = READY;
     outgoing.message = const_cast<char*>("RESET");
-    TCPSend(serverSock, PacketToCharArray(outgoing));
+    NetworkUtil::TCPSend(serverSock, NetworkUtil::PacketToCharArray(outgoing));
+    //std::cout << "Exiting resetReadyState" << std::endl << std::endl;
+}
+
+void NetworkManagerClient::quit()
+{
+    //std::cout << "Entering quit" << std::endl << std::endl << std::endl;
+    Packet outgoing;
+    outgoing.type = CONNECTION;
+    outgoing.message = const_cast<char*>("QUIT");
+    while(!NetworkUtil::TCPSend(serverSock, NetworkUtil::PacketToCharArray(outgoing))); // FIXME: what if server crashed?
+    connected = false;
+    //std::cout << "Exiting quit" << std::endl << std::endl << std::endl;
 }
 
 void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
 {
+    //std::cout << "Entering sendPlayerInput" << std::endl << std::endl;
     Packet outgoing;
     
     bool left = controller->left();
@@ -140,69 +149,24 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     outgoing.type = PLAYERINPUT;
     outgoing.message = &result;
     
-    char *out = PacketToCharArray(outgoing);
-    if(!TCPSend(serverSock, out))
+    char *out = NetworkUtil::PacketToCharArray(outgoing);
+    if(!NetworkUtil::TCPSend(serverSock, out))
         connected = false;
-}
-
-bool NetworkManagerClient::isOnline()
-{
-    return connected;
-}
-
-void NetworkManagerClient::quit()
-{
-    Packet outgoing;
-    outgoing.type = CONNECTION;
-    outgoing.message = const_cast<char*>("QUIT");
-    while(!TCPSend(serverSock, PacketToCharArray(outgoing))); // FIXME: what if server crashed?
-    connected = false;
-}
-
-void NetworkManagerClient::sendPlayerScore(double score)
-{
-    std::stringstream ss;
-    std::string s;
-    ss << score;
-    s = ss.str();
- 
-    Packet outgoing;
-    outgoing.type = SCORE;
-    outgoing.message = const_cast<char*>(s.c_str());   
-    char *incoming = NULL;
-    char *out = PacketToCharArray(outgoing);
-    if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
-        printf("Receving: %s\n", incoming);
-        Packet pack = charArrayToPacket(incoming);
-        if(pack.type != SCORE)
-        {
-            printf("Error in sendPlayerScore() in NetworkManagerClient.cpp. Score not received from server.\n");
-            scores = "";
-        }
-        else{
-            printf("Received message: %s\n", pack.message);
-            scores = pack.message;
-        }
-    }
-    else {
-        connected = false;
-        scores = "";
-    }
+    //std::cout << "Exiting sendPlayerInput" << std::endl << std::endl;
 }
 
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundManager* sound, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::vector<GameObject*>& walls)
 {
-    //std::cout << "Beginning of receiveData" << std::endl << std::endl;
+    //std::cout << "Entering receiveData" << std::endl << std::endl;
     static int iii = 0;
     Packet outgoing;
     outgoing.type = STATE;
-    outgoing.message = "NONE";
+    outgoing.message = const_cast<char*>("NONE");
     char* incoming = NULL;
-    char* out = PacketToCharArray(outgoing);
-    //std::cout << "End of receiveData" << std::endl << std::endl;
+    char* out = NetworkUtil::PacketToCharArray(outgoing);
 
-    if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
-        Packet infoPacket = charArrayToPacket(incoming);
+    if(NetworkUtil::TCPSend(serverSock, out) && NetworkUtil::TCPReceive(serverSock, &incoming)) {
+        Packet infoPacket = NetworkUtil::charArrayToPacket(incoming);
         std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
     }
     else {
@@ -214,11 +178,11 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
                         for(int i = 0; i < packs; ++i)
                         {
                             //std::cout << "We are about to receive packet number " << i << "." << std::endl;
-                            if(TCPReceive(serverSock, &incoming)) {
+                            if(NetworkUtil::TCPReceive(serverSock, &incoming)) {
                                 //std::cout << "We received packet number " << i << "." << std::endl;
                                 std::string msg(incoming);
                                 std::cout << "---" << msg << std::endl;
-                                Packet in = charArrayToPacket(incoming);
+                                Packet in = NetworkUtil::charArrayToPacket(incoming);
                                 if(in.type == MINERAL)
                                 {
                                     //std::cout << "It was a mineral." << std::endl;
@@ -337,5 +301,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
                             }
                         }
                         */
+    //std::cout << "Exiting receiveData" << std::endl << std::endl;
 }
 
