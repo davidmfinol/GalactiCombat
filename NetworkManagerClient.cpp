@@ -194,12 +194,6 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
 
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundManager* sound, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::vector<GameObject*>& walls)
 {
-    static std::clock_t prev_t = std::clock();
-    std::clock_t curr_t = std::clock();
-    if ((curr_t - prev_t) < 300000) {
-        return;
-    }
-    prev_t = curr_t;
     std::cout << "Entering receiveData" << std::endl << std::endl;
     static int iii = 0;
     Packet outgoing;

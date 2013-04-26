@@ -96,7 +96,7 @@ public:
         
         char* charArray = (char*)malloc(2 + messageLength);
         //sprintf(charArray, "%2d", pack.type);
-        //TODO: may want to fix, division is expensive
+        //TODO: FIXME: division is expensive
         char digit1 = pack.type/10 + 48;
         char digit2 = pack.type%10 + 48;
         memmove(charArray, &digit1, 1);
@@ -157,7 +157,7 @@ public:
         if(result < len)
         {   
             if(SDLNet_GetError() && strlen(SDLNet_GetError())) // sometimes blank!
-            std::cerr << "SDLNet_TCP_Recv done goofed: " << SDLNet_GetError() << std::endl;
+                std::cerr << "SDLNet_TCP_Recv done goofed: " << SDLNet_GetError() << std::endl;
             free(*buf);
             buf=NULL;
         }   

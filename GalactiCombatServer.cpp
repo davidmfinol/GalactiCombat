@@ -1,6 +1,6 @@
 #include "GalactiCombatServer.h"
 
-GalactiCombatServer::GalactiCombatServer() : clients(0), state(PAUSE), scoreboard(), lastFrameTime(std::time(0))
+GalactiCombatServer::GalactiCombatServer() : clients(0), state(PAUSE), scoreboard()
 {
     if(SDL_Init(0) != 0)
     {
@@ -25,27 +25,25 @@ std::vector<Client*> GalactiCombatServer::getClients()
 
 Client* GalactiCombatServer::findClientBySocket(TCPsocket sock)
 {
-    //std::cout << "Entering findClientBySocket" << std::endl;
     for(int i = 0; i < clients.size(); i++)
         if(clients[i]->sock == sock)
             return clients[i];
-    //std::cout << "Failed to find with findClientBySocket" << std::endl;
+    std::cerr << "Failed to find with findClientBySocket" << std::endl << std::endl;
     return 0;
 }
 
 Client* GalactiCombatServer::findClientByName(std::string name)
 {
-    //std::cout << "Entering findClientByName -" << name << std::endl;
     for(int i = 0; i < clients.size(); i++)
         if(clients[i]->name == name)
             return clients[i];
-    //std::cout << "Failed to find with findClientByName -" << name << std::endl;
+    std::cerr << "Failed to find with findClientByName - " << name << std::endl << std::endl;
     return 0;
 }
 
 Client* GalactiCombatServer::addClient(TCPsocket sock, int channel, std::string name)
 {
-    std::cout << "Entering addClient -" << name << std::endl;
+    std::cout << "Entering addClient - " << name << std::endl;
     
     clients.push_back(new Client());
     clients.back()->sock = sock;
@@ -61,13 +59,13 @@ Client* GalactiCombatServer::addClient(TCPsocket sock, int channel, std::string 
                                        mSceneMgr->getRootSceneNode()->createChildSceneNode(name + "ParentNode", Ogre::Vector3(pos_x, pos_y, pos_z)), NULL, 30 ));
     physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, true);
     
-    //std::cout << "Exiting addClient -" << name << std::endl;
+    std::cout << "Exiting addClient -" << name << std::endl << std::endl;
     return(clients.back());
 }
 
 void GalactiCombatServer::removeClient(int i)
 {
-    //std::cout << "Entering removeClient -" << i << std::endl;
+    std::cout << "Entering removeClient - " << i << std::endl;
     if(i < 0 && i >= clients.size())
         return;
     
@@ -85,12 +83,12 @@ void GalactiCombatServer::removeClient(int i)
     delete clients[i];
     clients.erase(clients.begin() + i);
     
-    //std::cout << "Exiting removeClient - " << i << std::endl;
+    std::cout << "Exiting removeClient - " << i << std::endl << std::endl;
 }
 
 void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
 {
-    //std::cout << "Entering sendToAll" < std::endl;
+    std::cout << "Entering sendToAll" << std::endl;
     useTCP = true;	//NOTE: temporary
     UDPpacket *UDPPack;
     
@@ -124,12 +122,12 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
             }
     }
     
-    //std::cout << "Exiting sendToAll" < std::endl;
+    std::cout << "Exiting sendToAll" << std::endl << std::endl;
 }
 
 SDLNet_SocketSet GalactiCombatServer::createSockSet()
 {
-    //std::cout << "Entering createSockSet" < std::endl;
+    std::cout << "Entering createSockSet" << std::endl;
     static SDLNet_SocketSet set = NULL;
     
     if(set)
@@ -144,13 +142,13 @@ SDLNet_SocketSet GalactiCombatServer::createSockSet()
     for(int i = 0; i < clients.size(); i++)
         SDLNet_TCP_AddSocket(set, clients[i]->sock);
     
-    //std::cout << "Exiting createSockSet" < std::endl;
+    std::cout << "Exiting createSockSet" << std::endl << std::endl;
     return set;
 }
 
 void GalactiCombatServer::createServerMinerals()
 {
-    //std::cout << "Entering createServerMinerals" << std::endl;
+    std::cout << "Entering createServerMinerals" << std::endl;
     int radius, i, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z;
     std::srand (std::time(NULL));
     for (i = 0; i < MINERALS_AMOUNT; i++)
@@ -168,12 +166,12 @@ void GalactiCombatServer::createServerMinerals()
         physicsSimulator->addGameObject(minerals[i], RESTITUTION);
         physicsSimulator->setGameObjectVelocity(minerals[i], Ogre::Vector3(vel_x, vel_y, vel_z));
     }
-    //std::cout << "Exiting createServerMinerals" << std::endl;
+   std::cout << "Exiting createServerMinerals" << std::endl << std::endl;
 }
 
 void GalactiCombatServer::createServerRoom()
 {
-    //std::cout << "Entering createServerRoom" << std::endl;
+    std::cout << "Entering createServerRoom" << std::endl;
     // create ground
     walls[0] = new GameObject ("ground", mSceneMgr->getRootSceneNode(), NULL, 0, 0, 0, 0, "UNIT_Y");
     physicsSimulator->addGameObject(walls[0]);
@@ -197,11 +195,12 @@ void GalactiCombatServer::createServerRoom()
     // create right wall
     walls[5] = new GameObject ("right", mSceneMgr->getRootSceneNode(), NULL, ROOM_HIGH/2, ROOM_SIZE/2, 0, 0, "NEGATIVE_UNIT_Z");
     physicsSimulator->addGameObject(walls[5]);
-    //std::cout << "Exiting createServerRoom" << std::endl;
+    std::cout << "Exiting createServerRoom" << std::endl << std::endl;
 }
 
 void GalactiCombatServer::startServer(long portNo)
 {
+    std::cout << "Entering startServer" << std::endl;
     IPaddress ip; //32-bit IPv4 host, 16-bit port
     const char *host = NULL;
     Uint16 port = (Uint16)portNo;
@@ -241,63 +240,26 @@ void GalactiCombatServer::startServer(long portNo)
     else
         std::cout << "Host: " << host << std::endl;
     
-    std::cout << "Ready for connections." << std::endl;
+    std::cout << "Exiting startServer" << std::endl << std::endl;
     serverLoop();
 }
 
 void GalactiCombatServer::serverLoop(void)
 {
-    static int looop = 0;
     std::cout << "Entering serverLoop" << std::endl;
     while(1)
     {
-        //get sockets
-        SDLNet_SocketSet set = this->createSockSet();
-        int numReady = SDLNet_CheckSockets(set, (Uint32) - 1);
-        if(numReady == -1)
-        {
-            std::cerr << "SDLNet_CheckSockets done goofed: " << SDLNet_GetError() << std::endl;
-            break;
-        }
-        if(!numReady)
-            continue;
-        
-        //listen for connections
-        if(SDLNet_SocketReady(TCPServerSock))
-        {
-            numReady--;
-            this->listenForConnections();
-        }
-        
-        //for each connection, receive data
-        for(int i = 0; numReady && i < clients.size(); i++)
-        {
-            //std::cout << "Checking sockets" << std::endl;
-            if(SDLNet_SocketReady(clients[i]->sock))
-            {
-                numReady--;
-                this->receiveData(i);
-            } else {
-                //FIXME: THIS SHOULD CHECK FOR DISCONNECTS, BUT DOESN'T WORK:
-                //std::cerr << "Client disconnected." << std::endl;
-                //this->removeClient(i);
-            }
-        }
+        std::cout << "==============Server Loop Run=============" << std::endl;
         
         //run the game loop
-        std::time_t currentTime = std::time(0);
-        std::time_t elapsedTime = currentTime - lastFrameTime; //FIXME: THIS IS INTEGER
-        lastFrameTime = currentTime;
         if(state == PLAY)
         {
-            //std::cout << "Running the Game loop" << std::endl;
+            std::cout << "Running the Game loop." << std::endl;
             static std::clock_t prev_t = std::clock();
             std::clock_t curr_t = std::clock();
-            if ((curr_t - prev_t) > 300000) {
-                std::cout << "GGGGAMMMMMME LLOOOOOOOOP: " << looop++ << std::endl;
-                gameLoop(elapsedTime);
-                prev_t = curr_t;
-            }
+            float elapsedTime = ( ((float)curr_t) - ((float)prev_t) ) / CLOCKS_PER_SEC;;
+            gameLoop(elapsedTime);
+            prev_t = curr_t;
             //std::cout << "Game loop has been run" << std::endl;
             
             // Debugging
@@ -308,22 +270,59 @@ void GalactiCombatServer::serverLoop(void)
                 //std::cout << "Player is at " << pos.x << " " << pos.y << " " << pos.z << std::endl;
             //}
         }
+        
+        //get sockets ready for connection
+        std::cout << "Getting SocketSet." << std::endl;
+        SDLNet_SocketSet set = this->createSockSet();
+        std::cout << "Checking Number of Sockets Ready..." << std::endl;
+        int numReady = SDLNet_CheckSockets(set, (Uint32) - 1);
+        std::cout << "Number of Sockets Ready: " << numReady << std::endl;
+        if(numReady == -1)
+        {
+            std::cerr << "SDLNet_CheckSockets done goofed: " << SDLNet_GetError() << std::endl;
+            break;
+        }
+        if(!numReady)
+            continue;
+        
+        //listen for new connections
+        std::cout << "Checking this server's socket." << std::endl;
+        if(SDLNet_SocketReady(TCPServerSock))
+        {
+            numReady--;
+            this->listenForConnections();
+        }
+        
+        //for each connection, receive data
+        for(int i = 0; numReady && i < clients.size(); i++)
+        {
+            std::cout << "Checking " << clients[i]->name << "'s socket." << std::endl;
+            if(SDLNet_SocketReady(clients[i]->sock))
+            {
+                numReady--;
+                this->receiveData(i);
+            } else {
+                std::cerr << clients[i]->name << "'s socket wasn't ready." << std::endl;
+                //FIXME: THIS SHOULD CHECK FOR DISCONNECTS, BUT DOESN'T WORK:
+                //this->removeClient(i);
+            }
+        }
     }
-    std::cout << "Exiting serverLoop" << std::endl;
+    std::cout << "Exiting serverLoop" << std::endl << std::endl;
 }
 
 void GalactiCombatServer::listenForConnections() 
 {
-    //std::cout << "Entering listenForConnections" << std::endl;
+    std::cout << "Entering listenForConnections" << std::endl;
     TCPsocket TCPsock = SDLNet_TCP_Accept(TCPServerSock);
     if(TCPsock)
     {
         char *msg = NULL;
         if(NetworkUtil::TCPReceive(TCPsock, &msg))
         {
-            //std::cout << "Received new connection with message: " <<  msg << std::endl;
+            std::cout << "Received new connection with message: " <<  msg << std::endl;
             Packet pack = NetworkUtil::charArrayToPacket(msg);
-            if(pack.type != CONNECTION) //FIXME: THIS SOMETIMES GETS CALLED INCORRECTLY?
+            if(pack.type != CONNECTION) //FIXME: THIS SOMETIMES HAPPENS? WHY?
             {
                 std::cerr << "Connection Error. Someone sent something other than a CONNECTION packet as a new socket." << std::endl;
                 return;
@@ -353,12 +352,12 @@ void GalactiCombatServer::listenForConnections()
             SDLNet_TCP_Close(TCPsock);
         }
     }
-    //std::cout << "Exiting listenForConnections" << std::endl;
+    std::cout << "Exiting listenForConnections" << std::endl << std::endl;
 }
 
 void GalactiCombatServer::receiveData(int clientIndex)
 {
-    //std::cout << "Entering receiveData" << std::endl;
+    std::cout << "Entering receiveData" << std::endl;
     char *msg = NULL;
     Packet incoming;
 /*
@@ -379,9 +378,8 @@ void GalactiCombatServer::receiveData(int clientIndex)
 */
     if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
     {
-        //std::cout << "Received TCP message from client " << clients[clientIndex]->name << std::endl;
         incoming = NetworkUtil::charArrayToPacket(msg);
-        std::cout<<"Received TCP message from "<<clients[clientIndex]->name<<": "<<msg<<std::endl;
+        std::cout << "Received TCP message from " << clients[clientIndex]->name << ": " << msg << std::endl;
         free(msg);
         msg = NULL;
     }
@@ -399,21 +397,23 @@ void GalactiCombatServer::receiveData(int clientIndex)
             receiveScorePacket(clientIndex, incoming); break;
         case READY:
             receiveReadyPacket(clientIndex, incoming); break;
-            
+        default:
+            std::cerr << "Unrecognized Packet type from " << clients[clientIndex]->name << std::endl;
     }
+    std::cout << "Exiting receiveData" << std::endl << std::endl;
 }
 
 void GalactiCombatServer::receiveConnectionPacket(int clientIndex, Packet& incoming)
 {
-    //std::cout << "Entering receiveConnectionPacket" << std::endl;
+    std::cout << "Entering receiveConnectionPacket" << std::endl;
     if(!strcmp(incoming.message, "QUIT"))
     {
         std::cout << clients[clientIndex]->name << " has quit the game!" << std::endl;
         this->removeClient(clientIndex); 
     }
     else
-        std::cout << "Received a non-quit connection packet from " << clients[clientIndex]->name << " after first connection." << std::endl;
-    //std::cout << "Exiting receiveConnectionPacket" << std::endl;
+        std::cerr << "Received a non-quit connection packet from " << clients[clientIndex]->name << " after first connection." << std::endl;
+   std::cout << "Exiting receiveConnectionPacket" << std::endl << std::endl;
 }
 
 void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
@@ -449,13 +449,13 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
 
     out.message = const_cast<char*>(ss.str().c_str());
 
-    std::cout << clients[clientIndex]->name << "     " << out.message << std::endl << std::endl;
+    std::cout << "StateMessage:     " << out.message << std::endl;
     if(NetworkUtil::TCPSend(clients[clientIndex]->sock, NetworkUtil::PacketToCharArray(out)))
         std::cout << "Sent back info to " << clients[clientIndex]->name << std::endl;
     else
-        std::cout << "Didn't send back info to " << clients[clientIndex]->name << std::endl;
+        std::cerr << "Didn't send back info to " << clients[clientIndex]->name << std::endl;
     
-    std::cout << "Exiting receiveStatePacket" << std::endl;
+    std::cout << "Exiting receiveStatePacket" << std::endl << std::endl;
 }
 
 void GalactiCombatServer::receivePlayerInputPacket(int clientIndex, Packet& incoming)
@@ -464,32 +464,14 @@ void GalactiCombatServer::receivePlayerInputPacket(int clientIndex, Packet& inco
     char input = *incoming.message;
     std::cout << "The input from " << clients[clientIndex]->name << " is " << input << std::endl;
     clients[clientIndex]->inputController->injectInput(input);
-    std::cout << "Exiting receivePlayerInputPacket" << std::endl;
-    std::cout << "Dicks, dicks everywhere" << std::endl;
+    std::cout << "Exiting receivePlayerInputPacket" << std::endl << std::endl;
 }
 
 void GalactiCombatServer::receiveScorePacket(int clientIndex, Packet& incoming)
 {
-    //std::cout << "Entering receiveScorePacket" << std::endl;
-    /*
-    printf("%s ended the game with a score of %s!\n", const_cast<char*>(clients[i]->name.c_str()), incoming.message);
-    
-    std::stringstream ss;
-    std::string name(clients[i]->name);
-    std::string score = incoming.message;
-    ss << scoreboard << name << "," << score << ";";
-    
-    scoreboard = ss.str();
-    Packet outgoing;
-    outgoing.type = SCORE;
-    outgoing.message = const_cast<char*>(scoreboard.c_str());
-    char *out = NetworkUtil::PacketToCharArray(outgoing);
-    if(NetworkUtil::TCPSend(clients[i]->sock, out))
-        printf("Sent back scoreboard: %s\n", out);
-    else
-        printf("Didn't send scoreboard\n");
-    */
-    //std::cout << "Exiting receiveScorePacket" << std::endl;
+    std::cout << "Entering receiveScorePacket" << std::endl;
+    //TODO: THIS PACKET TYPE NEEDS TO BE REDONE
+    std::cout << "Exiting receiveScorePacket" << std::endl;
 }
 
 void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
@@ -519,7 +501,7 @@ void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
         if(NetworkUtil::TCPSend(clients[clientIndex]->sock, out))
             std::cout << "Sent back lobby list: " << out << std::endl;
         else
-            std::cout << "Didn't send back lobby list: " << std::endl;
+            std::cerr << "Didn't send back lobby list: " << std::endl;
     }
     else if(!strcmp(incoming.message, "READY")) {
         clients[clientIndex]->ready = true;
@@ -536,7 +518,7 @@ void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
     else if(!strcmp(incoming.message, "START")) {
         state = PLAY;
     }
-    std::cout << "Exiting receiveReadyPacket" << std::endl;
+    std::cout << "Exiting receiveReadyPacket" << std::endl << std::endl;
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32

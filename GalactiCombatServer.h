@@ -44,7 +44,6 @@ protected:
     UDPsocket UDPServerSock;            //server socket for UDP messages
     
     int state;                          //whether the server is currently running the game
-    std::time_t lastFrameTime;          //time of the last occurence of gameLoop()
     std::string scoreboard;             //of the format "Name,Score;"
 
 private:
