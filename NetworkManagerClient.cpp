@@ -203,9 +203,9 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
     char* out = NetworkUtil::PacketToCharArray(outgoing);
     
     std::cout << "About to request data" << std::endl << std::endl;
-    while (!NetworkUtil::TCPSend(TCPServerSock, out));
-    std::cout << "About to receive data" << std::endl << std::endl;
-    while (!NetworkUtil::TCPReceive(TCPServerSock, &incoming));
+    while (!NetworkUtil::TCPSend(TCPServerSock, out));//FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    std::cout << "About to receive data" << std::endl << std::endl;//FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    while (!NetworkUtil::TCPReceive(TCPServerSock, &incoming)); //FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
     Packet infoPacket = NetworkUtil::charArrayToPacket(incoming);
     std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;

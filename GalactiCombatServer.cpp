@@ -274,9 +274,9 @@ void GalactiCombatServer::serverLoop(void)
         //get sockets ready for connection
         std::cout << "Getting SocketSet." << std::endl;
         SDLNet_SocketSet set = this->createSockSet();
-        std::cout << "Checking Number of Sockets Ready..." << std::endl;
-        int numReady = SDLNet_CheckSockets(set, (Uint32) - 1);
-        std::cout << "Number of Sockets Ready: " << numReady << std::endl;
+        std::cout << "Checking Number of Sockets Ready..." << std::endl; //FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        int numReady = SDLNet_CheckSockets(set, (Uint32) - 1); //FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        std::cout << "Number of Sockets Ready: " << numReady << std::endl; //FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if(numReady == -1)
         {
             std::cerr << "SDLNet_CheckSockets done goofed: " << SDLNet_GetError() << std::endl;
