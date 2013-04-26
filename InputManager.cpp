@@ -8,7 +8,7 @@ InputManager::InputManager(NetworkManagerClient* network): mNetworkMgr(network),
 mLeft(false), mRight(false), mForward(false), mBack(false), mUp(false), mDown(false), mShoot(false),
 mCameraHorizontal(0), mCameraVertical(0)
 {
-	//TODO: WAT
+    //TODO: BETTER WAY TO DO THIS?
     keyCodesToCharacters[OIS::KC_Q] = "Q";
     keyCodesToCharacters[OIS::KC_W] = "W";
     keyCodesToCharacters[OIS::KC_E] = "E";

@@ -290,7 +290,7 @@ void GalactiCombatServer::serverLoop(void)
         if(state == PLAY)
         {
             //std::cout << "Running the Game loop" << std::endl;
-            //gameLoop(elapsedTime);
+            gameLoop(elapsedTime);
             //std::cout << "Game loop has been run" << std::endl;
             
             // Debugging
@@ -435,7 +435,6 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
         Ogre::Vector3 vel = physicsSimulator->getGameObjectVelocity(spaceShips[in]);
         Ogre::Quaternion rot = physicsSimulator->getGameObjectOrientation(spaceShips[in]);
         double size = spaceShips[in]->getSize();
-        std::cout << "Giant purple dildo detected" << std::endl;
         char buffer[100];
         sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, size);
         ss << buffer;

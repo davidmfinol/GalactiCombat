@@ -69,6 +69,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     
     //server uses UDP_PORT; +1 is necessary when server and client run
     //on the same machine
+    /*
     UDPServerSock = SDLNet_UDP_Open(UDP_PORT+1);
     if(!UDPServerSock)
     {
@@ -78,6 +79,7 @@ int NetworkManagerClient::connect(char *host, char *name)
         std::string exception = "fail_to_connect";
         throw exception;
     }
+    */
     
     // login with a name
     Packet pack;
