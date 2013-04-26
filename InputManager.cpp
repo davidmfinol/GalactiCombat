@@ -217,10 +217,10 @@ bool InputManager::keyPressed(const OIS::KeyEvent& arg)
         default:
             break;
     }
-    
+    /*
     if(mNetworkMgr->isOnline())
         mNetworkMgr->sendPlayerInput(this);
-    
+    */
     return true;
 }
 //-------------------------------------------------------------------------------------
@@ -268,10 +268,10 @@ bool InputManager::keyReleased( const OIS::KeyEvent &arg )
         }
         mGUIMgr->setMultiplayerInput(newString);
     }
-    
+    /*
     if(mNetworkMgr->isOnline())
         mNetworkMgr->sendPlayerInput(this);
-    
+    */
     return true;
 }
 //-------------------------------------------------------------------------------------
@@ -303,10 +303,10 @@ bool InputManager::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID 
         default:
             break;
     }
-    
+    /*
     if(mNetworkMgr->isOnline())
         mNetworkMgr->sendPlayerInput(this);
-    
+    */
     return true;
 }
 //-------------------------------------------------------------------------------------
@@ -322,9 +322,9 @@ bool InputManager::mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID
         default:
             break;
     }
-    
+    /*
     if(mNetworkMgr->isOnline())
         mNetworkMgr->sendPlayerInput(this);
-    
+    */
     return true;
 }
