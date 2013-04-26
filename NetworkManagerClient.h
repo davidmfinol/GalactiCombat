@@ -20,7 +20,7 @@ public:
     virtual ~NetworkManagerClient();
     
     // Connection Data
-    int TCPConnect(char *host, char *name);
+    int connect(char *host, char *name);
     TCPsocket& getSocket();
     bool isOnline();
     void resetReadyState();
@@ -28,10 +28,12 @@ public:
     
     // Game Logic Transaction
     void sendPlayerInput(ISpaceShipController* controller);
-    void receiveData(Ogre::SceneManager*, SoundManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::vector<GameObject*>&);
+    void receiveData(Ogre::SceneManager*, SoundManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::vector<GameObject*>&); //FIXME: BETTER DATA PASSING
     
 protected:
-    TCPsocket serverSock;
+    TCPsocket TCPServerSock;
+    UDPsocket UDPServerSock;
+    IPaddress serverIP;
     std::string mName;
     bool connected;
 };

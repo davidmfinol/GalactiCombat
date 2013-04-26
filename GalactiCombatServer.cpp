@@ -115,12 +115,11 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
         else //using UDP
             {
                 UDPPack = SDLNet_AllocPacket(65535);
-                
                 UDPPack->channel = clients[cindex]->channel;
                 UDPPack->data = (Uint8*)buf;
                 UDPPack->len = strlen(buf) + 1;
-                NetworkUtil::UDPSend(UDPServerSock, UDPPack);
-                
+                NetworkUtil::UDPSend(UDPServerSock, clients[cindex]->channel, UDPPack);
+
                 SDLNet_FreePacket(UDPPack);
             }
     }
@@ -204,12 +203,8 @@ void GalactiCombatServer::createServerRoom()
 void GalactiCombatServer::startServer(long portNo)
 {
     IPaddress ip; //32-bit IPv4 host, 16-bit port
-    //char *message = NULL;
     const char *host = NULL;
-    
-    Uint16 port;
-    
-    port = (Uint16)portNo;
+    Uint16 port = (Uint16)portNo;
     
     isServer = true;
     
@@ -279,19 +274,8 @@ void GalactiCombatServer::serverLoop(void)
             //std::cout << "Checking sockets" << std::endl;
             if(SDLNet_SocketReady(clients[i]->sock))
             {
-                //std::cout << clients[i]->name << "'s socket is read!" << std::endl;
-                char *msg = NULL;
-                std::string score;
-                if(NetworkUtil::TCPReceive(clients[i]->sock, &msg))
-                {
-                    //std::cout << "Received message from client " << clients[i]->name << std::endl;
-                    numReady--;
-                    Packet incoming = NetworkUtil::charArrayToPacket(msg);
-                    this->receiveData(incoming, i);
-                    //std::cout << "Message processed  from " << clients[i]->name << std::endl;
-                }
-                free(msg);
-                msg = NULL;
+                numReady--;
+                this->receiveData(i);
             } else {
                 //FIXME: THIS SHOULD CHECK FOR DISCONNECTS, BUT DOESN'T WORK:
                 //std::cerr << "Client disconnected." << std::endl;
@@ -352,8 +336,9 @@ void GalactiCombatServer::listenForConnections()
             // TODO: FIXME: add some checks for repeated names. Could cause crash
             Client* client = this->addClient(TCPsock, channel, name);
             
-            std::cout << name << " has logged in." << name << std::endl;
-            std::cout << clients.size() << " players have logged in." << std::endl;
+            std::cout << name << " has logged in!" << std::endl;
+            std::cout << name << " has been bound to channel " << channel << "." << std::endl;
+            std::cout << clients.size() << " players are logged in." << std::endl;
         }
         else
         {
@@ -364,89 +349,188 @@ void GalactiCombatServer::listenForConnections()
     //std::cout << "Exiting listenForConnections" << std::endl;
 }
 
-void GalactiCombatServer::receiveData(const Packet &incoming, int i)
+void GalactiCombatServer::receiveData(int clientIndex)
 {
-    if(incoming.type == CONNECTION)
+    //std::cout << "Entering receiveData" << std::endl;
+    char *msg = NULL;
+    Packet incoming;
+/*
+    UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
+    if(!UDPPack)
     {
-        if(!strcmp(incoming.message, "QUIT"))
-        {
-            printf("%s has quit the game!\n", const_cast<char*>(clients[i]->name.c_str()));
-            this->removeClient(i); 
+            std::cerr << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
+            return;
+    }
+
+    //receive data from a socket, depending on the transport protocol being used
+    if(UDPReceive(UDPServerSock, UDPPack) > 0)
+    {
+            std::cout << "Received UDP packet from client " << clients[clientIndex]->name << std::endl;
+            incoming = charArrayToPacket((char*)UDPPack->data);
+    }
+    else if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
+*/
+    if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
+    {
+        //std::cout << "Received TCP message from client " << clients[clientIndex]->name << std::endl;
+        incoming = NetworkUtil::charArrayToPacket(msg);
+        std::cout<<"Received TCP message from "<<clients[clientIndex]->name<<": "<<msg<<std::endl;
+        free(msg);
+        msg = NULL;
+    }
+
+    //process the received message
+    switch(incoming.type)
+    {
+        case CONNECTION:
+            receiveConnectionPacket(clientIndex, incoming); break;
+        case STATE:
+            receiveStatePacket(clientIndex, incoming); break;
+        case PLAYERINPUT:
+            receivePlayerInputPacket(clientIndex, incoming); break;
+        case SCORE:
+            receiveScorePacket(clientIndex, incoming); break;
+        case READY:
+            receiveReadyPacket(clientIndex, incoming); break;
+            
+    }
+}
+
+void GalactiCombatServer::receiveConnectionPacket(int clientIndex, Packet& incoming)
+{
+    //std::cout << "Entering receiveConnectionPacket" << std::endl;
+    if(!strcmp(incoming.message, "QUIT"))
+    {
+        std::cout << clients[clientIndex]->name << " has quit the game!" << std::endl;
+        this->removeClient(clientIndex); 
+    }
+    else
+        std::cout << "Received a non-quit connection packet from " << clients[clientIndex]->name << " after first connection." << std::endl;
+    //std::cout << "Exiting receiveConnectionPacket" << std::endl;
+}
+
+void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
+{
+    std::cout << "Entering receiveStatePacket" << std::endl;
+    Packet out;
+    out.type = INFO;
+    std::stringstream ss;
+
+    ss << "minerals:" << minerals.size() << ",";
+    for (int in = 0; in < minerals.size(); in++) {
+        std::string name = minerals[in]->getName();
+        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(minerals[in]);
+        Ogre::Vector3 vel = physicsSimulator->getGameObjectVelocity(minerals[in]);
+        Ogre::Quaternion rot = physicsSimulator->getGameObjectOrientation(minerals[in]);
+        double radius = minerals[in]->getRadius();
+        char buffer[100];
+        sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, radius);
+        ss << buffer;
+    }
+
+    ss << "spaceships:" << spaceShips.size() << ",";
+    for (int in = 0; in < spaceShips.size(); in++) {
+        std::string name = spaceShips[in]->getName();
+        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(spaceShips[in]);
+        Ogre::Vector3 vel = physicsSimulator->getGameObjectVelocity(spaceShips[in]);
+        Ogre::Quaternion rot = physicsSimulator->getGameObjectOrientation(spaceShips[in]);
+        double size = spaceShips[in]->getSize();
+        std::cout << "Giant purple dildo detected" << std::endl;
+        char buffer[100];
+        sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, size);
+        ss << buffer;
+    }
+
+    out.message = const_cast<char*>(ss.str().c_str());
+
+    std::cout << clients[clientIndex]->name << "     " << out.message << std::endl << std::endl;
+    if(NetworkUtil::TCPSend(clients[clientIndex]->sock, NetworkUtil::PacketToCharArray(out)))
+        std::cout << "Sent back info to " << clients[clientIndex]->name << std::endl;
+    else
+        std::cout << "Didn't send back info to " << clients[clientIndex]->name << std::endl;
+    
+    std::cout << "Exiting receiveStatePacket" << std::endl;
+}
+
+void GalactiCombatServer::receivePlayerInputPacket(int clientIndex, Packet& incoming)
+{
+    std::cout << "Entering receivePlayerInputPacket" << std::endl;
+    char input = *incoming.message;
+    std::cout << "The input from " << clients[clientIndex]->name << " is " << input << std::endl;
+    clients[clientIndex]->inputController->injectInput(input);
+    std::cout << "Exiting receivePlayerInputPacket" << std::endl;
+    std::cout << "Dicks, dicks everywhere" << std::endl;
+}
+
+void GalactiCombatServer::receiveScorePacket(int clientIndex, Packet& incoming)
+{
+    //std::cout << "Entering receiveScorePacket" << std::endl;
+    /*
+    printf("%s ended the game with a score of %s!\n", const_cast<char*>(clients[i]->name.c_str()), incoming.message);
+    
+    std::stringstream ss;
+    std::string name(clients[i]->name);
+    std::string score = incoming.message;
+    ss << scoreboard << name << "," << score << ";";
+    
+    scoreboard = ss.str();
+    Packet outgoing;
+    outgoing.type = SCORE;
+    outgoing.message = const_cast<char*>(scoreboard.c_str());
+    char *out = NetworkUtil::PacketToCharArray(outgoing);
+    if(NetworkUtil::TCPSend(clients[i]->sock, out))
+        printf("Sent back scoreboard: %s\n", out);
+    else
+        printf("Didn't send scoreboard\n");
+    */
+    //std::cout << "Exiting receiveScorePacket" << std::endl;
+}
+
+void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
+{
+    std::cout << "Entering receiveReadyPacket" << std::endl;
+    if(!strcmp(incoming.message, "LIST_REQUEST"))
+    {
+        int readyCount = 0;
+        std::string result("Game will start when all players (more than one) are ready:\n\n");
+        for (int count = 0; count < clients.size(); count++) {
+            std::stringstream ss;
+            std::string name(clients[count]->name);
+            std::string ready;
+            if (clients[count]->ready) {
+                ready = "READY!";
+                readyCount++;
+            }
+            else ready = "Preparing";
+            ss << name << ".................." << ready << "\n";
+            result += ss.str();
         }
-        else
-            printf("WAT R U DOING\n");
-    }
-    else if(incoming.type == SCORE)
-    {
-        printf("%s ended the game with a score of %s!\n", const_cast<char*>(clients[i]->name.c_str()), incoming.message);
         
-        std::stringstream ss;
-        std::string name(clients[i]->name);
-        std::string score = incoming.message;
-        ss << scoreboard << name << "," << score << ";";
-        
-        scoreboard = ss.str();
-        Packet outgoing;
-        outgoing.type = SCORE;
-        outgoing.message = const_cast<char*>(scoreboard.c_str());
-        char *out = NetworkUtil::PacketToCharArray(outgoing);
-        if(NetworkUtil::TCPSend(clients[i]->sock, out))
-            printf("Sent back scoreboard: %s\n", out);
+        if((readyCount == clients.size()) && (clients.size() != 1))
+            result += "\nAll players ready, game is starting in:\n";
+
+        char* out = const_cast<char*>(result.c_str());
+        if(NetworkUtil::TCPSend(clients[clientIndex]->sock, out))
+            std::cout << "Sent back lobby list: " << out << std::endl;
         else
-            printf("Didn't send scoreboard\n");
+            std::cout << "Didn't send back lobby list: " << std::endl;
     }
-    else if(incoming.type == PLAYERINPUT)
-    {
-        char input = *incoming.message;
-        printf("The input is: %d\n", input);
-        clients[i]->inputController->injectInput(input);
+    else if(!strcmp(incoming.message, "READY")) {
+        clients[clientIndex]->ready = true;
     }
-    else if(incoming.type == READY)
-    {
+    else if(!strcmp(incoming.message, "PREPARING")) {
+        clients[clientIndex]->ready = false;
     }
-    else if(incoming.type == STATE) {
+    else if(!strcmp(incoming.message, "RESET")) {
+        for (int count = 0; count < clients.size(); count++) {
+            clients[count]->ready = false;
+            state = PAUSE;
+        }
     }
-}
-
-void GalactiCombatServer::sendMineral(Mineral* mineral, int cindex)
-{
-    //std::cout << "Entering sendMineral" << std::endl;
-    Packet outgoing;
-    outgoing.type = MINERAL;
-    
-    std::string name = mineral->getName();
-    Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(mineral);
-    Ogre::Vector3 vel = physicsSimulator->getGameObjectVelocity(mineral);
-    Ogre::Quaternion rot = physicsSimulator->getGameObjectOrientation(mineral);
-    double radius = mineral->getRadius();
-    
-    char buffer[100];
-    sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, radius);
-    outgoing.message = buffer;
-    char* out = NetworkUtil::PacketToCharArray(outgoing);
-    NetworkUtil::TCPSend(clients[cindex]->sock, out);
-    //std::cout << "Exiting sendMineral" << std::endl;
-}
-
-void GalactiCombatServer::sendSpaceShip(SpaceShip* spaceShip, int cindex)
-{
-    //std::cout << "Entering sendSpaceShip" << std::endl;
-    Packet outgoing;
-    outgoing.type = SPACESHIP;
-    
-    std::string name = spaceShip->getName();
-    Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(spaceShip);
-    Ogre::Vector3 vel = physicsSimulator->getGameObjectVelocity(spaceShip);
-    Ogre::Quaternion rot = physicsSimulator->getGameObjectOrientation(spaceShip);
-    double size = spaceShip->getSize();
-    
-    //FIXME: MAYBE WE CAN FIND A BETTER WAY TO DO THIS?
-    char buffer[100];
-    sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, size);
-    outgoing.message = buffer;
-    char* out = NetworkUtil::PacketToCharArray(outgoing);
-    NetworkUtil::TCPSend(clients[cindex]->sock, out);
-    //std::cout << "Exiting sendSpaceShip" << std::endl;
+    else if(!strcmp(incoming.message, "START")) {
+        state = PLAY;
+    }
+    std::cout << "Exiting receiveReadyPacket" << std::endl;
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32

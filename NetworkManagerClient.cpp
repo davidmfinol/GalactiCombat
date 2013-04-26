@@ -31,7 +31,7 @@ NetworkManagerClient::~NetworkManagerClient(void)
     SDL_Quit();
 }
 
-int NetworkManagerClient::TCPConnect(char *host, char *name)
+int NetworkManagerClient::connect(char *host, char *name)
 {
     //std::cout << "Entering TCPConnect" << std::endl << std::endl;
     Uint16 port = (Uint16) TCP_PORT;
@@ -45,7 +45,7 @@ int NetworkManagerClient::TCPConnect(char *host, char *name)
         exit(4); /*most of the time this is a major error, but do what you want. */
     }
     
-    /* Resolve the argument into an IPaddress type */
+    // Resolve the argument into an IPaddress type 
     std::cout << "Connecting to " << host << " port " << port << std::endl;
     IPaddress ip;
     if(SDLNet_ResolveHost(&ip, host, port)==-1)
@@ -55,10 +55,10 @@ int NetworkManagerClient::TCPConnect(char *host, char *name)
         throw exception;
     }
     
-    /* open the server socket */
+    // open the server socket
     std::cout << "Opening server socket." << std::endl;
-    serverSock = SDLNet_TCP_Open(&ip);
-    if(!serverSock)
+    TCPServerSock = SDLNet_TCP_Open(&ip);
+    if(!TCPServerSock)
     {
         std::cerr << "SDLNet_TCP_Open done goofed: " << SDLNet_GetError() << std::endl;
         SDLNet_Quit();
@@ -67,36 +67,41 @@ int NetworkManagerClient::TCPConnect(char *host, char *name)
         throw exception;
     }
     
-    
-    if(SDLNet_TCP_AddSocket(set,serverSock) == -1)
+    //server uses UDP_PORT; +1 is necessary when server and client run
+    //on the same machine
+    UDPServerSock = SDLNet_UDP_Open(UDP_PORT+1);
+    if(!UDPServerSock)
     {
-        std::cerr << "SDLNet_TCP_AddSocket done goofed: " << SDLNet_GetError() << std::endl;
+        std::cerr << "SDLNet_UDP_Open done goofed: " << SDLNet_GetError() << std::endl;
         SDLNet_Quit();
         SDL_Quit();
-        exit(7);
+        std::string exception = "fail_to_connect";
+        throw exception;
     }
     
-    /* login with a name */
+    // login with a name
     Packet pack;
     pack.type = CONNECTION;
     pack.message = name; // FIXME: SHOULD USE? :char message[MAXLEN];
     char* out = NetworkUtil::PacketToCharArray(pack);
     std::cout << "Sent " << out << std::endl;
-    if(!NetworkUtil::TCPSend(serverSock, out))
+    if(!NetworkUtil::TCPSend(TCPServerSock, out))
     {
-        SDLNet_TCP_Close(serverSock);
+        SDLNet_TCP_Close(TCPServerSock);
         exit(8);
     }
     
+    // store our connection info
     mName = name;
-    std::cout << "Logged in as " << mName << std::endl;
+    serverIP = ip;
     connected = true;
+    std::cout << "Logged in as " << mName << std::endl;
     //std::cout << "Exiting TCPConnect" << std::endl << std::endl;
 }
 
 TCPsocket& NetworkManagerClient::getSocket()
 {
-    return this->serverSock;
+    return this->TCPServerSock;
 }
 
 bool NetworkManagerClient::isOnline()
@@ -110,7 +115,7 @@ void NetworkManagerClient::resetReadyState()
     Packet outgoing;
     outgoing.type = READY;
     outgoing.message = const_cast<char*>("RESET");
-    NetworkUtil::TCPSend(serverSock, NetworkUtil::PacketToCharArray(outgoing));
+    NetworkUtil::TCPSend(TCPServerSock, NetworkUtil::PacketToCharArray(outgoing));
     //std::cout << "Exiting resetReadyState" << std::endl << std::endl;
 }
 
@@ -118,10 +123,28 @@ void NetworkManagerClient::quit()
 {
     //std::cout << "Entering quit" << std::endl << std::endl << std::endl;
     Packet outgoing;
+/*
+        UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
+        if(!UDPPack)
+        {
+                std::cerr << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
+                return;
+        }
+*/
+
     outgoing.type = CONNECTION;
     outgoing.message = const_cast<char*>("QUIT");
-    while(!NetworkUtil::TCPSend(serverSock, NetworkUtil::PacketToCharArray(outgoing))); // FIXME: what if server crashed?
+    while(!NetworkUtil::TCPSend(TCPServerSock, NetworkUtil::PacketToCharArray(outgoing))); // FIXME: what if server crashed?
+/*
+        UDPPack->data = (Uint8*)msg;
+        UDPPack->len = strlen(msg) + 1;
+        UDPPack->address = serverIP;
+        UDPSend(UDPServerSock, -1, UDPPack);
+        SDLNet_FreePacket(UDPPack);
+*/
+
     connected = false;
+    std::cout << "You have quit the game." << std::endl;
     //std::cout << "Exiting quit" << std::endl << std::endl << std::endl;
 }
 
@@ -129,6 +152,12 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
 {
     //std::cout << "Entering sendPlayerInput" << std::endl << std::endl;
     Packet outgoing;
+    UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
+    if(!UDPPack)
+    {
+            std::cout << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
+            return;
+    }
     
     bool left = controller->left();
     bool right = controller->right();
@@ -150,35 +179,40 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     outgoing.message = &result;
     
     char *out = NetworkUtil::PacketToCharArray(outgoing);
-    if(!NetworkUtil::TCPSend(serverSock, out))
-        connected = false;
+    NetworkUtil::TCPSend(TCPServerSock, out);
+/*
+    UDPPack->data = (Uint8*)out;
+    UDPPack->len = strlen(out) + 1;
+    UDPPack->address = serverIP;
+    UDPSend(UDPServerSock, -1, UDPPack);
+    SDLNet_FreePacket(UDPPack);
+*/
     //std::cout << "Exiting sendPlayerInput" << std::endl << std::endl;
 }
 
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundManager* sound, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::vector<GameObject*>& walls)
 {
-    //std::cout << "Entering receiveData" << std::endl << std::endl;
+    std::cout << "Entering receiveData" << std::endl << std::endl;
     static int iii = 0;
     Packet outgoing;
     outgoing.type = STATE;
     outgoing.message = const_cast<char*>("NONE");
     char* incoming = NULL;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
-
-    if(NetworkUtil::TCPSend(serverSock, out) && NetworkUtil::TCPReceive(serverSock, &incoming)) {
-        Packet infoPacket = NetworkUtil::charArrayToPacket(incoming);
-        std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
-    }
-    else {
-        connected = false;
-       return;
-    }
+    
+    std::cout << "About to request data" << std::endl << std::endl;
+    while (!NetworkUtil::TCPSend(TCPServerSock, out));
+    std::cout << "About to receive data" << std::endl << std::endl;
+    while (!NetworkUtil::TCPReceive(TCPServerSock, &incoming));
+    
+    Packet infoPacket = NetworkUtil::charArrayToPacket(incoming);
+    std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
 
                         /*
                         for(int i = 0; i < packs; ++i)
                         {
                             //std::cout << "We are about to receive packet number " << i << "." << std::endl;
-                            if(NetworkUtil::TCPReceive(serverSock, &incoming)) {
+                            if(NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
                                 //std::cout << "We received packet number " << i << "." << std::endl;
                                 std::string msg(incoming);
                                 std::cout << "---" << msg << std::endl;
@@ -301,6 +335,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
                             }
                         }
                         */
-    //std::cout << "Exiting receiveData" << std::endl << std::endl;
+    std::cout << "Exiting receiveData" << std::endl << std::endl;
 }
 

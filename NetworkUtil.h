@@ -52,14 +52,15 @@ public:
     */
     static Packet charArrayToPacket(char* msg)
     {
+        std::cout << "Entering charArrayToPacket" << std::endl;
         Packet pack;
-        int messageLength = strlen(msg) + 1;
         
         char* typeFinder = (char*)malloc(2);
         memmove(typeFinder, msg, 2);
         int type = atoi(typeFinder);
         pack.type = type;
         
+        int messageLength = strlen(msg) + 1;
         if(type == PLAYERINPUT)
             messageLength = 3;
         char* messageFinder =  (char*)malloc(messageLength-2);
@@ -71,6 +72,8 @@ public:
         
         //free(typeFinder); // FIXME: SHOULD FREE THIS HERE
         //free(messageFinder); //TODO: CHECK THAT WHEN THE PACKET IS DISCARDED, THIS IS FREED
+        
+        std::cout << "Exiting charArrayToPacket" << std::endl;
         return pack;
     }
     
@@ -86,6 +89,7 @@ public:
     */
     static char* PacketToCharArray(Packet pack)
     {
+        std::cout << "Entering PacketToCharArray" << std::endl;
         int messageLength = strlen(pack.message) + 1;
         if(pack.type == PLAYERINPUT)
             messageLength = 1;
@@ -100,6 +104,7 @@ public:
         memmove(charArray+2, pack.message, messageLength);
         
         return charArray;
+        std::cout << "Exiting PacketToCharArray" << std::endl;
     }
     
     
@@ -113,6 +118,7 @@ public:
      */
     static char* TCPReceive(TCPsocket sock, char **buf)
     {
+        std::cout << "Entering TCPReceive" << std::endl;
         Uint32 len,result;
         static char *_buf;
         
@@ -157,6 +163,7 @@ public:
         }   
                     
         // return the new buffer
+        std::cout << "Exiting TCPReceive" << std::endl;
         return(*buf);
     }
     
@@ -172,6 +179,7 @@ public:
      */
     static int TCPSend(TCPsocket sock, char *buf)
     {
+        std::cout << "Entering TCPSend" << std::endl;
         Uint32 len,result;
         
         if(!buf || !strlen(buf))
@@ -204,38 +212,44 @@ public:
                 std::cerr << "\t- " << SDLNet_GetError() << std::endl;
             return(0);
         }
-            
-        // return the length sent
+        
+        std::cout << "Exiting TCPSend" << std::endl;
         return(result);
     }
     
+
     /*
-     *          UDPSend(UDPsocket, UDPpacket*):
-     *          Wrapper function for SDLNet_UDP_Send.
-     *
-     *          -sock: The UDPsocket to send the packet through.
-     *          -outgoing: The UDPpacket to send.
-     */
-    static int UDPSend(UDPsocket sock, UDPpacket *outgoing)
+    *           UDPSend(UDPsocket, UDPpacket*):
+    *           Wrapper function for SDLNet_UDP_Send. If using channels, ensure that the
+    *           UDPpacket argument has that information in the "channel" field.
+    *
+    *           -sock: The UDPsocket to send the packet through.
+    *           -channel: The socket's channel to send through. Use -1 if not using channels.
+    *           -outgoing: The UDPpacket to send.
+    */
+    static int UDPSend(UDPsocket sock, int channel, UDPpacket *outgoing)
     {
-        int numSent = SDLNet_UDP_Send(sock, outgoing->channel, outgoing);
+        std::cout << "Entering UDPSend" << std::endl;
+        int numSent = SDLNet_UDP_Send(sock, channel, outgoing);
         if(!numSent)
         {
             std::cerr << "SDLNet_UDP_Send done goofed: " << SDLNet_GetError() << std::endl;
             exit(4);
         }
+        std::cout << "Exiting UDPSend" << std::endl;
         return numSent;
     }
-    
+
     /*
-     *          UDPReceive(UDPsocket, UDPpacket, Uint32, Uint8, int):
-     *          Wrapper function for SDLNet_UDP_Recv.
-     *
-     *          sock: The UDPsocket to listen on.
-     *          -in: The incoming UDPpacket.
-     */
+    *           UDPReceive(UDPsocket, UDPpacket, Uint32, Uint8, int):
+    *           Wrapper function for SDLNet_UDP_Recv.
+    *
+    *           -sock: The UDPsocket to listen on.
+    *           -in: The incoming UDPpacket.
+    */
     static int UDPReceive(UDPsocket sock, UDPpacket *in)
     {
+        std::cout << "Entering UDPReceive" << std::endl;
         int received = SDLNet_UDP_Recv(sock, in);
         if(received > 0)
         {
@@ -246,6 +260,7 @@ public:
         {
             std::cout << "UDPReceive: No packets received." << std::endl;
         }
+        std::cout << "Exiting UDPReceive" << std::endl;
         return received;
     }
 };

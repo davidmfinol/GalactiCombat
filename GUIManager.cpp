@@ -306,7 +306,7 @@ void GUIManager::submit(void)
     std::string clientName = userInputs.substr(userInputs.find(",", 0) + 1);
 //    int port = 5172;
     try {
-        mNetworkMgr->TCPConnect(const_cast<char*>(host.c_str()), const_cast<char*>(clientName.c_str()));
+        mNetworkMgr->connect(const_cast<char*>(host.c_str()), const_cast<char*>(clientName.c_str()));
         lobby();
     }
     catch (std::string exception) {

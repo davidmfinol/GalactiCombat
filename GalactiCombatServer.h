@@ -31,7 +31,7 @@ public:
     Client* findClientByName(std::string name);
     Client* findClientBySocket(TCPsocket sock);
     Client* addClient(TCPsocket sock, int channel, std::string name);
-    void removeClient(int i);
+    void removeClient(int clientIndex);
     void sendToAll(char *buf, bool TCP);
     
     // Server-side replacements of GalactiCombat's createScene() methods
@@ -50,10 +50,12 @@ protected:
 private:
     void serverLoop();
     void listenForConnections();
-    void receiveData(const Packet& incoming, int i);
-    void sendMineral(Mineral* mineral, int i);
-    void sendSpaceShip(SpaceShip* spaceShip, int i);
-    void movePlayer(int i, std::string direction);
+    void receiveData(int clientIndex);
+    void receiveConnectionPacket(int clientIndex, Packet& incoming);
+    void receiveStatePacket(int clientIndex, Packet& incoming);
+    void receivePlayerInputPacket(int clientIndex, Packet& incoming);
+    void receiveScorePacket(int clientIndex, Packet& incoming);
+    void receiveReadyPacket(int clientIndex, Packet& incoming);
     
 };
 #endif //#ifndef __GalactiCombatServer_h_
