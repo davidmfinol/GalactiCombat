@@ -285,12 +285,17 @@ void GalactiCombatServer::serverLoop(void)
         
         //run the game loop
         std::time_t currentTime = std::time(0);
-        std::time_t elapsedTime = currentTime - lastFrameTime;
+        std::time_t elapsedTime = currentTime - lastFrameTime; //FIXME: THIS IS INTEGER
         lastFrameTime = currentTime;
         if(state == PLAY)
         {
             //std::cout << "Running the Game loop" << std::endl;
-            //gameLoop(elapsedTime);
+            static std::clock_t prev_t = std::clock();
+            std::clock_t curr_t = std::clock();
+            if ((curr_t - prev_t) > 100000) {
+                gameLoop(elapsedTime);
+                prev_t = curr_t;
+            }
             //std::cout << "Game loop has been run" << std::endl;
             
             // Debugging
