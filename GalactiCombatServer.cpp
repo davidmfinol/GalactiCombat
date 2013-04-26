@@ -247,6 +247,7 @@ void GalactiCombatServer::startServer(long portNo)
 
 void GalactiCombatServer::serverLoop(void)
 {
+    static int looop = 0;
     std::cout << "Entering serverLoop" << std::endl;
     while(1)
     {
@@ -292,7 +293,8 @@ void GalactiCombatServer::serverLoop(void)
             //std::cout << "Running the Game loop" << std::endl;
             static std::clock_t prev_t = std::clock();
             std::clock_t curr_t = std::clock();
-            if ((curr_t - prev_t) > 100000) {
+            if ((curr_t - prev_t) > 300000) {
+                std::cout << "GGGGAMMMMMME LLOOOOOOOOP: " << looop++ << std::endl;
                 gameLoop(elapsedTime);
                 prev_t = curr_t;
             }

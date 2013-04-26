@@ -196,7 +196,7 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
 {
     static std::clock_t prev_t = std::clock();
     std::clock_t curr_t = std::clock();
-    if ((curr_t - prev_t) < 100000) {
+    if ((curr_t - prev_t) < 300000) {
         return;
     }
     prev_t = curr_t;
