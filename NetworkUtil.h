@@ -207,14 +207,16 @@ static int TCPSend(TCPsocket sock, char *buf)
 
 /*
  *		UDPSend(UDPsocket, UDPpacket*):
- *		Wrapper function for SDLNet_UDP_Send.
+ *		Wrapper function for SDLNet_UDP_Send. If using channels, ensure that the
+ *		UDPpacket argument has that information in the "channel" field.
  *
  *		-sock: The UDPsocket to send the packet through.
+ *		-channel: The socket's channel to send through. Use -1 if not using channels.
  *		-outgoing: The UDPpacket to send.
  */
-static int UDPSend(UDPsocket sock, UDPpacket *outgoing)
+static int UDPSend(UDPsocket sock, int channel, UDPpacket *outgoing)
 {
-	int numSent = SDLNet_UDP_Send(sock, outgoing->channel, outgoing);
+	int numSent = SDLNet_UDP_Send(sock, channel, outgoing);
 	if(!numSent)
 	{
 		std::cerr << "SDLNet_UDP_Send done goofed: " << SDLNet_GetError() << std::endl;
@@ -233,15 +235,17 @@ static int UDPSend(UDPsocket sock, UDPpacket *outgoing)
 static int UDPReceive(UDPsocket sock, UDPpacket *in)
 {
 	int received = SDLNet_UDP_Recv(sock, in);
-	if(received > 0)
+	if(received < 0)
 	{
 		std::cerr << "SDLNet_UDP_Recv done goofed: " << SDLNet_GetError() << std::endl;
 		exit(4);
 	}
+	/*
 	if(received == 0)
 	{
 		std::cout << "UDPReceive: No packets received." << std::endl;
 	}
+	*/
 	return received;
 }
 

@@ -122,7 +122,7 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
 				UDPPack->channel = clients[cindex]->channel;
 				UDPPack->data = (Uint8*)buf;
 				UDPPack->len = strlen(buf) + 1;
-				UDPSend(UDPServerSock, UDPPack);
+				UDPSend(UDPServerSock, clients[cindex]->channel, UDPPack);
 
 				SDLNet_FreePacket(UDPPack);
             }
@@ -204,12 +204,8 @@ void GalactiCombatServer::createServerRoom()
 void GalactiCombatServer::startServer(long portNo)
 {
     IPaddress ip; //32-bit IPv4 host, 16-bit port
-    //	char *message = NULL;
     const char *host = NULL;
-    
-    Uint16 port;
-    
-    port = (Uint16)portNo;
+    Uint16 port = (Uint16)portNo;
     
     isServer = true;
     
@@ -299,7 +295,9 @@ void GalactiCombatServer::serverLoop(void)
             //std::cout << "Checking sockets" << std::endl;
             if(SDLNet_SocketReady(clients[i]->sock))
             {
-                //std::cout << clients[i]->name << "'s socket is read!" << std::endl;
+				numReady--;
+				this->receiveData(i);
+				/*
                 char *msg = NULL;
                 std::string score;
                 if(TCPReceive(clients[i]->sock, &msg))
@@ -312,7 +310,7 @@ void GalactiCombatServer::serverLoop(void)
                 }
                 free(msg);
                 msg = NULL;
-                
+                */
             } else {
                 //FIXME: THIS SHOULD CHECK FOR DISCONNECTS, BUT DOESN'T WORK:
                 //std::cerr << "Client disconnected." << std::endl;
@@ -374,8 +372,9 @@ void GalactiCombatServer::listenForConnections()
             // TODO: FIXME: add some checks for repeated names. Could cause crash
             client = this->addClient( TCPsock, channel, const_cast<char*>(name.c_str()) );
             
-            printf("%s has logged in.\n", const_cast<char*>(client->name.c_str()));
-            printf("%d players have logged in.\n", (int)clients.size());
+			std::cout << name << " has logged in!" << std::endl;
+			std::cout << name << " has been bound to channel " << channel << "." << std::endl;
+            //printf("%d players have logged in.\n", (int)clients.size());
         }
         else
         {
@@ -385,8 +384,37 @@ void GalactiCombatServer::listenForConnections()
     }
 }
 
-void GalactiCombatServer::receiveData(const Packet &incoming, int i)
+void GalactiCombatServer::receiveData(int i)
 {
+	char *msg = NULL;
+ 	Packet incoming;
+/*
+	UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
+	if(!UDPPack)
+	{
+		std::cerr << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
+		return;
+	}
+
+	//receive data from a socket, depending on the transport protocol being used
+	if(UDPReceive(UDPServerSock, UDPPack) > 0)
+	{
+		std::cout << "Received UDP packet from client " << clients[i]->name << std::endl;
+		incoming = charArrayToPacket((char*)UDPPack->data);
+	}
+	else if(TCPReceive(clients[i]->sock, &msg))
+*/
+	if(TCPReceive(clients[i]->sock, &msg))
+    {
+//    	std::cout << "Received TCP message from client " << clients[i]->name << std::endl;
+        incoming = charArrayToPacket(msg);
+		std::cout<<"Received TCP message from "<<clients[i]->name<<": "<<msg<<std::endl;
+		free(msg);
+		msg = NULL;
+    }
+
+
+	//process the received message
     if(incoming.type == CONNECTION)
     {
         if(!strcmp(incoming.message, "QUIT"))
@@ -445,10 +473,10 @@ void GalactiCombatServer::receiveData(const Packet &incoming, int i)
                 result += "\nAll players ready, game is starting in:\n";
 
             char* out = const_cast<char*>(result.c_str());
-            if(TCPSend(clients[i]->sock, out))
-                printf("Sent back lobby list: %s\n", out);
-            else
-                printf("Didn't send lobby list\n");
+            if(TCPSend(clients[i]->sock, out));
+                //printf("Sent back lobby list: %s\n", out);
+            else;
+                //printf("Didn't send lobby list\n");
         }
         else if(!strcmp(incoming.message, "READY")) {
             clients[i]->ready = true;

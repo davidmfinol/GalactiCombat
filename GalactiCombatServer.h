@@ -42,7 +42,7 @@ protected:
     void createServerRoom();
     void serverLoop();
     void listenForConnections();
-    void receiveData(const Packet& incoming, int i);
+    void receiveData(int i);
     void sendMineral(Mineral* mineral, int i);
     void sendSpaceShip(SpaceShip* spaceShip, int i);
     //--------------------------------------------------------------------------
