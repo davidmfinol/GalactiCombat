@@ -141,8 +141,7 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     outgoing.message = &result;
     
     char *out = PacketToCharArray(outgoing);
-    if(!TCPSend(serverSock, out))
-        connected = false;
+    TCPSend(serverSock, out);
 }
 
 bool NetworkManagerClient::isOnline()
@@ -200,13 +199,11 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
     char* incoming = NULL;
     char* out = PacketToCharArray(outgoing);
     std::cout << "About to request data" << std::endl << std::endl;
-    if(TCPSend(serverSock, out) && TCPReceive(serverSock, &incoming)) {
-        Packet infoPacket = charArrayToPacket(incoming);
-        std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
-    }
-    else {
-        connected = false;
-    }
+    while (!TCPSend(serverSock, out));
+    std::cout << "About to receive data" << std::endl << std::endl;
+    while (!TCPReceive(serverSock, &incoming));
+    Packet infoPacket = charArrayToPacket(incoming);
+    std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
     std::cout << "End of receiveData" << std::endl << std::endl;
 
                         /*

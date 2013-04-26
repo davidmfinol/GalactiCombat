@@ -496,8 +496,7 @@ void GalactiCombatServer::receiveData(const Packet &incoming, int i)
             ss << buffer;
         }
 
-        std::string sss("short");
-        out.message = const_cast<char*>(sss.c_str());
+        out.message = const_cast<char*>(ss.str().c_str());
 
         std::cout << clients[i]->name << "     " << out.message << std::endl << std::endl;
         if(TCPSend(clients[i]->sock, PacketToCharArray(out)))
