@@ -360,7 +360,7 @@ void GalactiCombatServer::receiveData(int clientIndex)
     std::cout << "Entering receiveData" << std::endl;
     char *msg = NULL;
     Packet incoming;
-
+/*	//FIXME: Not receiving client's UDP packets.
     UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
     if(!UDPPack)
     {
@@ -377,8 +377,8 @@ void GalactiCombatServer::receiveData(int clientIndex)
     }
 
     else if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
-
-//    if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
+*/
+	if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
     {
         incoming = NetworkUtil::charArrayToPacket(msg);
         std::cout << "Received TCP message from " << clients[clientIndex]->name << ": " << msg << std::endl;
@@ -453,11 +453,28 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     out.message = const_cast<char*>(ss.str().c_str());
 
     std::cout << "StateMessage:     " << out.message << std::endl;
+
+/*	FIXME: Still workin on it
+	UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
+	if(!UDPPack)
+	{
+		std::cout<<"SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
+		return;
+	}
+
+	char *msg = NetworkUtil::PacketToCharArray(out);
+	UDPPack->data = (Uint8*)msg;
+	UDPPack->len = strlen(msg)+1;
+	NetworkUtil::UDPSend(UDPServerSock, clients[clientIndex]->channel, UDPPack);
+	std::cout<<"UDPSend game state."<<std::endl;
+	SDLNet_FreePacket(UDPPack);
+*/
+
     if(NetworkUtil::TCPSend(clients[clientIndex]->sock, NetworkUtil::PacketToCharArray(out)))
         std::cout << "Sent back info to " << clients[clientIndex]->name << std::endl;
     else
         std::cerr << "Didn't send back info to " << clients[clientIndex]->name << std::endl;
-    
+
     std::cout << "Exiting receiveStatePacket" << std::endl << std::endl;
 }
 
