@@ -236,16 +236,14 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
-    // FIXME: WE SHOULDN'T NEED TO ARTIFICIALLY SLOW THIS DOWN
-    static std::clock_t prev_t = std::clock();
-    std::clock_t curr_t = std::clock();
-    if ((curr_t - prev_t) < 10000) {
-        return;
-    }
-    prev_t = curr_t;
+    //static std::clock_t prev_t = std::clock();
+    //std::clock_t curr_t = std::clock();
+    //if ((curr_t - prev_t) < 10000) {
+    //    return;
+    //}
+    //prev_t = curr_t;
      //NOTE: WE REALLY SHOULD USE A SEPERATE THREAD FOR THIS
     mNetworkMgr->receiveData(mSceneMgr, mSoundMgr, minerals,spaceShips,walls); //FIXME: THE WAY WE'RE PASSING DATA HERE IS BAD
-    mNetworkMgr->sendPlayerInput(mInputMgr); // FIXME: SEND IT FROM INSIDE mInputMgr (UNCOMMENT 4X)
     //vector<Mineral*> newMinerals = mInputMgr->receiveMinerals();
     //vector<SpaceShip*> newSpaceShips = mInputMgr->receiveSpaceShips();
     //this->updateSpaceShips(newSpaceShips);

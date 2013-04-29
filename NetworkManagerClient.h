@@ -1,15 +1,29 @@
 #ifndef __NetworkManagerClient_h_
 #define __NetworkManagerClient_h_
 
+#ifndef WIN32
+#include <unistd.h>
+#include <sys/time.h>
+
+#else
+#include <windows.h>
+#include <time.h>
+
+#endif
+
+#include <string.h>
+#include <sys/types.h>
+#include <stdlib.h>
 #include <vector>
 #include <OgreSceneManager.h>
-#include "SoundManager.h"
+
 #include "NetworkUtil.h"
+#include "GameObject.h"
+#include "Mineral.h"
+#include "SpaceShip.h"
 #include "ISpaceShipController.h"
 #include "ClientSpaceShipController.h"
-#include "Mineral.h"
-#include "GameObject.h"
-#include "SpaceShip.h"
+#include "SoundManager.h"
 
 #define MAXLEN (10*1024) //10 KB
 

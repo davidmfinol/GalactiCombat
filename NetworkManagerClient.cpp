@@ -1,17 +1,4 @@
 #include "NetworkManagerClient.h"
-#include <string.h>
-#include <sys/types.h>
-#include <stdlib.h>
-
-#ifndef WIN32
-#include <unistd.h>
-#include <sys/time.h>
-
-#else
-#include <windows.h>
-#include <time.h>
-
-#endif
 
 NetworkManagerClient::NetworkManagerClient(void) : connected(false)
 {
@@ -33,7 +20,7 @@ NetworkManagerClient::~NetworkManagerClient(void)
 
 int NetworkManagerClient::connect(char *host, char *name)
 {
-    //std::cout << "Entering TCPConnect" << std::endl << std::endl;
+    //std::cout << "Entering connect" << std::endl << std::endl;
     Uint16 port = (Uint16) TCP_PORT;
     
     SDLNet_SocketSet set = SDLNet_AllocSocketSet(1);
@@ -126,7 +113,7 @@ void NetworkManagerClient::quit()
 
     outgoing.type = CONNECTION;
     outgoing.message = const_cast<char*>("QUIT");
-	while(!NetworkUtil::TCPSend(TCPServerSock, NetworkUtil::PacketToCharArray(outgoing))); // FIXME: what if server crashed?
+    while(!NetworkUtil::TCPSend(TCPServerSock, NetworkUtil::PacketToCharArray(outgoing))); // FIXME: what if server crashed?
 
 /*	//FIXME: Server doesn't receive any UDP packets.
     UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
@@ -173,7 +160,7 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     outgoing.message = &result;
     
     char *out = NetworkUtil::PacketToCharArray(outgoing);
-	NetworkUtil::TCPSend(TCPServerSock, out);
+    NetworkUtil::TCPSend(TCPServerSock, out);
 
 /*	//FIXME: Server doesn't receive any UDP packets.
     UDPpacket *UDPPack = SDLNet_AllocPacket(sizeof(int)+1);
@@ -197,13 +184,13 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
     std::cout << "Entering receiveData" << std::endl << std::endl;
     static int iii = 0;
     Packet outgoing;
-	Packet infoPacket;
+    Packet infoPacket;
     outgoing.type = STATE;
     outgoing.message = const_cast<char*>("NONE");
     char* incoming = NULL;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
 
-    std::cout << "About to request and request data" << std::endl << std::endl;
+    std::cout << "About to request and receive data" << std::endl << std::endl;
     if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
         infoPacket = NetworkUtil::charArrayToPacket(incoming);
         std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;

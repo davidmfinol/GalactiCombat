@@ -35,9 +35,7 @@ struct Packet {
 };
 typedef struct Packet Packet; // allows Packet struct to be used in C
 
-class NetworkUtil {
-    
-public:
+namespace NetworkUtil {
     
     /*
     *           charArrayToPacket(char*):
@@ -262,6 +260,6 @@ public:
         //std::cout << "Exiting UDPReceive" << std::endl;
         return received;
     }
-};
+}
 
 #endif //#ifndef __NetworkUtil_h
