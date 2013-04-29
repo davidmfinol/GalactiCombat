@@ -250,16 +250,15 @@ void GalactiCombatServer::serverLoop(void)
     while(1)
     {
         std::cout << "==============Server Loop Run=============" << std::endl;
+        static std::clock_t prev_t = std::clock();
+        std::clock_t curr_t = std::clock();
         
         //run the game loop
         if(state == PLAY)
         {
             std::cout << "Running the Game loop." << std::endl;
-            static std::clock_t prev_t = std::clock();
-            std::clock_t curr_t = std::clock();
             float elapsedTime = ( ((float)curr_t) - ((float)prev_t) ) / CLOCKS_PER_SEC;;
             gameLoop(elapsedTime);
-            prev_t = curr_t;
             //std::cout << "Game loop has been run" << std::endl;
             
             // Debugging
@@ -270,6 +269,7 @@ void GalactiCombatServer::serverLoop(void)
                 //std::cout << "Player is at " << pos.x << " " << pos.y << " " << pos.z << std::endl;
             //}
         }
+        prev_t = curr_t;
         
         //get sockets ready for connection
         std::cout << "Getting SocketSet." << std::endl;

@@ -239,7 +239,7 @@ void GalactiCombat::updateFromServer(void)
     // FIXME: WE SHOULDN'T NEED TO ARTIFICIALLY SLOW THIS DOWN
     static std::clock_t prev_t = std::clock();
     std::clock_t curr_t = std::clock();
-    if ((curr_t - prev_t) < 300000) {
+    if ((curr_t - prev_t) < 10000) {
         return;
     }
     prev_t = curr_t;

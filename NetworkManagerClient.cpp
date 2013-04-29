@@ -202,12 +202,12 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
     outgoing.message = const_cast<char*>("NONE");
     char* incoming = NULL;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
-    
-    std::cout << "About to request data" << std::endl << std::endl;
-	while (!NetworkUtil::TCPSend(TCPServerSock, out));//FIXME: THIS IS WHERE WE HANG!!!
-    std::cout << "About to receive data" << std::endl << std::endl;//FIXME: THIS IS WHERE WE HANG!!!
-    while (!NetworkUtil::TCPReceive(TCPServerSock, &incoming)); //FIXME: THIS IS WHERE WE HANG!
-	infoPacket = NetworkUtil::charArrayToPacket(incoming);
+
+    std::cout << "About to request and request data" << std::endl << std::endl;
+    if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
+        infoPacket = NetworkUtil::charArrayToPacket(incoming);
+        std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
+    }
 
 /*	//FIXME: Fix the other UDP bugs first.
 	UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
@@ -227,7 +227,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
 		return;
 */
 
-    std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
 
                         /*
                         for(int i = 0; i < packs; ++i)
