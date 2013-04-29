@@ -16,7 +16,6 @@
 #define TIMEOUT 5000 //five seconds
 
 #define TCP_PORT 5172
-#define UDP_PORT 6172
 
 // Used for the Packet struct
 #define CONNECTION 10
@@ -251,7 +250,7 @@ public:
     {
         //std::cout << "Entering UDPReceive" << std::endl;
         int received = SDLNet_UDP_Recv(sock, in);
-        if(received > 0)
+        if(received < 0)
         {
             std::cerr << "SDLNet_UDP_Recv done goofed: " << SDLNet_GetError() << std::endl;
             exit(4);

@@ -117,7 +117,7 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
                 UDPPack->data = (Uint8*)buf;
                 UDPPack->len = strlen(buf) + 1;
                 NetworkUtil::UDPSend(UDPServerSock, clients[cindex]->channel, UDPPack);
-
+				std::cout << "UDPSend."<<std::endl;
                 SDLNet_FreePacket(UDPPack);
             }
     }
@@ -220,7 +220,7 @@ void GalactiCombatServer::startServer(long portNo)
         exit(4);
     }
     
-    UDPServerSock = SDLNet_UDP_Open(UDP_PORT);
+    UDPServerSock = SDLNet_UDP_Open(0);
     if(!UDPServerSock)
     {
         std::cerr << "SDLNet_UDP_Open done goofed: " << SDLNet_GetError() << std::endl;
@@ -274,9 +274,9 @@ void GalactiCombatServer::serverLoop(void)
         //get sockets ready for connection
         std::cout << "Getting SocketSet." << std::endl;
         SDLNet_SocketSet set = this->createSockSet();
-        std::cout << "Checking Number of Sockets Ready..." << std::endl; //FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        int numReady = SDLNet_CheckSockets(set, (Uint32) - 1); //FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        std::cout << "Number of Sockets Ready: " << numReady << std::endl; //FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        std::cout << "Checking Number of Sockets Ready..." << std::endl;
+        int numReady = SDLNet_CheckSockets(set, (Uint32) - 1); //NOTE: This will block until there is some network activity.
+        std::cout << "Number of Sockets Ready: " << numReady << std::endl;
         if(numReady == -1)
         {
             std::cerr << "SDLNet_CheckSockets done goofed: " << SDLNet_GetError() << std::endl;
@@ -360,7 +360,7 @@ void GalactiCombatServer::receiveData(int clientIndex)
     std::cout << "Entering receiveData" << std::endl;
     char *msg = NULL;
     Packet incoming;
-/*
+
     UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
     if(!UDPPack)
     {
@@ -369,20 +369,23 @@ void GalactiCombatServer::receiveData(int clientIndex)
     }
 
     //receive data from a socket, depending on the transport protocol being used
-    if(UDPReceive(UDPServerSock, UDPPack) > 0)
+    if(NetworkUtil::UDPReceive(UDPServerSock, UDPPack) > 0)
     {
             std::cout << "Received UDP packet from client " << clients[clientIndex]->name << std::endl;
-            incoming = charArrayToPacket((char*)UDPPack->data);
+            incoming = NetworkUtil::charArrayToPacket((char*)UDPPack->data);
+			SDLNet_FreePacket(UDPPack);
     }
+
     else if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
-*/
-    if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
+
+//    if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
     {
         incoming = NetworkUtil::charArrayToPacket(msg);
         std::cout << "Received TCP message from " << clients[clientIndex]->name << ": " << msg << std::endl;
         free(msg);
         msg = NULL;
     }
+
 
     //process the received message
     switch(incoming.type)

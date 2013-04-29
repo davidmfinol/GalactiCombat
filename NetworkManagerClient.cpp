@@ -67,10 +67,8 @@ int NetworkManagerClient::connect(char *host, char *name)
         throw exception;
     }
     
-    //server uses UDP_PORT; +1 is necessary when server and client run
-    //on the same machine
-    /*
-    UDPServerSock = SDLNet_UDP_Open(UDP_PORT+1);
+    
+    UDPServerSock = SDLNet_UDP_Open(0);
     if(!UDPServerSock)
     {
         std::cerr << "SDLNet_UDP_Open done goofed: " << SDLNet_GetError() << std::endl;
@@ -79,7 +77,7 @@ int NetworkManagerClient::connect(char *host, char *name)
         std::string exception = "fail_to_connect";
         throw exception;
     }
-    */
+    
     
     // login with a name
     Packet pack;
@@ -125,25 +123,25 @@ void NetworkManagerClient::quit()
 {
     //std::cout << "Entering quit" << std::endl << std::endl << std::endl;
     Packet outgoing;
-/*
-        UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
-        if(!UDPPack)
-        {
-                std::cerr << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
-                return;
-        }
-*/
+
+    UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
+    if(!UDPPack)
+    {
+        std::cerr << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
+        return;
+    }
 
     outgoing.type = CONNECTION;
     outgoing.message = const_cast<char*>("QUIT");
-    while(!NetworkUtil::TCPSend(TCPServerSock, NetworkUtil::PacketToCharArray(outgoing))); // FIXME: what if server crashed?
-/*
-        UDPPack->data = (Uint8*)msg;
-        UDPPack->len = strlen(msg) + 1;
-        UDPPack->address = serverIP;
-        UDPSend(UDPServerSock, -1, UDPPack);
-        SDLNet_FreePacket(UDPPack);
-*/
+//    while(!NetworkUtil::TCPSend(TCPServerSock, NetworkUtil::PacketToCharArray(outgoing))); // FIXME: what if server crashed?
+
+	char *msg = NetworkUtil::PacketToCharArray(outgoing);
+    UDPPack->data = (Uint8*)msg;
+    UDPPack->len = strlen(msg) + 1;
+    UDPPack->address = serverIP;
+    NetworkUtil::UDPSend(UDPServerSock, -1, UDPPack);
+    SDLNet_FreePacket(UDPPack);
+
 
     connected = false;
     std::cout << "You have quit the game." << std::endl;
@@ -154,7 +152,7 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
 {
     //std::cout << "Entering sendPlayerInput" << std::endl << std::endl;
     Packet outgoing;
-    UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
+    UDPpacket *UDPPack = SDLNet_AllocPacket(sizeof(int)+1);
     if(!UDPPack)
     {
             std::cout << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
@@ -181,14 +179,15 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     outgoing.message = &result;
     
     char *out = NetworkUtil::PacketToCharArray(outgoing);
-    NetworkUtil::TCPSend(TCPServerSock, out);
-/*
+//	NetworkUtil::TCPSend(TCPServerSock, out);
+
     UDPPack->data = (Uint8*)out;
     UDPPack->len = strlen(out) + 1;
     UDPPack->address = serverIP;
-    UDPSend(UDPServerSock, -1, UDPPack);
+    NetworkUtil::UDPSend(UDPServerSock, -1, UDPPack);
+	std::cout << "UDPSend player input." << std::endl;
     SDLNet_FreePacket(UDPPack);
-*/
+
     //std::cout << "Exiting sendPlayerInput" << std::endl << std::endl;
 }
 
@@ -197,17 +196,32 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
     std::cout << "Entering receiveData" << std::endl << std::endl;
     static int iii = 0;
     Packet outgoing;
+	Packet infoPacket;
     outgoing.type = STATE;
     outgoing.message = const_cast<char*>("NONE");
     char* incoming = NULL;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
     
     std::cout << "About to request data" << std::endl << std::endl;
-    while (!NetworkUtil::TCPSend(TCPServerSock, out));//FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    std::cout << "About to receive data" << std::endl << std::endl;//FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    while (!NetworkUtil::TCPReceive(TCPServerSock, &incoming)); //FIXME: THIS IS WHERE WE HANG!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
-    Packet infoPacket = NetworkUtil::charArrayToPacket(incoming);
+    while (!NetworkUtil::TCPSend(TCPServerSock, out));//FIXME: THIS IS WHERE WE HANG!!!
+    std::cout << "About to receive data" << std::endl << std::endl;//FIXME: THIS IS WHERE WE HANG!!!
+	UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
+	if(!UDPPack)
+	{
+		std::cerr << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
+		return;
+	}
+
+	if(NetworkUtil::UDPReceive(UDPServerSock, UDPPack) > 0)
+	{
+		std::cout << "Received UDP Packet." << std::endl;
+		infoPacket = NetworkUtil::charArrayToPacket((char*)UDPPack->data);
+		SDLNet_FreePacket(UDPPack);
+	}
+	else
+		return;
+//    while (!NetworkUtil::TCPReceive(TCPServerSock, &incoming)); //FIXME: THIS IS WHERE WE HANG!!!  
+//	infoPacket = NetworkUtil::charArrayToPacket(incoming);
     std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
 
                         /*
