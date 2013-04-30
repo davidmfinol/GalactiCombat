@@ -459,7 +459,6 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     strcpy(packetMessage, ss.str().c_str());
     outgoing.message = packetMessage;
 
-    std::cout << "ss.str().c_str():     " << ss.str().c_str() << std::endl << std::endl;
     std::cout << "outgoing.type:        " << outgoing.type << std::endl << std::endl;
     std::cout << "outgoing.message:     " << outgoing.message << std::endl << std::endl;
 
