@@ -42,7 +42,7 @@ int NetworkManagerClient::connect(char *host, char *name)
         throw exception;
     }
     
-    // open the server socket
+    // open the TCP socket
     std::cout << "Opening server socket." << std::endl;
     TCPServerSock = SDLNet_TCP_Open(&ip);
     if(!TCPServerSock)
@@ -54,7 +54,7 @@ int NetworkManagerClient::connect(char *host, char *name)
         throw exception;
     }
     
-    
+    // open the UDP socket
     UDPServerSock = SDLNet_UDP_Open(0);
     if(!UDPServerSock)
     {
@@ -64,7 +64,6 @@ int NetworkManagerClient::connect(char *host, char *name)
         std::string exception = "fail_to_connect";
         throw exception;
     }
-    
     
     // login with a name
     Packet pack;
@@ -77,6 +76,7 @@ int NetworkManagerClient::connect(char *host, char *name)
         SDLNet_TCP_Close(TCPServerSock);
         exit(8);
     }
+    free(out);
     
     // store our connection info
     mName = name;
@@ -113,7 +113,9 @@ void NetworkManagerClient::quit()
 
     outgoing.type = CONNECTION;
     outgoing.message = const_cast<char*>("QUIT");
-    while(!NetworkUtil::TCPSend(TCPServerSock, NetworkUtil::PacketToCharArray(outgoing))); // FIXME: what if server crashed?
+    char* out = NetworkUtil::PacketToCharArray(outgoing);
+    while(!NetworkUtil::TCPSend(TCPServerSock, out)); // FIXME: what if server crashed?
+    free(out);
 
 /*	//FIXME: Server doesn't receive any UDP packets.
     UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
@@ -159,8 +161,9 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     outgoing.type = PLAYERINPUT;
     outgoing.message = &result;
     
-    char *out = NetworkUtil::PacketToCharArray(outgoing);
+    char* out = NetworkUtil::PacketToCharArray(outgoing);
     NetworkUtil::TCPSend(TCPServerSock, out);
+    free(out);
 
 /*	//FIXME: Server doesn't receive any UDP packets.
     UDPpacket *UDPPack = SDLNet_AllocPacket(sizeof(int)+1);
@@ -195,6 +198,8 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
         infoPacket = NetworkUtil::charArrayToPacket(incoming);
         std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
     }
+    free(out);
+    free(incoming);
 
 /*	//FIXME: Fix the other UDP bugs first.
 	UDPpacket *UDPPack = SDLNet_AllocPacket(65535);

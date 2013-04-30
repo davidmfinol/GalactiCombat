@@ -166,19 +166,19 @@ void PhysicsSimulator::setGameObjectVelocity(GameObject* obj, const Ogre::Vector
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::setGameObjectOrientation(GameObject* obj, const Ogre::Quaternion& rot)
 {
-    std::cout << "Getting MotionState" << std::endl;
-    OgreMotionState* objectMotionState = (OgreMotionState*) gameObjects[obj]->getMotionState();
-    std::cout << "Getting rotation" << std::endl;
+    std::cout << "Creating quaternion" << std::endl;
     btQuaternion btRot(rot.x, rot.y, rot.z, rot.w);
     std::cout << "Getting transform" << std::endl;
-    btTransform transform;
-    std::cout << "Getting world transform" << std::endl;
-    objectMotionState->getWorldTransform(transform);
-    std::cout << "Setting rotation" << std::endl;
+    btTransform transform = gameObjects[obj]->getCenterOfMassTransform();
+    std::cout << "Applying quaternion to transform" << std::endl;
     transform.setRotation(btRot);
-    std::cout << "Setting World transform" << std::endl;
-    objectMotionState->setWorldTransform(transform);
-    std::cout << "Set World transform" << std::endl;
+    std::cout << "Setting transform" << std::endl;
+    gameObjects[obj]->setCenterOfMassTransform(transform);
+    
+    std::cout << "Getting motionState" << std::endl;
+    OgreMotionState* objectMotionState = (OgreMotionState*) gameObjects[obj]->getMotionState();
+    std::cout << "Setting motionstate" << std::endl;
+    objectMotionState->setOrientation(btRot);
 }
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::stepSimulation(const float elapsedTime, int maxSubSteps, const float fixedTimestep) 

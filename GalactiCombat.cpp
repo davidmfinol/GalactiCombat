@@ -314,14 +314,13 @@ void GalactiCombat::createBullet(SpaceShip* ship)
         char idChar[4];
         sprintf(idChar,"%d", bulletID);
         bulletName += idChar;
-        std::cout << "The bullet's name is " << bulletName << std::endl;
-        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x + 100, pos.y + 100, pos.z + 100)); //FIXME
-        std::cout << "We created the bullet " << std::endl;
+        if(!isServer)
+            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x + 100, pos.y + 100, pos.z + 100)); //FIXME
+        else
+            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x + 100, pos.y + 100, pos.z + 100)); //FIXME
         physicsSimulator->addGameObject(bullets.back());
-        std::cout << "We added the bullet " << std::endl;
         physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
-        std::cout << "We moved the bullet " << std::endl;
-        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
+        //physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
         std::cout << "We oriented the bullet " << std::endl;
         bulletID++;
         

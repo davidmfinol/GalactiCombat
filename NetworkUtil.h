@@ -46,14 +46,19 @@ namespace NetworkUtil {
     *           It's not very robust and doesn't check to make sure that the argument can actually
     *           be converted into a Packet; it just assumes that it can. You may or may not
     *           want to FIXME.
+    * 
+    *           As another NOTE, this method mallocs() a char* for the Packet.message.
+    *           When you release the packet, you need to free(packet.message).
+    *           Otherwise, you WILL have memory problem. Use with caution.
     */
     static Packet charArrayToPacket(char* msg)
     {
         //std::cout << "Entering charArrayToPacket" << std::endl;
         Packet pack;
         
-        char* typeFinder = (char*)malloc(2);
+        char* typeFinder = (char*)malloc(3);
         memmove(typeFinder, msg, 2);
+        *(typeFinder+3) = 0;
         int type = atoi(typeFinder);
         pack.type = type;
         
@@ -67,8 +72,7 @@ namespace NetworkUtil {
         }
         pack.message = messageFinder;
         
-        //free(typeFinder); // FIXME: SHOULD FREE THIS HERE
-        //free(messageFinder); //TODO: CHECK THAT WHEN THE PACKET IS DISCARDED, THIS IS FREED
+        free(typeFinder);
         
         //std::cout << "Exiting charArrayToPacket" << std::endl;
         return pack;
@@ -79,6 +83,10 @@ namespace NetworkUtil {
     *           This method takes a Packet and converts it to an
     *           array of chars. This makes it so that you can use it as the second
     *           argument in TCPSend().
+    * 
+    *           NOTE: This method mallocs(). 
+    *           You need to free() when done with the charArray.
+    *           Otherwise, you WILL have memory problem. Use with caution.
     *
     *           -pack: the Packet to be converted
     *
@@ -92,12 +100,7 @@ namespace NetworkUtil {
             messageLength = 1;
         
         char* charArray = (char*)malloc(2 + messageLength);
-        //sprintf(charArray, "%2d", pack.type);
-        //TODO: FIXME: division is expensive
-        char digit1 = pack.type/10 + 48;
-        char digit2 = pack.type%10 + 48;
-        memmove(charArray, &digit1, 1);
-        memmove(charArray+1, &digit2, 1);
+        sprintf(charArray, "%02d", pack.type);
         memmove(charArray+2, pack.message, messageLength);
         
         //std::cout << "Exiting PacketToCharArray" << std::endl;
@@ -109,6 +112,10 @@ namespace NetworkUtil {
      *        TCPReceive(TCPsocket, char**):
      *        This method listens for a message on the specified socket.
      *        This was copied from the method getMsg() from tcputil.h in the SDLNet example code.
+     * 
+     *         NOTE: This method mallocs(). 
+     *         You need to free(buf) when you're done with it.
+     *         Otherwise, you WILL have memory problem. Use with caution.
      * 
      *        -sock: the socket to listen on
      *        -buf: a pointer to a block of memory where the data can be stored

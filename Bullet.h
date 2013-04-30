@@ -7,6 +7,7 @@
 class Bullet : public GameObject {
     
 public:
+    Bullet (std::string name, Ogre::SceneNode* parentNode, Ogre::Entity* entity, SpaceShip* owner, int x, int y, int z);
     Bullet (std::string name, Ogre::SceneNode* parentNode, SpaceShip* owner, int x, int y, int z);
     virtual ~Bullet(void);        
     virtual void collidedWith(GameObject*);
