@@ -11,7 +11,7 @@
 class PhysicsSimulator {
     
 public:
-    PhysicsSimulator(int minSphereSize, int maxSphereSize);
+    PhysicsSimulator(int maxSphereSize);
     virtual ~PhysicsSimulator(void);
     void addGameObject (GameObject* obj, double restitution = 1.0, bool activeKinematic = false, bool posInParentNode = false);
     void removeGameObject(GameObject* obj);
@@ -34,7 +34,7 @@ protected:
     btDiscreteDynamicsWorld* dynamicsWorld;
     
 private:
-    void defineCollisionShapes(int minSphereSize, int maxSphereSize);
+    void defineCollisionShapes(int maxSphereSize);
     void deleteGameObject(GameObject*);
 };
 

@@ -7,9 +7,9 @@
 #include "GalactiCombat.h"
 
 //-------------------------------------------------------------------------------------
-GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), spaceShips(0), walls(6), isServer(false), startTime(0)
+GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), spaceShips(0), walls(6), bullets(0), isServer(false), startTime(0)
 {
-    physicsSimulator = new PhysicsSimulator(Mineral::MIN_RADIUS, Mineral::MAX_RADIUS);
+    physicsSimulator = new PhysicsSimulator(Mineral::MAX_RADIUS);
     mSoundMgr = new SoundManager();
     mGUIMgr = new GUIManager(SpaceShip::MIN_ENERGY, SpaceShip::MAX_ENERGY);
     mNetworkMgr = new NetworkManagerClient();
@@ -282,16 +282,51 @@ void GalactiCombat::gameLoop(float elapsedTime)
             velocity += orientation.zAxis()*elapsedTime*SpaceShip::ACCELERATION;
             spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
         }
-        //if(spaceShips[i]->getController()->shoot()) 
         physicsSimulator->setGameObjectVelocity(spaceShips[i], velocity);
+        
+        if(spaceShips[i]->getController()->shoot()) 
+            createBullet(spaceShips[i]);
     }
     
     // Step the physics simulator
     physicsSimulator->stepSimulation(elapsedTime);
     
     // Update objects after the results of the physics step
-    this->updateSpaceShips();
     this->updateMinerals();
+    this->updateSpaceShips();
+    this->updateBullets();
+}
+//-------------------------------------------------------------------------------------
+void GalactiCombat::createBullet(SpaceShip* ship)
+{
+    static std::time_t previousTimeStamp = 0;
+    std::time_t currentTimeStamp = std::time(0);
+    if (currentTimeStamp != previousTimeStamp) { 
+        
+        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
+        Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
+        Ogre::Quaternion orientation = ship->getSceneNode()->getParentSceneNode()->getOrientation();
+        Ogre::Vector3 additionalVelocity = orientation*Ogre::Vector3(0, 0, 20);
+        //float spaceShipSize = spaceShips->getSize();
+        
+        static int bulletID = 0;
+        std::string bulletName("Bullet");
+        char idChar[4];
+        sprintf(idChar,"%d", bulletID);
+        bulletName += idChar;
+        std::cout << "The bullet's name is " << bulletName << std::endl;
+        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x + 100, pos.y + 100, pos.z + 100)); //FIXME
+        std::cout << "We created the bullet " << std::endl;
+        physicsSimulator->addGameObject(bullets.back());
+        std::cout << "We added the bullet " << std::endl;
+        physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
+        std::cout << "We moved the bullet " << std::endl;
+        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
+        std::cout << "We oriented the bullet " << std::endl;
+        bulletID++;
+        
+        previousTimeStamp = currentTimeStamp;
+    }
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateSpaceShips(void)
@@ -331,14 +366,23 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
         mineral->getEntity()->setMaterialName("Examples/SphereYellow");
 }
 //-------------------------------------------------------------------------------------
+void GalactiCombat::updateBullets(void)
+{
+    // Update all the bullets
+    for(int i = 0 ; i < bullets.size(); ++i)
+    {
+        if(bullets[i]->hasHit())
+        {
+            physicsSimulator->removeGameObject(bullets[i]);
+            delete bullets[i];
+            bullets.erase(bullets.begin() + i);
+        }
+    }
+}
+//-------------------------------------------------------------------------------------
 void GalactiCombat::crazyEnergyInjection(void)
 {
     int i, vel_x, vel_y, vel_z;
-    
-    vel_x = ((std::rand() % 500) + 500) * (std::rand() % 2 == 0 ? 1 : -1); 
-    vel_y = ((std::rand() % 500) + 500);
-    vel_z = ((std::rand() % 500) + 500) * (std::rand() % 2 == 0 ? 1 : -1); 
-    physicsSimulator->setGameObjectVelocity(spaceShips[0], Ogre::Vector3(vel_x, vel_y, vel_z));
     
     for (i = 0; i < minerals.size(); i++) {
         vel_x = ((std::rand() % 500) + 500) * (std::rand() % 2 == 0 ? 1 : -1); 
@@ -362,13 +406,13 @@ std::string GalactiCombat::getCurrentTime(void) {
     static std::time_t startTime = std::time(0);
     static std::time_t prevTime = startTime;
     std::time_t currentTime = std::time(0);
-    static int min = 9;
-    static int sec = 20;
+    static int min = 4;
+    static int sec = 59;
     if (mGUIMgr->resetTimer()) {
         startTime = std::time(0);
         prevTime = startTime;
-        min = 9;
-        sec = 20;
+        min = 4;
+        sec = 59;
         mGUIMgr->resetTimerDone();
     }
     if (min != 0 && sec <= 10) {

@@ -1,7 +1,7 @@
 #include "PhysicsSimulator.h"
 
 //-------------------------------------------------------------------------------------
-PhysicsSimulator::PhysicsSimulator(int minSphereSize, int maxSphereSize)
+PhysicsSimulator::PhysicsSimulator(int maxSphereSize)
 {
     // The following initialization is required by bullet
     // It is based off the HelloWorld.cpp Demo from bullet
@@ -14,7 +14,7 @@ PhysicsSimulator::PhysicsSimulator(int minSphereSize, int maxSphereSize)
     dynamicsWorld->setGravity(btVector3(0, 0, 0));
     
     // We cache all possible shapes here for better performance
-    defineCollisionShapes(minSphereSize, maxSphereSize);
+    defineCollisionShapes(maxSphereSize);
 }
 //-------------------------------------------------------------------------------------
 PhysicsSimulator::~PhysicsSimulator(void) 
@@ -40,7 +40,7 @@ PhysicsSimulator::~PhysicsSimulator(void)
     delete collisionConfiguration;
 }
 //-------------------------------------------------------------------------------------
-void PhysicsSimulator::defineCollisionShapes(int minSphereSize, int maxSphereSize)
+void PhysicsSimulator::defineCollisionShapes(int maxSphereSize)
 {
     // Default game object
     collisionShapes["Box"] = new btBoxShape(btVector3(btScalar(1.), btScalar(1.), btScalar(1.)));
@@ -52,7 +52,7 @@ void PhysicsSimulator::defineCollisionShapes(int minSphereSize, int maxSphereSiz
     collisionShapes["UNIT_Z"] = new btStaticPlaneShape(btVector3(btScalar(0.),btScalar(0.),btScalar(1.)), btScalar(0.));
     collisionShapes["NEGATIVE_UNIT_Z"] = new btStaticPlaneShape(btVector3(btScalar(0.),btScalar(0.),btScalar(-1.)), btScalar(0.));
     // Spheres
-    for(int i = minSphereSize; i <= maxSphereSize; ++i) {
+    for(int i = 1; i <= maxSphereSize; ++i) {
         std::ostringstream m;
         m << "Sphere" << i;
         collisionShapes[m.str()] = new btSphereShape(btScalar(i));
@@ -166,13 +166,19 @@ void PhysicsSimulator::setGameObjectVelocity(GameObject* obj, const Ogre::Vector
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::setGameObjectOrientation(GameObject* obj, const Ogre::Quaternion& rot)
 {
-    btQuaternion btRot(rot.x, rot.y, rot.z, rot.w);
-    btTransform transform = gameObjects[obj]->getCenterOfMassTransform();
-    transform.setRotation(btRot);
-    gameObjects[obj]->setCenterOfMassTransform(transform);
-    
+    std::cout << "Getting MotionState" << std::endl;
     OgreMotionState* objectMotionState = (OgreMotionState*) gameObjects[obj]->getMotionState();
-    objectMotionState->setOrientation(btRot);
+    std::cout << "Getting rotation" << std::endl;
+    btQuaternion btRot(rot.x, rot.y, rot.z, rot.w);
+    std::cout << "Getting transform" << std::endl;
+    btTransform transform;
+    std::cout << "Getting world transform" << std::endl;
+    objectMotionState->getWorldTransform(transform);
+    std::cout << "Setting rotation" << std::endl;
+    transform.setRotation(btRot);
+    std::cout << "Setting World transform" << std::endl;
+    objectMotionState->setWorldTransform(transform);
+    std::cout << "Set World transform" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::stepSimulation(const float elapsedTime, int maxSubSteps, const float fixedTimestep) 

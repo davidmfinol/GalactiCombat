@@ -13,6 +13,7 @@
 #include <time.h>
 #include <vector>
 #include <string>
+#include <cstdlib>
 
 #include "BaseApplication.h"
 #include "GameObject.h"
@@ -57,17 +58,20 @@ protected:
     // Game logic
     void updateFromServer(void);
     void gameLoop(float elapsedTime);
-    void updateSpaceShips(void);
-    void adjustSpaceShipMaterial(SpaceShip* ship);
+    void createBullet(SpaceShip* ship);
     void updateMinerals(void);
     void adjustMineralMaterial(Mineral* mineral);
+    void updateSpaceShips(void);
+    void adjustSpaceShipMaterial(SpaceShip* ship);
+    void updateBullets(void);
     void crazyEnergyInjection(void);
     std::string getCurrentTime(void);
     
     // Game objects
+    std::vector<GameObject*> walls;
     std::vector<Mineral*> minerals;
     std::vector<SpaceShip*> spaceShips;
-    std::vector<GameObject*> walls;
+    std::vector<Bullet*> bullets;
     
     // For music
     std::time_t startTime;

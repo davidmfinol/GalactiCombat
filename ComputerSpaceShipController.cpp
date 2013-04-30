@@ -28,10 +28,10 @@ bool ComputerSpaceShipController::up() const
 //-------------------------------------------------------------------------------------
 bool ComputerSpaceShipController::down() const
 {
-    return true;
+    return false;
 }
 //-------------------------------------------------------------------------------------
 bool ComputerSpaceShipController::shoot() const
 {
-    return true;
+    return false;
 }

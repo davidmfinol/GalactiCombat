@@ -294,7 +294,6 @@ bool InputManager::mouseMoved( const OIS::MouseEvent &arg )
 // OIS::MouseListener
 bool InputManager::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
 {
-    mShoot = true;
     mGUIMgr->getTrayMgr()->injectMouseDown(arg, id);
     switch (id)
     {
@@ -313,7 +312,6 @@ bool InputManager::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID 
 // OIS::MouseListener
 bool InputManager::mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
 {
-    mShoot = false;
     mGUIMgr->getTrayMgr()->injectMouseUp(arg, id);
     switch (id)
     {
