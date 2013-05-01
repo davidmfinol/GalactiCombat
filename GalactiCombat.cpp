@@ -60,21 +60,21 @@ void GalactiCombat::createScene(void)
     // create player
     spaceShips.resize(1);
     spaceShips[0] = new SpaceShip("PlayerSpaceShip", mSoundMgr, 
-                         dynamic_cast<ISpaceShipController*>(mInputMgr), mSceneMgr->getRootSceneNode()->createChildSceneNode("PlayerNode", Ogre::Vector3(100, 100, 100)), 30, mCamera);
-    physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, true);
+                         dynamic_cast<ISpaceShipController*>(mInputMgr), mSceneMgr->getRootSceneNode(), 100, 100, 100, 30, mCamera);
+    physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
     // create floating minerals
     createMinerals();
     // create enemy
     spaceShips.push_back(new SpaceShip("EnemySpaceShip", mSoundMgr, 
-                                        new ComputerSpaceShipController(), mSceneMgr->getRootSceneNode()->createChildSceneNode("EnemyNode", Ogre::Vector3(500, 500, 500)) ));
-    physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, true);
+                                        new ComputerSpaceShipController(), mSceneMgr->getRootSceneNode(), 200, 200, 200 ));
+    physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, false);
     // create walls
     createRoom();
     
     // Lights!
     createLights();
     // Camera!
-    mInputMgr->setPlayerCamera(spaceShips[0]->getSceneNode()->getParentSceneNode(), mCamera->getParentSceneNode());
+    mInputMgr->setPlayerCamera(spaceShips[0]->getSceneNode(), mCamera->getParentSceneNode());
     // Music!
     mSoundMgr->playMusic("media/sounds/Level1_destination.wav");
 }
@@ -236,27 +236,17 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
-    //static std::clock_t prev_t = std::clock();
-    //std::clock_t curr_t = std::clock();
-    //if ((curr_t - prev_t) < 10000) {
-    //    return;
-    //}
-    //prev_t = curr_t;
-     //NOTE: WE REALLY SHOULD USE A SEPERATE THREAD FOR THIS
     mNetworkMgr->receiveData(mSceneMgr, mSoundMgr, minerals,spaceShips,walls); //FIXME: THE WAY WE'RE PASSING DATA HERE IS BAD
-    //vector<Mineral*> newMinerals = mInputMgr->receiveMinerals();
-    //vector<SpaceShip*> newSpaceShips = mInputMgr->receiveSpaceShips();
-    //this->updateSpaceShips(newSpaceShips);
-    //this->updateMineralMaterial(newMinerals);
+    // in particular, we shouldn't need to pass soundmanager
+    // we may need to also call some ot the other gameLogic methods
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
 {
     // Update the physics for the ships
     for (int i = 0; i < spaceShips.size(); ++i) {
-        //Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(spaceShips[i], true); //FIXME: USE THIS LINE INSTEAD OF TWO BELOW
-        Ogre::Quaternion orientation = spaceShips[i]->getSceneNode()->getParentSceneNode()->getOrientation();
-        //Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(spaceShips[i]);
+        Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(spaceShips[i]);
+        //Ogre::Quaternion orientation = spaceShips[i]->getSceneNode()->getParentSceneNode()->getOrientation();
         Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(spaceShips[i]);
         if(spaceShips[i]->getController()->left()) {
             velocity -= orientation.xAxis()*elapsedTime*SpaceShip::ACCELERATION;
@@ -300,14 +290,14 @@ void GalactiCombat::gameLoop(float elapsedTime)
 void GalactiCombat::createBullet(SpaceShip* ship)
 {
     static std::time_t previousTimeStamp = 0;
-    std::time_t currentTimeStamp = std::time(0);
+    std::time_t currentTimeStamp = std::time(0); // FIXME: THIS PREVENTS ALL SHIPS FROM SPAMMING BULLETS(SHOULD PUT THE CHECK IN APPROPRIATE ISPACESHIPCONTROLLER)
     if (currentTimeStamp != previousTimeStamp) { 
         
         Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
         Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
-        Ogre::Quaternion orientation = ship->getSceneNode()->getParentSceneNode()->getOrientation();
+        Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
         Ogre::Vector3 additionalVelocity = orientation*Ogre::Vector3(0, 0, 20);
-        //float spaceShipSize = spaceShips->getSize();
+        //float spaceShipSize = spaceShips->getSize(); // gonna need to know where to put bullet
         
         static int bulletID = 0;
         std::string bulletName("Bullet");
@@ -320,8 +310,7 @@ void GalactiCombat::createBullet(SpaceShip* ship)
             bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x + 100, pos.y + 100, pos.z + 100)); //FIXME
         physicsSimulator->addGameObject(bullets.back());
         physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
-        //physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
-        std::cout << "We oriented the bullet " << std::endl;
+        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
         bulletID++;
         
         previousTimeStamp = currentTimeStamp;

@@ -11,8 +11,8 @@
 class SpaceShip : public GameObject {
     
 public:
-    SpaceShip (std::string name, SoundManager* sound, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, double s = 30, Ogre::Camera* cam = 0);
-    SpaceShip (std::string name, SoundManager* sound, ISpaceShipController* controller, Ogre::SceneNode* parentNode, double s = 30, Ogre::Camera* cam = 0);
+    SpaceShip (std::string name, SoundManager* sound, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x = 100, int y = 100, int z = 100, double s = 30, Ogre::Camera* cam = 0);
+    SpaceShip (std::string name, SoundManager* sound, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x = 100, int y = 100, int z = 100, double s = 30, Ogre::Camera* cam = 0);
     virtual ~SpaceShip(void);
     
     // The controller is used to make decisions

@@ -49,7 +49,7 @@ namespace NetworkUtil {
     * 
     *           As another NOTE, this method mallocs() a char* for the Packet.message.
     *           When you release the packet, you need to free(packet.message).
-    *           Otherwise, you WILL have memory problem. Use with caution.
+    *           Otherwise, you WILL have memory problems. Use with caution.
     */
     static Packet charArrayToPacket(char* msg)
     {
@@ -86,7 +86,7 @@ namespace NetworkUtil {
     * 
     *           NOTE: This method mallocs(). 
     *           You need to free() when done with the charArray.
-    *           Otherwise, you WILL have memory problem. Use with caution.
+    *           Otherwise, you WILL have memory problems. Use with caution.
     *
     *           -pack: the Packet to be converted
     *
@@ -115,7 +115,7 @@ namespace NetworkUtil {
      * 
      *         NOTE: This method mallocs(). 
      *         You need to free(buf) when you're done with it.
-     *         Otherwise, you WILL have memory problem. Use with caution.
+     *         Otherwise, you WILL have memory problems. Use with caution.
      * 
      *        -sock: the socket to listen on
      *        -buf: a pointer to a block of memory where the data can be stored

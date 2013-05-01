@@ -59,7 +59,7 @@ void PhysicsSimulator::defineCollisionShapes(int maxSphereSize)
     }
 }
 //-------------------------------------------------------------------------------------
-void PhysicsSimulator::addGameObject (GameObject* obj, double restitution, bool activeKinematic, bool posInParentNode) 
+void PhysicsSimulator::addGameObject (GameObject* obj, double restitution, bool activeKinematic, bool allowRotation) 
 {
     // Determine shape
     std::map<std::string, btCollisionShape*>::iterator it = collisionShapes.find(obj->getShapeName());
@@ -79,8 +79,6 @@ void PhysicsSimulator::addGameObject (GameObject* obj, double restitution, bool 
     
     // Determine its position
     Ogre::Vector3 pos = obj->getSceneNode()->getPosition();
-    if(posInParentNode)
-        pos = obj->getSceneNode()->getParentSceneNode()->getPosition();
     btTransform transform;
     transform.setIdentity();
     transform.setOrigin(btVector3(pos.x, pos.y, pos.z));
@@ -89,7 +87,7 @@ void PhysicsSimulator::addGameObject (GameObject* obj, double restitution, bool 
     if(!gameObjects.count(obj))
     {
         // Create the rigidbody
-        OgreMotionState* state = new OgreMotionState(transform, obj->getSceneNode(), posInParentNode);
+        OgreMotionState* state = new OgreMotionState(transform, obj->getSceneNode(), allowRotation);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, state, shape, inertia);
         rbInfo.m_restitution = restitution;
         btRigidBody* body = new btRigidBody(rbInfo);
@@ -166,18 +164,12 @@ void PhysicsSimulator::setGameObjectVelocity(GameObject* obj, const Ogre::Vector
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::setGameObjectOrientation(GameObject* obj, const Ogre::Quaternion& rot)
 {
-    std::cout << "Creating quaternion" << std::endl;
     btQuaternion btRot(rot.x, rot.y, rot.z, rot.w);
-    std::cout << "Getting transform" << std::endl;
     btTransform transform = gameObjects[obj]->getCenterOfMassTransform();
-    std::cout << "Applying quaternion to transform" << std::endl;
     transform.setRotation(btRot);
-    std::cout << "Setting transform" << std::endl;
     gameObjects[obj]->setCenterOfMassTransform(transform);
     
-    std::cout << "Getting motionState" << std::endl;
     OgreMotionState* objectMotionState = (OgreMotionState*) gameObjects[obj]->getMotionState();
-    std::cout << "Setting motionstate" << std::endl;
     objectMotionState->setOrientation(btRot);
 }
 //-------------------------------------------------------------------------------------
@@ -185,6 +177,19 @@ void PhysicsSimulator::stepSimulation(const float elapsedTime, int maxSubSteps, 
 {    
     // Step simulation
     dynamicsWorld->stepSimulation(elapsedTime, maxSubSteps, fixedTimestep);
+    
+    // Correct the orientation of objects that we don't allow changed orientation
+    for (int j=dynamicsWorld->getNumCollisionObjects()-1; j>=0 ;j--)
+    {
+        btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[j];
+        btRigidBody* body = btRigidBody::upcast(obj);
+        OgreMotionState* motionState = (OgreMotionState*) body->getMotionState();
+        if (body && motionState && !motionState->allowsRotation())
+        {
+            Ogre::Quaternion rot = rigidBodies[body]->getSceneNode()->getOrientation();
+            this->setGameObjectOrientation(rigidBodies[body], rot);
+        }
+    }
     
     // Inform all game objects that have collided of that fact
     int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();

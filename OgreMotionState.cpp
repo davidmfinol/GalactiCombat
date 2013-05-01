@@ -1,7 +1,7 @@
 #include "OgreMotionState.h"
 
 //-------------------------------------------------------------------------------------
-OgreMotionState::OgreMotionState(const btTransform& initialpos, Ogre::SceneNode* visibleObj, bool posInParent) : mPosInParent(posInParent)
+OgreMotionState::OgreMotionState(const btTransform& initialpos, Ogre::SceneNode* visibleObj, bool allowRotation) : mAllowRotation(allowRotation)
 {
     mPhysicalPos = initialpos;
     mVisibleObj = visibleObj;
@@ -25,10 +25,11 @@ void OgreMotionState::setWorldTransform(const btTransform& worldTrans)
     mPhysicalPos = worldTrans;
     
     // Copy information from bullet to Ogre
-    btVector3 btPos = worldTrans.getOrigin();
-    btQuaternion btRot = worldTrans.getRotation();
+    btVector3 btPos = mPhysicalPos.getOrigin();
+    btQuaternion btRot = mPhysicalPos.getRotation();
     this->setPosition(btPos);
-    this->setOrientation(btRot);
+    if(mAllowRotation)
+        this->setOrientation(btRot);
 }
 //-------------------------------------------------------------------------------------
 void OgreMotionState::setPosition(const btVector3& newPos)
@@ -38,19 +39,24 @@ void OgreMotionState::setPosition(const btVector3& newPos)
     
     // Update the visible Ogre object's position
     Ogre::Vector3 ogrePos = Ogre::Vector3(newPos.x(), newPos.y(), newPos.z());
-    if(mPosInParent)
-        mVisibleObj->getParentSceneNode()->setPosition(ogrePos);
-    else
-        mVisibleObj->setPosition(ogrePos);
+    mVisibleObj->setPosition(ogrePos);
 }
-
 //-------------------------------------------------------------------------------------
 void OgreMotionState::setOrientation(const btQuaternion& newRot)
 {
+    std::cout << "Entering setOrientation" << std::endl;
     if(NULL == mVisibleObj)
         return; // we don't do anything if we don't have a node
     
     // Update the visible Ogre object's orientation
-    Ogre::Quaternion ogreRot = Ogre::Quaternion(newRot.w(), newRot.x(), newRot.y(), newRot.z());
+    std::cout << "Getting Orientation" << std::endl;
+    Ogre::Quaternion ogreRot(newRot.w(), newRot.x(), newRot.y(), newRot.z());
+    std::cout << "We can seg fault now? Orientation" << std::endl;
     mVisibleObj->setOrientation(ogreRot);
+    std::cout << "Exiting setOrientation" << std::endl;
+}
+//-------------------------------------------------------------------------------------
+bool OgreMotionState::allowsRotation(void) const
+{
+    return mAllowRotation;
 }

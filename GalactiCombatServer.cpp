@@ -56,7 +56,7 @@ Client* GalactiCombatServer::addClient(TCPsocket sock, int channel, std::string 
     double pos_z = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
     double pos_y = (std::rand() % (ROOM_HIGH - 500)) + 250;
     spaceShips.push_back(new SpaceShip(name, mSoundMgr, clients.back()->inputController,
-                                       mSceneMgr->getRootSceneNode()->createChildSceneNode(name + "ParentNode", Ogre::Vector3(pos_x, pos_y, pos_z)), NULL, 30 ));
+                                       mSceneMgr->getRootSceneNode(), NULL, pos_x, pos_y, pos_z, 30 ));
     physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, true);
     
     //std::cout << "Exiting addClient -" << name << std::endl << std::endl;
@@ -235,10 +235,9 @@ void GalactiCombatServer::startServer(long portNo)
     this->createServerMinerals();
     
     host = SDLNet_ResolveIP(&ip);
-    //if(host == NULL)
-        //std::cout << "Host: N/A" << std::endl;
-    //else
-        //std::cout << "Host: " << host << std::endl;
+    if(host == NULL)
+        host = "N/A";
+    //std::cout << "Host: " << host << std::endl;
     
     //std::cout << "Exiting startServer" << std::endl << std::endl;
     serverLoop();
@@ -459,9 +458,6 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     strcpy(packetMessage, ss.str().c_str());
     outgoing.message = packetMessage;
 
-    std::cout << "outgoing.type:        " << outgoing.type << std::endl << std::endl;
-    std::cout << "outgoing.message:     " << outgoing.message << std::endl << std::endl;
-
 /*	FIXME: Still workin on it
 	UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
 	if(!UDPPack)
@@ -479,10 +475,10 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
 */
 
     char* outgoingMessage = NetworkUtil::PacketToCharArray(outgoing);
-    if(NetworkUtil::TCPSend(clients[clientIndex]->sock, outgoingMessage))
-        std::cout << "Sent back info to " << clients[clientIndex]->name << std::endl;
-    else
+    if(!NetworkUtil::TCPSend(clients[clientIndex]->sock, outgoingMessage))
         std::cerr << "Didn't send back info to " << clients[clientIndex]->name << std::endl;
+    //else
+    //    std::cout << "Sent back info to " << clients[clientIndex]->name << std::endl;
     
     free(outgoingMessage);
     free(packetMessage);
@@ -530,10 +526,10 @@ void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
             result += "\nAll players ready, game is starting in:\n";
 
         char* out = const_cast<char*>(result.c_str());
-        if(NetworkUtil::TCPSend(clients[clientIndex]->sock, out))
-            std::cout << "Sent back lobby list: " << out << std::endl;
-        else
-            std::cerr << "Didn't send back lobby list: " << std::endl;
+        if(!NetworkUtil::TCPSend(clients[clientIndex]->sock, out))
+            std::cerr << "Didn't send back lobby list to " << clients[clientIndex]->name << std::endl;
+        //else
+        //    std::cout << "Sent back lobby list: " << out << std::endl;
     }
     else if(!strcmp(incoming.message, "READY")) {
         clients[clientIndex]->ready = true;

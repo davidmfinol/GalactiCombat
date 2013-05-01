@@ -28,7 +28,7 @@ material Examples/SphereYellow
 		{
 			texture_unit
 			{
-				texture dkyellow.jpg
+				texture dkyellow.png
 			}
 
 			texture_unit

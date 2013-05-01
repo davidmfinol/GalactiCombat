@@ -13,7 +13,7 @@ class PhysicsSimulator {
 public:
     PhysicsSimulator(int maxSphereSize);
     virtual ~PhysicsSimulator(void);
-    void addGameObject (GameObject* obj, double restitution = 1.0, bool activeKinematic = false, bool posInParentNode = false);
+    void addGameObject (GameObject* obj, double restitution = 1.0, bool activeKinematic = false, bool allowRotation = true);
     void removeGameObject(GameObject* obj);
     Ogre::Vector3 getGameObjectPosition(GameObject* obj);
     Ogre::Vector3 getGameObjectVelocity(GameObject* obj);

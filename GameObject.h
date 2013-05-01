@@ -9,8 +9,8 @@
 class GameObject {
     
 public:
-    GameObject (std::string name, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x = 0, int y = 0, int z = 0, int mass = 0, std::string shapeName = "Box");
-    GameObject (std::string name, Ogre::SceneNode* parentNode, std::string mesh, bool shadow = false, int x = 0, int y = 0, int z = 0, int mass = 0, std::string shapeName = "Box");
+    GameObject (std::string name, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x = 100, int y = 100, int z = 100, int mass = 0, std::string shapeName = "Box");
+    GameObject (std::string name, Ogre::SceneNode* parentNode, std::string mesh, bool shadow = false, int x = 100, int y = 100, int z = 100, int mass = 0, std::string shapeName = "Box");
     virtual ~GameObject (void);
 
     // Getters
