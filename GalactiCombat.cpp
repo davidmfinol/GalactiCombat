@@ -59,14 +59,14 @@ void GalactiCombat::createScene(void)
 {
     // create player
     spaceShips.resize(1);
-    spaceShips[0] = new SpaceShip("PlayerSpaceShip", mSoundMgr, 
-                         dynamic_cast<ISpaceShipController*>(mInputMgr), mSceneMgr->getRootSceneNode(), 100, 100, 100, 30, mCamera);
+    spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
+                                  mSceneMgr->getRootSceneNode(), 100, 100, 100, 30, mCamera);
     physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
     // create floating minerals
     createMinerals();
     // create enemy
-    spaceShips.push_back(new SpaceShip("EnemySpaceShip", mSoundMgr, 
-                                        new ComputerSpaceShipController(), mSceneMgr->getRootSceneNode(), 200, 200, 200 ));
+    spaceShips.push_back(new SpaceShip("EnemySpaceShip", new ComputerSpaceShipController(), 
+                                       mSceneMgr->getRootSceneNode(), 200, 200, 200 ));
     physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, false);
     // create walls
     createRoom();
@@ -93,7 +93,7 @@ void GalactiCombat::createMinerals(void)
         vel_x = (std::rand() % 10) * (std::rand() % 2 == 0 ? 1 : -1); 
         vel_y = (std::rand() % 5) * (std::rand() % 2 == 0 ? 1 : -1); 
         vel_z = (std::rand() % 10) * (std::rand() % 2 == 0 ? 1 : -1); 
-        minerals[i] = new Mineral(o.str(), mSoundMgr, mSceneMgr->getRootSceneNode(), pos_x, pos_y, pos_z, radius);
+        minerals[i] = new Mineral(o.str(), mSceneMgr->getRootSceneNode(), pos_x, pos_y, pos_z, radius);
         adjustMineralMaterial(minerals[i]);
         physicsSimulator->addGameObject(minerals[i], RESTITUTION);
         physicsSimulator->setGameObjectVelocity(minerals[i], Ogre::Vector3(vel_x, vel_y, vel_z));
@@ -236,20 +236,17 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
-    mNetworkMgr->receiveData(mSceneMgr, mSoundMgr, minerals,spaceShips,walls); //FIXME: THE WAY WE'RE PASSING DATA HERE IS BAD
-    // in particular, we shouldn't need to pass soundmanager
+    mNetworkMgr->receiveData(mSceneMgr, minerals, spaceShips);
     // we may need to also call some ot the other gameLogic methods
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
 {
     // Update the physics for the ships
-    std::cout << "Running the gameLoop, elapsedTime: " << elapsedTime << std::endl << std::endl;
-
     for (int i = 0; i < spaceShips.size(); ++i) {
         Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(spaceShips[i]);
-        //Ogre::Quaternion orientation = spaceShips[i]->getSceneNode()->getParentSceneNode()->getOrientation();
         Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(spaceShips[i]);
+        
         if(spaceShips[i]->getController()->left()) {
             velocity -= orientation.xAxis()*elapsedTime*SpaceShip::ACCELERATION;
             spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
@@ -286,7 +283,7 @@ void GalactiCombat::gameLoop(float elapsedTime)
     // Update objects after the results of the physics step
     this->updateMinerals();
     this->updateSpaceShips();
-    this->updateBullets();
+    //this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
@@ -323,6 +320,8 @@ void GalactiCombat::updateSpaceShips(void)
 {
     //TODO:
     //if(!isServer)
+    //if (camera) mSoundMgr->playSound("media/sounds/bell.wav");
+    //if (camera) mSoundMgr->playSound("media/sounds/bounce.wav");
     //adjustSpaceShipMaterial()
 }
 //-------------------------------------------------------------------------------------

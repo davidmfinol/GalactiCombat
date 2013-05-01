@@ -6,14 +6,13 @@
 #ifndef __GalactiCombat_h_
 #define __GalactiCombat_h_
 
-#include <string>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <cstdlib>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <stdio.h>
 
 #include "BaseApplication.h"
 #include "GameObject.h"

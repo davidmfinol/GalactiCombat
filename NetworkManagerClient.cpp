@@ -182,7 +182,7 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     //std::cout << "Exiting sendPlayerInput" << std::endl << std::endl;
 }
 
-void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundManager* sound, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::vector<GameObject*>& walls)
+void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships)
 {
     std::cout << "Entering receiveData" << std::endl << std::endl;
     static int iii = 0;
@@ -244,7 +244,7 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
             if(!found)
             {
                 //std::cout << "Doesn't exist, create it." << std::endl;
-                minerals.push_back(new Mineral(name, sound, sceneManager->getRootSceneNode(), pos_x, pos_y, pos_z, radius));
+                minerals.push_back(new Mineral(name, sceneManager->getRootSceneNode(), pos_x, pos_y, pos_z, radius));
                 minerals.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
             }
             //std::cout << "Got the Mineral!" << std::endl;

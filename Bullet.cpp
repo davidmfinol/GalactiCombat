@@ -22,8 +22,8 @@ Bullet::~Bullet(void)
 //-------------------------------------------------------------------------------------
 void Bullet::collidedWith(GameObject* other)
 {
+    //std::cout << "The bullet collided with " << other->getInternalType() << std::endl; //FIXME
     _hasHit = true;
-    std::cout << "The bullet collided with " << other->getInternalType() << std::endl;
     if(other->getInternalType() == "SpaceShip")
     {
         ((SpaceShip*)other)->adjustSize(LOSS);

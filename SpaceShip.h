@@ -5,14 +5,13 @@
 
 #include "GameObject.h"
 #include "ISpaceShipController.h"
-#include "SoundManager.h"
 #include "Mineral.h"
 
 class SpaceShip : public GameObject {
     
 public:
-    SpaceShip (std::string name, SoundManager* sound, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x = 100, int y = 100, int z = 100, double s = 30, Ogre::Camera* cam = 0);
-    SpaceShip (std::string name, SoundManager* sound, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x = 100, int y = 100, int z = 100, double s = 30, Ogre::Camera* cam = 0);
+    SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x = 100, int y = 100, int z = 100, double s = 30, Ogre::Camera* cam = 0);
+    SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x = 100, int y = 100, int z = 100, double s = 30, Ogre::Camera* cam = 0);
     virtual ~SpaceShip(void);
     
     // The controller is used to make decisions
@@ -41,7 +40,6 @@ public:
     
 protected:
     Ogre::Camera* camera;
-    SoundManager* mSoundMgr;
     ISpaceShipController* brain;
     double size;
     double sizeDifference;

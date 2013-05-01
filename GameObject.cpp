@@ -2,7 +2,7 @@
 
 //-------------------------------------------------------------------------------------
 GameObject::GameObject(std::string name, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x, int y, int z, int mass, std::string shapeName) 
-:mName(name), mEntity(entity), mNode(0) , mMass(mass), mShapeName(shapeName), mCollisionTimeStamp(0)
+: mName(name), mEntity(entity), mNode(0) , mMass(mass), mShapeName(shapeName), mCollisionTimeStamp(0)
 {
     mNode = parentNode->createChildSceneNode(name + "Node", Ogre::Vector3(x, y, z));
     if(mEntity)
@@ -10,7 +10,7 @@ GameObject::GameObject(std::string name, Ogre::SceneNode* parentNode, Ogre::Enti
 }
 //-------------------------------------------------------------------------------------
 GameObject::GameObject(std::string name, Ogre::SceneNode* parentNode, std::string mesh, bool shadow, int x, int y, int z, int mass, std::string shapeName) 
-:mName(name), mNode(0), mMass(mass), mShapeName(shapeName), mCollisionTimeStamp(0)
+: mName(name), mNode(0), mMass(mass), mShapeName(shapeName), mCollisionTimeStamp(0)
 {
     // create entity
     mEntity = parentNode->getCreator()->createEntity(name + "Entity", mesh);
@@ -58,6 +58,7 @@ std::string GameObject::getShapeName(void) const
 //-------------------------------------------------------------------------------------
 void GameObject::collidedWith(GameObject* other)
 {
+    std::cout << getInternalType() << " has collided with " << other->getInternalType() << std::endl; //FIXME
 }
 //-------------------------------------------------------------------------------------
 std::string GameObject::getInternalType(void) const

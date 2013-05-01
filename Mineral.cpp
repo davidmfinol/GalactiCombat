@@ -6,16 +6,16 @@ const double Mineral::RADIUS_INCREASE = 5.0;
 const double Mineral::RADIUS_DECREASE = -5.0;
 
 //-------------------------------------------------------------------------------------
-Mineral::Mineral(std::string name, SoundManager* sound, Ogre::SceneNode* parentNode, Ogre::Entity* entity,
+Mineral::Mineral(std::string name, Ogre::SceneNode* parentNode, Ogre::Entity* entity,
     int x, int y, int z, double r)
-:mSoundMgr(sound), radius(r), radiusDifference(0), GameObject(name, parentNode, entity, x, y, z)
+: radius(r), radiusDifference(0), GameObject(name, parentNode, entity, x, y, z)
 {
     setupMineral();
 }
 //-------------------------------------------------------------------------------------
-Mineral::Mineral(std::string name, SoundManager* sound, Ogre::SceneNode* parentNode,
+Mineral::Mineral(std::string name, Ogre::SceneNode* parentNode,
     int x, int y, int z, double r)
-:mSoundMgr(sound), radius(r), radiusDifference(0), GameObject(name, parentNode, "sphere.mesh", true, x, y, z)
+: radius(r), radiusDifference(0), GameObject(name, parentNode, "sphere.mesh", true, x, y, z)
 {
     setupMineral();
 }

@@ -8,14 +8,14 @@ const double SpaceShip::MIN_ENERGY = 0;
 const double SpaceShip::MAX_ENERGY = 100;
 
 //-------------------------------------------------------------------------------------
-SpaceShip::SpaceShip (std::string name, SoundManager* sound, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x, int y, int z, double s, Ogre::Camera* cam)
-: mSoundMgr(sound), brain(controller), camera(cam), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, entity, x, y, z, s)
+SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x, int y, int z, double s, Ogre::Camera* cam)
+: brain(controller), camera(cam), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, entity, x, y, z, s)
 {
     setupSpaceShip();
 }
 //-------------------------------------------------------------------------------------
-SpaceShip::SpaceShip (std::string name, SoundManager* sound, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x, int y, int z, double s, Ogre::Camera* cam)
-: mSoundMgr(sound), brain(controller), camera(cam), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, "sphere.mesh", true, x, y, z, s)
+SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x, int y, int z, double s, Ogre::Camera* cam)
+: brain(controller), camera(cam), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, "sphere.mesh", true, x, y, z, s)
 {
     setupSpaceShip();
 }
@@ -118,11 +118,9 @@ void SpaceShip::collidedWith(GameObject* other)
             if(((Mineral*)other)->getRadius() <= size) { // the mineral is smaller than us; we can mine it
                 energy += ENERGY_MINING;
                 energy = energy > MAX_ENERGY ? MAX_ENERGY : energy;
-                if (camera) mSoundMgr->playSound("media/sounds/bell.wav");
             }
             else if(((Mineral*)other)->getRadius() > size) { // mineral is too large; take damage
                 //sizeDifference = RADIUS_DECREASE;
-                if (camera) mSoundMgr->playSound("media/sounds/bounce.wav");
             }
             mCollisionTimeStamp = currentTimeStamp;
         }

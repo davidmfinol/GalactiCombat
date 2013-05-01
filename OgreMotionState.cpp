@@ -44,16 +44,16 @@ void OgreMotionState::setPosition(const btVector3& newPos)
 //-------------------------------------------------------------------------------------
 void OgreMotionState::setOrientation(const btQuaternion& newRot)
 {
-    std::cout << "Entering setOrientation" << std::endl;
+  //  std::cout << "Entering setOrientation" << std::endl;
     if(NULL == mVisibleObj)
         return; // we don't do anything if we don't have a node
     
     // Update the visible Ogre object's orientation
-    std::cout << "Getting Orientation" << std::endl;
+   // std::cout << "Getting Orientation" << std::endl;
     Ogre::Quaternion ogreRot(newRot.w(), newRot.x(), newRot.y(), newRot.z());
-    std::cout << "We can seg fault now? Orientation" << std::endl;
+    //std::cout << "We can seg fault now? Orientation" << std::endl;
     mVisibleObj->setOrientation(ogreRot);
-    std::cout << "Exiting setOrientation" << std::endl;
+    //std::cout << "Exiting setOrientation" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 bool OgreMotionState::allowsRotation(void) const

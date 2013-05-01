@@ -2,14 +2,13 @@
 #define __Mineral_h_
 
 #include "GameObject.h"
-#include "SoundManager.h"
 
 class Mineral : public GameObject {
     
 public:
-    Mineral (std::string name, SoundManager* sound, Ogre::SceneNode* parentNode, Ogre::Entity* entity,
+    Mineral (std::string name, Ogre::SceneNode* parentNode, Ogre::Entity* entity,
         int x = 100, int y = 100, int z = 100, double r = 1);
-    Mineral (std::string name, SoundManager* sound, Ogre::SceneNode* parentNode,
+    Mineral (std::string name, Ogre::SceneNode* parentNode,
         int x = 100, int y = 100, int z = 100, double r = 1);
     virtual ~Mineral(void);
     
@@ -31,7 +30,6 @@ public:
 protected:
     double radius;
     double radiusDifference;
-    SoundManager* mSoundMgr;
     
 private:
     void setupMineral(void);

@@ -23,7 +23,6 @@
 #include "SpaceShip.h"
 #include "ISpaceShipController.h"
 #include "ClientSpaceShipController.h"
-#include "SoundManager.h"
 
 #define MAXLEN (10*1024) //10 KB
 
@@ -42,7 +41,7 @@ public:
     
     // Game Logic Transaction
     void sendPlayerInput(ISpaceShipController* controller);
-    void receiveData(Ogre::SceneManager*, SoundManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::vector<GameObject*>&); //FIXME: BETTER DATA PASSING
+    void receiveData(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&);
     
 protected:
     TCPsocket TCPServerSock;
