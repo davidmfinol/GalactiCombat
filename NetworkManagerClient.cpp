@@ -197,60 +197,59 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, SoundMa
     if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
         infoPacket = NetworkUtil::charArrayToPacket(incoming);
         std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
-        std::string modelInfo(infoPacket.message);
+        std::string message(infoPacket.message);
 
-        /*
-        //std::cout << "It was a mineral." << std::endl;
-        std::string message(in.message);
-        //std::cout << "The mineral's message is " << message << std::endl;
-        std::string name = message.substr(0, message.find(","));
-        message = message.substr(message.find(",") + 1);
-        double pos_x = atof(message.substr(0, message.find(",")).c_str());
-        message = message.substr(message.find(",") + 1);
-        double pos_y = atof(message.substr(0, message.find(",")).c_str());
-        message = message.substr(message.find(",") + 1);
-        double pos_z = atof(message.substr(0, message.find(",")).c_str());
-        message = message.substr(message.find(",") + 1);
-        double vel_x = atof(message.substr(0, message.find(",")).c_str());
-        message = message.substr(message.find(",") + 1);
-        double vel_y = atof(message.substr(0, message.find(",")).c_str());
-        message = message.substr(message.find(",") + 1);
-        double vel_z = atof(message.substr(0, message.find(",")).c_str());
-        message = message.substr(message.find(",") + 1);
-        double rot_w = atof(message.substr(0, message.find(",")).c_str());
-        message = message.substr(message.find(",") + 1);
-        double rot_x = atof(message.substr(0, message.find(",")).c_str());
-        message = message.substr(message.find(",") + 1);
-        double rot_y = atof(message.substr(0, message.find(",")).c_str());
-        message = message.substr(message.find(",") + 1);
-        double rot_z = atof(message.substr(0, message.find(",")).c_str());
-        message = message.substr(message.find(",") + 1);
-        double radius = atof(message.substr(0, message.find(",")).c_str());
-        //std::cout << "We parsed that message." << message << std::endl;
-        
-        // FIXME: THIS IS BAD, oh well
-        bool found = false;
-        for(int j = 0; j < minerals.size(); ++j)
-        {
-            //std::cout << "Checking to see if " << name << " already exists." << std::endl;
-            if(minerals[j]->getName() == name)
-            {
-                //std::cout << "Exists." << std::endl;
-                found = true;
-                minerals[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
-                minerals[j]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
-                break;
-            }
-        }
-        if(!found)
-        {
-            //std::cout << "Doesn't exist, create it." << std::endl;
-            minerals.push_back(new Mineral(name, sound, sceneManager->getRootSceneNode(), pos_x, pos_y, pos_z, radius));
-            minerals.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
-        }
-        //std::cout << "Got the Mineral!" << std::endl;
-        */
+        int mineralsAmount = atoi(message.substr(message.find(":") + 1, message.find(",")).c_str());
+
+        for (int i = 0; i < mineralsAmount; i++) {
+            message = message.substr(message.find(",") + 1);
+            std::string name = message.substr(0, message.find(","));
+            message = message.substr(message.find(",") + 1);
+            double pos_x = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double pos_y = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double pos_z = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double vel_x = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double vel_y = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double vel_z = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_w = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_x = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_y = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double rot_z = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double radius = atof(message.substr(0, message.find(",")).c_str());
             
+            // FIXME: THIS IS BAD, oh well
+            bool found = false;
+            for(int j = 0; j < minerals.size(); ++j)
+            {
+                //std::cout << "Checking to see if " << name << " already exists." << std::endl;
+                if(minerals[j]->getName() == name)
+                {
+                    //std::cout << "Exists." << std::endl;
+                    found = true;
+                    minerals[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                    minerals[j]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
+                    break;
+                }
+            }
+            if(!found)
+            {
+                //std::cout << "Doesn't exist, create it." << std::endl;
+                minerals.push_back(new Mineral(name, sound, sceneManager->getRootSceneNode(), pos_x, pos_y, pos_z, radius));
+                minerals.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
+            }
+            //std::cout << "Got the Mineral!" << std::endl;
+        }
+
         /*
         else if(in.type == SPACESHIP)
         {

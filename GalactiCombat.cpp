@@ -253,6 +253,8 @@ void GalactiCombat::updateFromServer(void)
 void GalactiCombat::gameLoop(float elapsedTime)
 {
     // Update the physics for the ships
+    std::cout << "Running the gameLoop, elapsedTime: " << elapsedTime << std::endl << std::endl;
+
     for (int i = 0; i < spaceShips.size(); ++i) {
         //Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(spaceShips[i], true); //FIXME: USE THIS LINE INSTEAD OF TWO BELOW
         Ogre::Quaternion orientation = spaceShips[i]->getSceneNode()->getParentSceneNode()->getOrientation();
@@ -414,12 +416,14 @@ std::string GalactiCombat::getCurrentTime(void) {
         sec = 59;
         mGUIMgr->resetTimerDone();
     }
+    /* === Crazy Energy Injection ===
     if (min != 0 && sec <= 10) {
         if (sec == 0) {
             crazyEnergyInjection();
         }
         mGUIMgr->countDown(sec, INJECT_CODE);
     }
+    ================================= */
     if (min == 0 && sec <= 10) {
         if (sec == 0) {
             mGUIMgr->gameOver(spaceShips[0]->getSize());
