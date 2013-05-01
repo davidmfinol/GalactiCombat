@@ -177,7 +177,7 @@ void GalactiCombatServer::createServerRoom()
     physicsSimulator->addGameObject(walls[0]);
     
     // create ceiling
-    walls[1] = new GameObject ("ceiling", mSceneMgr->getRootSceneNode(), NULL, ROOM_HIGH, 0, 0, 0, "NEGATIVE_UNIT_Y");
+    walls[1] = new GameObject ("ceiling", mSceneMgr->getRootSceneNode(), NULL, 0, ROOM_HIGH, 0, 0, "NEGATIVE_UNIT_Y");
     physicsSimulator->addGameObject(walls[1]);
     
     // create front wall
@@ -189,11 +189,11 @@ void GalactiCombatServer::createServerRoom()
     physicsSimulator->addGameObject(walls[3]);
     
     // create left wall
-    walls[4] = new GameObject ("left", mSceneMgr->getRootSceneNode(), NULL, ROOM_HIGH/2, -ROOM_SIZE/2, 0, 0, "UNIT_Z");
+    walls[4] = new GameObject ("left", mSceneMgr->getRootSceneNode(), NULL, 0, ROOM_HIGH/2, -ROOM_SIZE/2, 0, "UNIT_Z");
     physicsSimulator->addGameObject(walls[4]);
     
     // create right wall
-    walls[5] = new GameObject ("right", mSceneMgr->getRootSceneNode(), NULL, ROOM_HIGH/2, ROOM_SIZE/2, 0, 0, "NEGATIVE_UNIT_Z");
+    walls[5] = new GameObject ("right", mSceneMgr->getRootSceneNode(), NULL, 0, ROOM_HIGH/2, ROOM_SIZE/2, 0, "NEGATIVE_UNIT_Z");
     physicsSimulator->addGameObject(walls[5]);
     //std::cout << "Exiting createServerRoom" << std::endl << std::endl;
 }
@@ -255,9 +255,12 @@ void GalactiCombatServer::serverLoop(void)
         //run the game loop
         if(state == PLAY)
         {
+            std::cout << "curr_t: " << curr_t << std::endl;
+            std::cout << "prev_t: " << prev_t << std::endl;
+            std::cout << "CLOCKS_PER_SEC: " << CLOCKS_PER_SEC << std::endl;
             //std::cout << "Running the Game loop." << std::endl;
             float elapsedTime = ( ((float)curr_t) - ((float)prev_t) ) / CLOCKS_PER_SEC;;
-            gameLoop(elapsedTime);
+            gameLoop(0.001);
             prev_t = std::clock();
             ////std::cout << "Game loop has been run" << std::endl;
             
@@ -380,12 +383,18 @@ void GalactiCombatServer::receiveData(int clientIndex)
 
     else if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
 */
+    std::cout << "Before IF" << std::endl;    
     if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
     {
+        std::cout << "After IF" << std::endl;    
         incoming = NetworkUtil::charArrayToPacket(msg);
         std::cout << "Received TCP message from " << clients[clientIndex]->name << ": " << msg << std::endl;
         free(msg);
         msg = NULL;
+    }
+    else
+    {
+        std::cout << "Did not receive TCP message from "<< clients[clientIndex]->name << std::endl;
     }
 
     //process the received message
