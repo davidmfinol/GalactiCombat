@@ -29,7 +29,7 @@ int NetworkManagerClient::connect(char *host, char *name)
         std::cerr << "SDLNet_AllocSocketSet done goofed: " << SDLNet_GetError() << std::endl;
         SDLNet_Quit();
         SDL_Quit();
-        exit(4); /*most of the time this is a major error, but do what you want. */
+        exit(4); //most of the time this is a major error, but do what you want.
     }
     
     // Resolve the argument into an IPaddress type 
@@ -70,12 +70,12 @@ int NetworkManagerClient::connect(char *host, char *name)
     pack.type = CONNECTION;
     pack.message = name; // FIXME: SHOULD USE? :char message[MAXLEN];
     char* out = NetworkUtil::PacketToCharArray(pack);
-    std::cout << "Sent " << out << std::endl;
     if(!NetworkUtil::TCPSend(TCPServerSock, out))
     {
         SDLNet_TCP_Close(TCPServerSock);
         exit(8);
     }
+    std::cout << "Sent " << out << std::endl;
     free(out);
     
     // store our connection info
@@ -86,15 +86,9 @@ int NetworkManagerClient::connect(char *host, char *name)
     //std::cout << "Exiting TCPConnect" << std::endl << std::endl;
 }
 
-TCPsocket& NetworkManagerClient::getSocket()
-{
-    return this->TCPServerSock;
-}
+TCPsocket& NetworkManagerClient::getSocket(){return this->TCPServerSock;}
 
-bool NetworkManagerClient::isOnline()
-{
-    return connected;
-}
+bool NetworkManagerClient::isOnline(){return connected;}
 
 void NetworkManagerClient::resetReadyState()
 {
@@ -118,12 +112,9 @@ void NetworkManagerClient::quit()
     free(out);
 
 /*	//FIXME: Server doesn't receive any UDP packets.
-    UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
-    if(!UDPPack)
-    {
-        std::cerr << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
-        return;
-    }
+    UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
+    if(!UDPPack) return;
+
 	char *msg = NetworkUtil::PacketToCharArray(outgoing);
     UDPPack->data = (Uint8*)msg;
     UDPPack->len = strlen(msg) + 1;
@@ -166,12 +157,9 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     free(out);
 
 /*	//FIXME: Server doesn't receive any UDP packets.
-    UDPpacket *UDPPack = SDLNet_AllocPacket(sizeof(int)+1);
-    if(!UDPPack)
-    {
-            std::cout << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
-            return;
-    }
+    UDPpacket *UDPPack = NetworkUtil::AllocPacket(sizeof(int)+1);
+    if(!UDPPack) return;
+
     UDPPack->data = (Uint8*)out;
     UDPPack->len = strlen(out) + 1;
     UDPPack->address = serverIP;
@@ -317,12 +305,8 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
     free(incoming);
 
 /*	//FIXME: Fix the other UDP bugs first.
-	UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
-	if(!UDPPack)
-	{
-		std::cerr << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
-		return;
-	}
+	UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
+	if(!UDPPack) return;
 
 	if(NetworkUtil::UDPReceive(UDPServerSock, UDPPack) > 0)
 	{
