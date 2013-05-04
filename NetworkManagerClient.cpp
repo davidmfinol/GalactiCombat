@@ -193,7 +193,7 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
     char* incoming = NULL;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
 
-    //std::cout << "About to request and receive data" << std::endl << std::endl;
+    std::cout << "About to request and receive data" << std::endl << std::endl;
     if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
         infoPacket = NetworkUtil::charArrayToPacket(incoming);
         //std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;

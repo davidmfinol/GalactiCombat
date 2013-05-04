@@ -155,7 +155,7 @@ void GalactiCombatServer::createServerMinerals()
     for (i = 0; i < MINERALS_AMOUNT; i++)
     {
         std::ostringstream o;
-        o << "RandomSphere" << i;
+        o << "ServerMineral" << i;
         pos_x = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
         pos_z = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
         pos_y = (std::rand() % (ROOM_HIGH - 500)) + 250;

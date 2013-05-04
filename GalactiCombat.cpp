@@ -48,11 +48,10 @@ void GalactiCombat::createViewports(void)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::destroyScene(void)
 {
-    while(!spaceShips.empty()) delete spaceShips.back(), spaceShips.pop_back();
+    while(spaceShips.size()>1) delete spaceShips.back(), spaceShips.pop_back();
     while(!minerals.empty()) delete minerals.back(), minerals.pop_back();
     while(!walls.empty()) delete walls.back(), walls.pop_back();
     mSceneMgr->destroyAllEntities();
-    mSceneMgr->clearScene();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createScene(void)
@@ -203,6 +202,8 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
                 std::string allReady(list);
                 if (allReady.find("All players ready") != std::string::npos) {
                     mGUIMgr->startCountingDown();
+                    std::cout << "Destroying scene" << std::endl;
+                    this->destroyScene();
                     startTime = prevTime = std::time(0);
                 }
             }
@@ -219,15 +220,22 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
     // Only run the game loop after the welcome menu and before the game ends
     if (!mGUIMgr->isWelcomeState() && !mGUIMgr->isGameOver()) {
         
+        // physics/main gameloop
+        if(!mNetworkMgr->isOnline())
+            gameLoop((float)evt.timeSinceLastFrame);
         if(mNetworkMgr->isOnline())
             updateFromServer();
-        else
-            gameLoop((float)evt.timeSinceLastFrame);
+        
+        // Update Visual components
+        this->updateMinerals();
+        this->updateSpaceShips();
+        //this->updateBullets(); //TODO
         
         // Update GUI
         mGUIMgr->setTimeLabel(getCurrentTime()); // FIXME: TIME FROM SERVER
         // TODO: mGUIMgr->informSize(spaceShips[0]->getSize());
         mGUIMgr->informEnergy(spaceShips[0]->getEnergy());// FIXME: ENERGY FROM SERVER
+        
         // Background music
         this->loopBackgroundMusic();
     }
@@ -237,7 +245,6 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 void GalactiCombat::updateFromServer(void)
 {
     mNetworkMgr->receiveData(mSceneMgr, minerals, spaceShips);
-    // we may need to also call some ot the other gameLogic methods
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
@@ -274,16 +281,11 @@ void GalactiCombat::gameLoop(float elapsedTime)
         physicsSimulator->setGameObjectVelocity(spaceShips[i], velocity);
         
         if(spaceShips[i]->getController()->shoot()) 
-            createBullet(spaceShips[i]);
+            this->createBullet(spaceShips[i]);
     }
     
     // Step the physics simulator
-    physicsSimulator->stepSimulation(elapsedTime);
-    
-    // Update objects after the results of the physics step
-    this->updateMinerals();
-    this->updateSpaceShips();
-    //this->updateBullets();
+    physicsSimulator->stepSimulation(elapsedTime, 5, 1.0f/60.0f);
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
@@ -301,7 +303,7 @@ void GalactiCombat::createBullet(SpaceShip* ship)
         static int bulletID = 0;
         std::string bulletName("Bullet");
         char idChar[4];
-        sprintf(idChar,"%d", bulletID);
+        sprintf(idChar, "%d", bulletID);
         bulletName += idChar;
         if(!isServer)
             bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x + 100, pos.y + 100, pos.z + 100)); //FIXME
