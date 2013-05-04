@@ -20,7 +20,7 @@ public:
     bool shoot() const;
     
 protected:
-    Ogre::SceneManager* scene; //TODO: MAYBE USE GAMEOBJECTS_LIST INSTEAD OF SCENE TO IDENTIFY SURROUNDINGS
+    Ogre::SceneManager* scene; //TODO: MAYBE USE GAMEOBJECTS_LIST (& physicSimulator) INSTEAD OF SCENE TO IDENTIFY SURROUNDINGS
     
 };
 
