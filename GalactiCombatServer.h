@@ -21,7 +21,7 @@ typedef struct Client Client; // allows Client struct to be used in C
 class GalactiCombatServer : public GalactiCombat {
     
 public:
-    GalactiCombatServer();
+    GalactiCombatServer(bool v = false);
     virtual ~GalactiCombatServer();
     void startServer(long portNo);
     
@@ -45,6 +45,7 @@ protected:
     
     int state;                          //whether the server is currently running the game
     std::string scoreboard;             //of the format "Name,Score;"
+    bool verbose;                       //whether to output print statements
 
 private:
     void serverLoop();

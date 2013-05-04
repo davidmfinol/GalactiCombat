@@ -54,18 +54,17 @@ OgreBites::SdkTrayManager* GUIManager::getTrayMgr(void)
 
 void GUIManager::displayWelcomeMsg(void)
 {
-    std::string msg = "Welcome to Ogre Glider! In this game, you are controlling a ";
-    msg += "ball. You can give the ball a push with WSAD, left-shift, or space, and ";
-    msg += "rotate the camera with your mouse. The goal of this game is to absorb ";
-    msg += "mass from the smaller balls, and avoid the bigger ones, which will absorb ";
-    msg += "your mass. Plan your movements carefully, because movements will consume ";
-    msg += "\"energy\", which is the size of your ball!\n\n\nTips:\n\n";
-    msg += "1). WASD gives your ball a push in corresponding direction, left-shift pushes ";
-    msg += "it downwards, and space pushes it upwards.\n\n";
-    msg += "2). Yellow balls are bigger than you, red ones are smaller, and blue ones ";
-    msg += "are of the same size as you.\n\n";
-    msg += "3). The max. size of any ball is 100 and min. size is 1. Never make your ";
-    msg += "ball to size 1, because you will have no energy to move at all at min. size,\n\n";
+    std::string msg = "Welcome to GalactiCombat! In this game, you are controlling a ";
+    msg += "spaceship. You can accelerate your ship in 3D space with WASD, left-shift, and space, and ";
+    msg += " you rotate the camera with your mouse. The goal of this game is to absorb ";
+    msg += "mass by shooting other ships, and eventually be the biggest ship in subspace.";
+    msg += "Plan your movements carefully and shots carefully, because both moving and shooting will consume ";
+    msg += "\"energy\", and you need energy to do those actions.\n\n\nTips:\n\n";
+    msg += "1) Collide into minerals smaller than you to gain energy.\n\n"; 
+    msg += "2). Yellow minerals are the same size as you, red ones are larger, and blue ones ";
+    msg += "are smaller.\n\n";
+    msg += "3). Getting shot by a bullet OR colliding into colliding into object bigger than you";
+    msg += " will cause you to decrease in size.\n\n";
     msg += "4). In order to keep the motion going, there will be a Crazy Energy Injection ";
     msg += "every minute. Watch out for that.\n";
     welcomeBox = mTrayMgr->createTextBox(OgreBites::TL_CENTER, "welcome_widget", "Welcome!", 400, 300);

@@ -7,6 +7,7 @@
 #define __GalactiCombat_h_
 
 #include <vector>
+#include <deque>
 #include <string>
 #include <sstream>
 #include <cstdlib>
@@ -70,7 +71,7 @@ protected:
     std::vector<GameObject*> walls;
     std::vector<Mineral*> minerals;
     std::vector<SpaceShip*> spaceShips;
-    std::vector<Bullet*> bullets;
+    std::deque<Bullet*> bullets;
     
     // For music
     std::time_t startTime;

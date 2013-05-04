@@ -58,7 +58,7 @@ std::string GameObject::getShapeName(void) const
 //-------------------------------------------------------------------------------------
 void GameObject::collidedWith(GameObject* other)
 {
-    std::cout << getInternalType() << " has collided with " << other->getInternalType() << std::endl; //FIXME
+    //std::cout << getInternalType() << " has collided with " << other->getInternalType() << std::endl; //FIXME
 }
 //-------------------------------------------------------------------------------------
 std::string GameObject::getInternalType(void) const
