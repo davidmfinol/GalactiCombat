@@ -257,7 +257,8 @@ void GalactiCombatServer::serverLoop(void)
         if(state == PLAY)
         {
             clock_gettime(CLOCK_MONOTONIC, &currTime);
-            float elapsedTime = currTime.tv_sec - prevTime.tv_sec;
+            float elapsedTime = currTime.tv_nsec - prevTime.tv_nsec;
+            elapsedTime /= 1000000000; //convert from nanoseconds to seconds
             if(elapsedTime == 0)
                 std::cerr << "Gameloop running with no elapsed time" << std::endl;
             else
@@ -459,6 +460,8 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     char* packetMessage = (char*)malloc(ss.str().length() + 1);
     strcpy(packetMessage, ss.str().c_str());
     outgoing.message = packetMessage;
+    
+    if(verbose) std::cout << "The state info is:             " << outgoing.message << std::endl;
 
 /*	FIXME: Still workin on it
 	UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
@@ -481,7 +484,7 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     if(!NetworkUtil::TCPSend(clients[clientIndex]->sock, outgoingMessage))
         std::cerr << "Didn't send back info to " << clients[clientIndex]->name << std::endl;
     else
-        if(verbose) std::cout << "Sent back info to " << clients[clientIndex]->name << std::endl;
+        if(verbose) std::cout << "-------Sent back info to " << clients[clientIndex]->name << std::endl;
     
     // clean-up
     free(outgoingMessage);
@@ -567,7 +570,13 @@ extern "C" {
     int main(int argc, char *argv[])
     #endif
     {   
-        GalactiCombatServer *server = new GalactiCombatServer();
+        bool verbose = false;
+        if(argc > 1)
+        {
+            verbose = true;
+            std::cout << "Verbose Enabled" << std::endl;
+        }
+        GalactiCombatServer *server = new GalactiCombatServer(verbose);
         server->startServer(TCP_PORT);
         server->~GalactiCombatServer();
         return 0;

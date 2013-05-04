@@ -184,7 +184,7 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
 
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships)
 {
-    std::cout << "Entering receiveData" << std::endl << std::endl;
+    //std::cout << "Entering receiveData" << std::endl << std::endl;
     static int iii = 0;
     Packet outgoing;
     Packet infoPacket;
@@ -193,10 +193,10 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
     char* incoming = NULL;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
 
-    std::cout << "About to request and receive data" << std::endl << std::endl;
+    //std::cout << "About to request and receive data" << std::endl << std::endl;
     if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
         infoPacket = NetworkUtil::charArrayToPacket(incoming);
-        std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
+        //std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
         std::string message(infoPacket.message);
 
         int mineralsAmount = atoi(message.substr(message.find(":") + 1, message.find(",")).c_str());
@@ -334,6 +334,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
 		return;
 */
 
-    std::cout << "Exiting receiveData" << std::endl << std::endl;
+    //std::cout << "Exiting receiveData" << std::endl << std::endl;
 }
 
