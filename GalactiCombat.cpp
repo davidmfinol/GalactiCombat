@@ -188,7 +188,8 @@ void GalactiCombat::setLighting(void)
     mSceneMgr->setSkyBox(true, "Examples/SpaceSkyBox2");
 }
 //-------------------------------------------------------------------------------------
-void GalactiCombat::loopBackgroundMusic(void) {
+void GalactiCombat::loopBackgroundMusic(void)
+{
     std::time_t currentTime = std::time(0);
     std::time_t diff = currentTime - startTime;
     if (diff != 0 && diff % 130 == 0) {
@@ -315,7 +316,7 @@ void GalactiCombat::gameLoop(float elapsedTime)
     // Update after physics
     this->updateMinerals();
     this->updateSpaceShips();
-    //this->updateBullets();
+    this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
@@ -340,8 +341,8 @@ void GalactiCombat::createBullet(SpaceShip* ship)
         else
             bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x + 100, pos.y + 100, pos.z + 100)); //FIXME
         physicsSimulator->addGameObject(bullets.back());
-        physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
-        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation); //FIXME
+        //physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
+        //physicsSimulator->setGameObjectOrientation(bullets.back(), orientation); //FIXME
         bulletID++;
         
         previousTimeStamp = currentTimeStamp;
@@ -391,9 +392,10 @@ void GalactiCombat::updateBullets(void)
 {
     //FIXME:
     // Update all the bullets
-    for(std::deque<Bullet*>::iterator it = bullets.begin(); it!=bullets.end(); ++it) {
+    for(std::deque<Bullet*>::iterator it = bullets.begin(); it<bullets.end(); ++it) {
         if( (*it)->hasHit() ) {
             physicsSimulator->removeGameObject(*it);
+            physicsSimulator->deleteGameObject(*it);
             delete *it;
             it = bullets.erase(it);
         }

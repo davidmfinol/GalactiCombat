@@ -15,6 +15,7 @@ public:
     virtual ~PhysicsSimulator(void);
     void addGameObject (GameObject* obj, double restitution = 1.0, bool activeKinematic = false, bool allowRotation = true);
     void removeGameObject(GameObject* obj);
+    void deleteGameObject(GameObject*);
     Ogre::Vector3 getGameObjectPosition(GameObject* obj);
     Ogre::Vector3 getGameObjectVelocity(GameObject* obj);
     Ogre::Quaternion getGameObjectOrientation(GameObject* obj);
@@ -35,7 +36,6 @@ protected:
     
 private:
     void defineCollisionShapes(int maxSphereSize);
-    void deleteGameObject(GameObject*);
 };
 
 #endif // #ifndef __PhysicsSimulator_h_

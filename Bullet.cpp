@@ -22,9 +22,9 @@ Bullet::~Bullet(void)
 //-------------------------------------------------------------------------------------
 void Bullet::collidedWith(GameObject* other)
 {
-    _hasHit = true;
     if(other->getInternalType() == "SpaceShip")
     {
+        _hasHit = true;
         ((SpaceShip*)other)->adjustSize(LOSS);
         _owner->adjustSize(GAIN);
     }

@@ -123,8 +123,11 @@ void PhysicsSimulator::removeGameObject (GameObject* obj)
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::deleteGameObject (GameObject* obj) 
 {
+    btRigidBody* body = gameObjects[obj];
+    rigidBodies.erase(body);
     delete gameObjects[obj]->getMotionState();
     delete gameObjects[obj];
+    gameObjects.erase(obj);
 }
 //-------------------------------------------------------------------------------------
 Ogre::Vector3 PhysicsSimulator::getGameObjectPosition(GameObject* obj)
