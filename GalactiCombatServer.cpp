@@ -483,6 +483,16 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
         ss << buffer;
     }
 
+    // pack the bullets
+    ss << "bullets:" << bullets.size() << ",";
+    for (int in = 0; in < bullets.size(); in++) {
+        std::string name = bullets[in]->getName();
+        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(bullets[in]);
+        char buffer[100];
+        sprintf(buffer,"%s,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z);
+        ss << buffer;
+    }
+
     // pack the message
     char* packetMessage = (char*)malloc(ss.str().length() + 1);
     strcpy(packetMessage, ss.str().c_str());
