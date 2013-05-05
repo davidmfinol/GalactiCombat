@@ -282,12 +282,9 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
             
             // FIXME: THIS IS BAD, oh well
             bool found = false;
-            std::cout << "Examining " << name << ". Our name is " << mName << std::endl;
             if(name == mName)
             {
-                std::cout << "Setting player at " << pos_x <<  " " << pos_y << " " << pos_z << std::endl;
-                spaceships[0]->getSceneNode()->getParentSceneNode()->setPosition(pos_x, pos_y, pos_z);
-                std::cout << "With rotation " << rot_w <<  " " << rot_x << " " << rot_y << " " << rot_z << std::endl;
+                spaceships[0]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
                 spaceships[0]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
                 continue;
             }

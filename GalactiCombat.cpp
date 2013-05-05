@@ -69,6 +69,8 @@ void GalactiCombat::destroyScene(void)
     while(!walls.empty()) delete walls.back(), walls.pop_back();
     while(!minerals.empty()) delete minerals.back(), minerals.pop_back();
     mSceneMgr->destroyAllEntities();
+    mSceneMgr->destroyAllCameras();
+    mSceneMgr->destroyAllLights();
     mSceneMgr->clearScene();
 }
 //-------------------------------------------------------------------------------------
@@ -225,7 +227,8 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
                 if (allReady.find("All players ready") != std::string::npos) {
                     mGUIMgr->startCountingDown();
                     this->destroyScene();
-                    spaceShips[0]->attachCamera(mCamera);
+                    this->createCamera();
+                    this->createViewports();
                     this->setLighting();
                     startTime = prevTime = std::time(0);
                 }
@@ -263,10 +266,10 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 void GalactiCombat::updateFromServer(void)
 {
     mNetworkMgr->receiveData(mSceneMgr, minerals, spaceShips, bullets);
-    // Update Visual components
+    // Update visual components
     this->updateMinerals();
     this->updateSpaceShips();
-    this->updateBullets();
+    //this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
@@ -338,7 +341,7 @@ void GalactiCombat::createBullet(SpaceShip* ship)
             bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x + 100, pos.y + 100, pos.z + 100)); //FIXME
         physicsSimulator->addGameObject(bullets.back());
         physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
-        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
+        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation); //FIXME
         bulletID++;
         
         previousTimeStamp = currentTimeStamp;
@@ -386,11 +389,10 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateBullets(void)
 {
+    //FIXME:
     // Update all the bullets
-    for(std::deque<Bullet*>::iterator it = bullets.begin(); it!=bullets.end(); ++it)
-    {
-        if( (*it)->hasHit() )
-        {
+    for(std::deque<Bullet*>::iterator it = bullets.begin(); it!=bullets.end(); ++it) {
+        if( (*it)->hasHit() ) {
             physicsSimulator->removeGameObject(*it);
             delete *it;
             it = bullets.erase(it);
@@ -410,7 +412,8 @@ void GalactiCombat::crazyEnergyInjection(void)
     }
 }
 //-------------------------------------------------------------------------------------
-std::string GalactiCombat::getCurrentTime(void) {
+std::string GalactiCombat::getCurrentTime(void)
+{
     std::ostringstream o;
     static std::time_t startTime = std::time(0);
     static std::time_t prevTime = startTime;
