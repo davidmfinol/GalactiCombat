@@ -60,12 +60,12 @@ protected:
     // Components that need to receive input
     Ogre::RenderWindow* mWindow;
     GUIManager* mGUIMgr;
+    NetworkManagerClient* mNetworkMgr;
     // OIS Input devices
     OIS::InputManager* mInputManager;
     OIS::Mouse*    mMouse;
     OIS::Keyboard* mKeyboard;
     
-    NetworkManagerClient* mNetworkMgr;
     // Relevant input
     bool mLeft;
     bool mRight;

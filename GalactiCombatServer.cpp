@@ -26,7 +26,7 @@ std::vector<Client*> GalactiCombatServer::getClients()
 //-------------------------------------------------------------------------------------
 int GalactiCombatServer::findClientBySocket(TCPsocket sock)
 {
-	int i;
+    int i;
     for(i = 0; i < clients.size(); i++)
         if(clients[i]->sock == sock)
             return i;
@@ -36,7 +36,7 @@ int GalactiCombatServer::findClientBySocket(TCPsocket sock)
 //-------------------------------------------------------------------------------------
 int GalactiCombatServer::findClientByName(std::string name)
 {
-	int i;
+    int i;
     for(i = 0; i < clients.size(); i++)
         if(clients[i]->name == name)
             return i;
@@ -58,18 +58,17 @@ Client* GalactiCombatServer::addClient(TCPsocket sock, int channel, std::string 
 {
     if(verbose) std::cout << "Entering addClient - " << name << std::endl;
     
+    double pos_x = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
+    double pos_z = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
+    double pos_y = (std::rand() % (ROOM_SIZE - 500)) + 250;
+    
     clients.push_back(new Client());
     clients.back()->sock = sock;
     clients.back()->channel = channel;
     clients.back()->name = name;
-    clients.back()->inputController = new ClientSpaceShipController();
+    clients.back()->ship = new SpaceShip(name, new ClientSpaceShipController(), mSceneMgr->getRootSceneNode(), NULL, pos_x, pos_y, pos_z, 30);
     clients.back()->ready = false;
-    
-    double pos_x = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
-    double pos_z = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
-    double pos_y = (std::rand() % (ROOM_SIZE - 500)) + 250;
-    spaceShips.push_back(new SpaceShip(name, clients.back()->inputController,
-                                       mSceneMgr->getRootSceneNode(), NULL, pos_x, pos_y, pos_z, 30 ));
+    spaceShips.push_back(clients.back()->ship);
     physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, false);
     
     if(verbose) std::cout << "Exiting addClient -" << name << std::endl << std::endl;
@@ -82,17 +81,17 @@ void GalactiCombatServer::removeClient(int i)
     if(i < 0 && i >= clients.size())
         return;
     
-    // Remove it from the game
-    physicsSimulator->removeGameObject(spaceShips[i]);
-    delete spaceShips[i];
-    spaceShips.erase(spaceShips.begin() + i);
+    // FIXME: Remove THE SPACESHIP from the game
+    //physicsSimulator->removeGameObject(spaceShips[i]);
+    //delete spaceShips[i];
+    //delete clients[i]->ship->getController();
+    //spaceShips.erase(spaceShips.begin() + i);
     
     //Unbind the UDP socket
     SDLNet_UDP_Unbind(UDPServerSock, clients[i]->channel);
     
-    // Remove it from our list of clients
+    // Remove the client from our list of clients
     SDLNet_TCP_Close(clients[i]->sock);
-    delete clients[i]->inputController;
     delete clients[i];
     clients.erase(clients.begin() + i);
     
@@ -425,10 +424,12 @@ void GalactiCombatServer::receiveData(int clientIndex)
             receiveStatePacket(clientIndex, incoming); break;
         case PLAYERINPUT:
             receivePlayerInputPacket(clientIndex, incoming); break;
-        case SCORE:
-            receiveScorePacket(clientIndex, incoming); break;
+        case PLAYERROTATE:    
+            receivePlayerRotatePacket(clientIndex, incoming); break;
         case READY:
             receiveReadyPacket(clientIndex, incoming); break;
+        case SCORE:
+            receiveScorePacket(clientIndex, incoming); break;
         default:
             std::cerr << "Unrecognized Packet type from " << clients[clientIndex]->name << std::endl;
     }
@@ -530,15 +531,27 @@ void GalactiCombatServer::receivePlayerInputPacket(int clientIndex, Packet& inco
     if(verbose) std::cout << "Entering receivePlayerInputPacket" << std::endl;
     char input = *incoming.message;
     if(verbose) std::cout << "The input from " << clients[clientIndex]->name << " is " << input << std::endl;
-    clients[clientIndex]->inputController->injectInput(input);
+    ((ClientSpaceShipController*)clients[clientIndex]->ship->getController())->injectInput(input);
     if(verbose) std::cout << "Exiting receivePlayerInputPacket" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
-void GalactiCombatServer::receiveScorePacket(int clientIndex, Packet& incoming)
+void GalactiCombatServer::receivePlayerRotatePacket(int clientIndex, Packet& incoming)
 {
-    if(verbose) std::cout << "Entering receiveScorePacket" << std::endl;
-    //TODO: THIS PACKET TYPE NEEDS TO BE REDONE
-    if(verbose) std::cout << "Exiting receiveScorePacket" << std::endl;
+    if(verbose) std::cout << "Entering receivePlayerRotatePacket" << std::endl;
+    
+    std::string message(incoming.message);
+    Ogre::Real yaw = atof(message.substr(0, message.find(",")).c_str());
+    message = message.substr(message.find(",") + 1);
+    Ogre::Real pitch = atof(message.substr(0, message.find(",")).c_str());
+    
+    if(verbose) std::cout << "The rotation from " << clients[clientIndex]->name << " is " << yaw << " by " << pitch << std::endl;
+    Ogre::SceneNode* node = clients[clientIndex]->ship->getSceneNode();
+    node->yaw(Ogre::Degree(yaw)); 
+    node->pitch(Ogre::Degree(pitch), Ogre::Node::TS_LOCAL);
+    Ogre::Quaternion rotation = node->getOrientation();
+    physicsSimulator->setGameObjectOrientation(clients[clientIndex]->ship, rotation);
+    
+    if(verbose) std::cout << "Exiting receivePlayerRotatePacket" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
@@ -586,6 +599,13 @@ void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
         state = PLAY;
     }
     if(verbose) std::cout << "Exiting receiveReadyPacket" << std::endl << std::endl;
+}
+//-------------------------------------------------------------------------------------
+void GalactiCombatServer::receiveScorePacket(int clientIndex, Packet& incoming)
+{
+    if(verbose) std::cout << "Entering receiveScorePacket" << std::endl;
+    //TODO: THIS PACKET TYPE NEEDS TO BE REDONE
+    if(verbose) std::cout << "Exiting receiveScorePacket" << std::endl;
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32

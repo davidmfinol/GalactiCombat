@@ -164,21 +164,20 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     //std::cout << "Exiting sendPlayerInput" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
-void NetworkManagerClient::sendPlayerRotate(float yaw, float pitch)
+void NetworkManagerClient::sendPlayerRotate(Ogre::Real yaw, Ogre::Real pitch)
 {
     //std::cout << "Entering sendPlayerRotate" << std::endl << std::endl;
     Packet outgoing;
-    outgoing.type = INFO;
-    std::stringstream ss;
-        mNetworkMgr->sendPlayerRotate(yaw, pitch);
-        char buffer[100];
-        sprintf(buffer,"%s,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z);
-        ss << buffer;
-        if(!NetworkUtil::TCPSend(TCPServerSock, out))
-    {
-        SDLNet_TCP_Close(TCPServerSock);
-        exit(8);
-    }
+    outgoing.type = PLAYERROTATE;
+    
+    char buffer[100];
+    sprintf(buffer,"%f,%f", yaw, pitch);
+    outgoing.message = buffer;
+    
+    char* out = NetworkUtil::PacketToCharArray(outgoing);
+    NetworkUtil::TCPSend(TCPServerSock, out);
+    
+    free(out);
     //std::cout << "Exiting sendPlayerRotate" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
@@ -346,7 +345,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
                 bullets.push_back(new Bullet(name, sceneManager->getRootSceneNode(), NULL, pos_x, pos_y, pos_z));
             }
         }
-
     }
     free(out);
     free(incoming);

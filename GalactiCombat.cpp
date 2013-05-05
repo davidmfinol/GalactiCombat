@@ -44,15 +44,19 @@ void GalactiCombat::createCamera(void)
     // create player
     spaceShips.resize(1);
     spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
-                                  mSceneMgr->getRootSceneNode(), 100, 100, 100, 30, mCamera);
-    physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
+                                  mSceneMgr->getRootSceneNode(), 100, 100, 100, 30);
     // set camera to player
+    spaceShips[0]->attachCamera(mCamera);
     mInputMgr->setPlayerCamera(spaceShips[0]->getSceneNode(), mCamera->getParentSceneNode());
+    
+    // we may as well add the player now
+    physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createViewports(void)
 {
     // create one viewport, entire window
+    mWindow->removeAllViewports();
     Ogre::Viewport* vp = mWindow->addViewport(mCamera);
     vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
     // alter the camera aspect ratio to match the viewport
@@ -65,6 +69,7 @@ void GalactiCombat::destroyScene(void)
     while(!walls.empty()) delete walls.back(), walls.pop_back();
     while(!minerals.empty()) delete minerals.back(), minerals.pop_back();
     mSceneMgr->destroyAllEntities();
+    mSceneMgr->clearScene();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createScene(void)
@@ -220,6 +225,8 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
                 if (allReady.find("All players ready") != std::string::npos) {
                     mGUIMgr->startCountingDown();
                     this->destroyScene();
+                    spaceShips[0]->attachCamera(mCamera);
+                    this->setLighting();
                     startTime = prevTime = std::time(0);
                 }
             }
@@ -259,7 +266,7 @@ void GalactiCombat::updateFromServer(void)
     // Update Visual components
     this->updateMinerals();
     this->updateSpaceShips();
-    //this->updateBullets();
+    this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
@@ -386,8 +393,7 @@ void GalactiCombat::updateBullets(void)
         {
             physicsSimulator->removeGameObject(*it);
             delete *it;
-            bullets.erase(it);
-            break;
+            it = bullets.erase(it);
         }
     }
 }

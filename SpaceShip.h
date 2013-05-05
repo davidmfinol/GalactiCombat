@@ -10,9 +10,10 @@
 class SpaceShip : public GameObject {
     
 public:
-    SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x = 100, int y = 100, int z = 100, double s = 30, Ogre::Camera* cam = 0);
-    SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x = 100, int y = 100, int z = 100, double s = 30, Ogre::Camera* cam = 0);
+    SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x = 100, int y = 100, int z = 100, double s = 30);
+    SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x = 100, int y = 100, int z = 100, double s = 30);
     virtual ~SpaceShip(void);
+    void attachCamera(Ogre::Camera* camera);
     
     // The controller is used to make decisions
     ISpaceShipController* getController(void) const;
@@ -39,7 +40,6 @@ public:
     static const double MAX_ENERGY;
     
 protected:
-    Ogre::Camera* camera;
     ISpaceShipController* brain;
     double size;
     double sizeDifference;
