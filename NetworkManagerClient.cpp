@@ -44,7 +44,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     }
     
     // open the TCP socket
-    //std::cout << "Opening server socket." << std::endl;
+    //std::cout << "Opening TCP server socket." << std::endl;
     TCPServerSock = SDLNet_TCP_Open(&ip);
     if(!TCPServerSock)
     {
@@ -56,6 +56,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     }
     
     // open the UDP socket
+    //std::cout << "Opening UDP server socket." << std::endl;
     UDPServerSock = SDLNet_UDP_Open(0);
     if(!UDPServerSock)
     {
@@ -83,7 +84,6 @@ int NetworkManagerClient::connect(char *host, char *name)
     mName = name;
     serverIP = ip;
     connected = true;
-    //std::cout << "Logged in as " << mName << std::endl;
     //std::cout << "Exiting TCPConnect" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
@@ -167,6 +167,18 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
 void NetworkManagerClient::sendPlayerRotate(float yaw, float pitch)
 {
     //std::cout << "Entering sendPlayerRotate" << std::endl << std::endl;
+    Packet outgoing;
+    outgoing.type = INFO;
+    std::stringstream ss;
+        mNetworkMgr->sendPlayerRotate(yaw, pitch);
+        char buffer[100];
+        sprintf(buffer,"%s,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z);
+        ss << buffer;
+        if(!NetworkUtil::TCPSend(TCPServerSock, out))
+    {
+        SDLNet_TCP_Close(TCPServerSock);
+        exit(8);
+    }
     //std::cout << "Exiting sendPlayerRotate" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------

@@ -44,17 +44,16 @@ int GalactiCombatServer::findClientByName(std::string name)
     return -1;
 }
 //-------------------------------------------------------------------------------------
-
 int GalactiCombatServer::findClientByChannel(int channel)
 {
-	int i;
+    int i;
     for(i = 0; i < clients.size(); i++)
         if(clients[i]->channel == channel)
             return i;
     std::cerr << "Failed to find with findClientByChannel - "<<channel<<std::endl<<std::endl;
     return -1;
 }
-
+//-------------------------------------------------------------------------------------
 Client* GalactiCombatServer::addClient(TCPsocket sock, int channel, std::string name)
 {
     if(verbose) std::cout << "Entering addClient - " << name << std::endl;
@@ -71,7 +70,7 @@ Client* GalactiCombatServer::addClient(TCPsocket sock, int channel, std::string 
     double pos_y = (std::rand() % (ROOM_SIZE - 500)) + 250;
     spaceShips.push_back(new SpaceShip(name, clients.back()->inputController,
                                        mSceneMgr->getRootSceneNode(), NULL, pos_x, pos_y, pos_z, 30 ));
-    physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, true);
+    physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, false);
     
     if(verbose) std::cout << "Exiting addClient -" << name << std::endl << std::endl;
     return(clients.back());
@@ -406,17 +405,17 @@ void GalactiCombatServer::receiveData(int clientIndex)
 	else
 	{
 */
-        mNetworkMgr->sendPlayerRotate(yaw, pitch);
-	    if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
-	    {
-        	incoming = NetworkUtil::charArrayToPacket(msg);
-	        if(verbose) std::cout << "Received TCP message from " << clients[clientIndex]->name << ": " << msg << std::endl;
-	        free(msg);
-	        msg = NULL;
-    	}
-	    else
-	        if(verbose) std::cout << "Did not receive TCP message from " << clients[clientIndex]->name << std::endl;
-//	}
+    if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
+    {
+        incoming = NetworkUtil::charArrayToPacket(msg);
+        if(verbose) std::cout << "Received TCP message from " << clients[clientIndex]->name << ": " << msg << std::endl;
+        free(msg);
+        msg = NULL;
+    }
+    else
+        if(verbose) std::cout << "Did not receive TCP message from " << clients[clientIndex]->name << std::endl;
+//}
+    
     //process the received message
     switch(incoming.type)
     {

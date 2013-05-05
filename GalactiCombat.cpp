@@ -242,11 +242,6 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
         if(mNetworkMgr->isOnline())
             updateFromServer();
         
-        // Update Visual components
-        this->updateMinerals();
-        this->updateSpaceShips();
-        this->updateBullets();
-        
         // Update GUI
         mGUIMgr->setTimeLabel(getCurrentTime()); // FIXME: TIME FROM SERVER
         // TODO: mGUIMgr->informSize(spaceShips[0]->getSize());
@@ -261,6 +256,10 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 void GalactiCombat::updateFromServer(void)
 {
     mNetworkMgr->receiveData(mSceneMgr, minerals, spaceShips);
+    // Update Visual components
+    this->updateMinerals();
+    this->updateSpaceShips();
+    //this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
@@ -302,6 +301,11 @@ void GalactiCombat::gameLoop(float elapsedTime)
     
     // Step the physics simulator
     physicsSimulator->stepSimulation(elapsedTime, MAX_SUB_STEPS, TIME_STEP);
+    
+    // Update after physics
+    this->updateMinerals();
+    this->updateSpaceShips();
+    //this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)

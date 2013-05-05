@@ -22,12 +22,10 @@
 #define STATE 11
 #define INFO 12
 #define PLAYERINPUT 13
-#define SCORE 14
+#define PLAYERROTATE 14
 #define READY 15
-#define MINERAL 13
-#define SPACESHIP 14
-#define WALL 16
-#define NUMBER_OF_PACKETS 17
+#define WALLS 16
+#define SCORE 17
 
 struct Packet {
     int type;
@@ -258,20 +256,24 @@ namespace NetworkUtil {
         return received;
     }
 
-	static UDPpacket *AllocPacket(int size)
-	{
-		UDPpacket *UDPpack = SDLNet_AllocPacket(size);
-		if(!UDPpack)
-			std::cerr<<"SDLNet_AllocPack done goofed: "<<SDLNet_GetError()<<std::endl;
-		return UDPpack;
-	}
-	static int UDPBind(UDPsocket sock, int channel, IPaddress *address)
-	{
-		int result = SDLNet_UDP_Bind(sock, channel, address);
-		if (result < 0)
-			std::cerr<<"SDLNet_UDP_Bind done goofed: "<<SDLNet_GetError()<<std::endl;
-		return result;
-	}
+    static UDPpacket *AllocPacket(int size)
+    {
+        //std::cout << "Entering AllocPacket" << std::endl;
+        UDPpacket *UDPpack = SDLNet_AllocPacket(size);
+        if(!UDPpack)
+            std::cerr << "SDLNet_AllocPack done goofed: " << SDLNet_GetError() << std::endl;
+        //std::cout << "Exiting AllocPacket" << std::endl;
+        return UDPpack;
+    }
+    static int UDPBind(UDPsocket sock, int channel, IPaddress *address)
+    {
+        //std::cout << "Entering UDPBind" << std::endl;
+        int result = SDLNet_UDP_Bind(sock, channel, address);
+        if (result < 0)
+            std::cerr << "SDLNet_UDP_Bind done goofed: " << SDLNet_GetError() << std::endl;
+        //std::cout << "Exiting UDPBind" << std::endl;
+        return result;
+    }
 }
 
 #endif //#ifndef __NetworkUtil_h
