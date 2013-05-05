@@ -1,5 +1,6 @@
 #include "NetworkManagerClient.h"
 
+//-------------------------------------------------------------------------------------
 NetworkManagerClient::NetworkManagerClient(void) : connected(false)
 {
     if(SDL_Init(0) != 0)
@@ -11,13 +12,13 @@ NetworkManagerClient::NetworkManagerClient(void) : connected(false)
     if(SDLNet_Init() != 0)
         std::cerr << "SDLNet_Init done goofed: " << SDLNet_GetError() << std::endl;
 }
-
+//-------------------------------------------------------------------------------------
 NetworkManagerClient::~NetworkManagerClient(void)
 {
     SDLNet_Quit();
     SDL_Quit();
 }
-
+//-------------------------------------------------------------------------------------
 int NetworkManagerClient::connect(char *host, char *name)
 {
     //std::cout << "Entering connect" << std::endl << std::endl;
@@ -85,11 +86,17 @@ int NetworkManagerClient::connect(char *host, char *name)
     //std::cout << "Logged in as " << mName << std::endl;
     //std::cout << "Exiting TCPConnect" << std::endl << std::endl;
 }
-
-TCPsocket& NetworkManagerClient::getSocket(){return this->TCPServerSock;}
-
-bool NetworkManagerClient::isOnline(){return connected;}
-
+//-------------------------------------------------------------------------------------
+TCPsocket& NetworkManagerClient::getSocket()
+{
+    return this->TCPServerSock;
+}
+//-------------------------------------------------------------------------------------
+bool NetworkManagerClient::isOnline()
+{
+    return connected;
+}
+//-------------------------------------------------------------------------------------
 void NetworkManagerClient::resetReadyState()
 {
     //std::cout << "Entering resetReadyState" << std::endl << std::endl;
@@ -99,7 +106,7 @@ void NetworkManagerClient::resetReadyState()
     NetworkUtil::TCPSend(TCPServerSock, NetworkUtil::PacketToCharArray(outgoing));
     //std::cout << "Exiting resetReadyState" << std::endl << std::endl;
 }
-
+//-------------------------------------------------------------------------------------
 void NetworkManagerClient::quit()
 {
     //std::cout << "Entering quit" << std::endl << std::endl << std::endl;
@@ -112,10 +119,9 @@ void NetworkManagerClient::quit()
     free(out);
 
     connected = false;
-    //std::cout << "You have quit the game." << std::endl;
     //std::cout << "Exiting quit" << std::endl << std::endl << std::endl;
 }
-
+//-------------------------------------------------------------------------------------
 void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
 {
     //std::cout << "Entering sendPlayerInput" << std::endl << std::endl;
@@ -157,7 +163,13 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     free(out);
     //std::cout << "Exiting sendPlayerInput" << std::endl << std::endl;
 }
-
+//-------------------------------------------------------------------------------------
+void NetworkManagerClient::sendPlayerRotate(float yaw, float pitch)
+{
+    //std::cout << "Entering sendPlayerRotate" << std::endl << std::endl;
+    //std::cout << "Exiting sendPlayerRotate" << std::endl << std::endl;
+}
+//-------------------------------------------------------------------------------------
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships)
 {
     //std::cout << "Entering receiveData" << std::endl << std::endl;

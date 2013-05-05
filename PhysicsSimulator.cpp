@@ -42,7 +42,7 @@ PhysicsSimulator::~PhysicsSimulator(void)
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::defineCollisionShapes(int maxSphereSize)
 {
-    // Default game object
+    // Default box
     collisionShapes["Box"] = new btBoxShape(btVector3(btScalar(1.), btScalar(1.), btScalar(1.)));
     // Planes
     collisionShapes["UNIT_X"] = new btStaticPlaneShape(btVector3(btScalar(1.),btScalar(0.),btScalar(0.)), btScalar(1.));

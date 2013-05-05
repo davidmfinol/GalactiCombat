@@ -406,6 +406,7 @@ void GalactiCombatServer::receiveData(int clientIndex)
 	else
 	{
 */
+        mNetworkMgr->sendPlayerRotate(yaw, pitch);
 	    if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
 	    {
         	incoming = NetworkUtil::charArrayToPacket(msg);
