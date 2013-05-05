@@ -260,7 +260,7 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
-    mNetworkMgr->receiveData(mSceneMgr, minerals, spaceShips);
+    mNetworkMgr->receiveData(mSceneMgr, minerals, spaceShips, bullets);
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)

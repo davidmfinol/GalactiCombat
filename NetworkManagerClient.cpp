@@ -170,7 +170,7 @@ void NetworkManagerClient::sendPlayerRotate(float yaw, float pitch)
     //std::cout << "Exiting sendPlayerRotate" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
-void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships)
+void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::deque<Bullet*>& bullets)
 {
     //std::cout << "Entering receiveData" << std::endl << std::endl;
     static int iii = 0;
