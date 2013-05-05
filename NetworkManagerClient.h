@@ -21,6 +21,7 @@
 #include "GameObject.h"
 #include "Mineral.h"
 #include "SpaceShip.h"
+#include "Bullet.h"
 #include "ISpaceShipController.h"
 #include "ClientSpaceShipController.h"
 
@@ -42,7 +43,7 @@ public:
     // Game Logic Transaction
     void sendPlayerInput(ISpaceShipController* controller);
     void sendPlayerRotate(float yaw, float pitch);
-    void receiveData(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&);
+    void receiveData(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::deque<Bullet*>&);
     
 protected:
     TCPsocket TCPServerSock;

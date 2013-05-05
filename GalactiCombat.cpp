@@ -255,7 +255,7 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
-    mNetworkMgr->receiveData(mSceneMgr, minerals, spaceShips);
+    mNetworkMgr->receiveData(mSceneMgr, minerals, spaceShips, bullets);
     // Update Visual components
     this->updateMinerals();
     this->updateSpaceShips();
