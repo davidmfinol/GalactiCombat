@@ -10,7 +10,7 @@ const float GalactiCombat::MAX_SUB_STEPS = 6.0f;
 const float GalactiCombat::TIME_STEP = 1.0f/60.0f;
 
 //-------------------------------------------------------------------------------------
-GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), walls(6), spaceShips(1), bullets(0), isServer(false), startTime(0)
+GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), walls(6), spaceShips(0), bullets(0), isServer(false), startTime(0)
 {
     physicsSimulator = new PhysicsSimulator(Mineral::MAX_RADIUS);
     mSoundMgr = new SoundManager();
@@ -22,7 +22,7 @@ GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), walls(6), spaceS
 GalactiCombat::~GalactiCombat(void)
 {
     if(spaceShips.size() > 0 && spaceShips[0])
-    delete spaceShips[0];
+        delete spaceShips[0];
     delete mInputMgr;
     delete mNetworkMgr;
     delete mGUIMgr;
@@ -42,6 +42,7 @@ void GalactiCombat::createCamera(void)
     mCamera->setFarClipDistance(500);
     
     // create player
+    spaceShips.resize(1);
     spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
                                   mSceneMgr->getRootSceneNode(), 100, 100, 100, 30, mCamera);
     physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
