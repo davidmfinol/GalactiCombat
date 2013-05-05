@@ -5,9 +5,12 @@
  */
 
 #include "GalactiCombat.h"
+    
+const float GalactiCombat::MAX_SUB_STEPS = 6.0f;
+const float GalactiCombat::TIME_STEP = 1.0f/60.0f;
 
 //-------------------------------------------------------------------------------------
-GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), spaceShips(0), walls(6), bullets(0), isServer(false), startTime(0)
+GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), walls(6), spaceShips(1), bullets(0), isServer(false), startTime(0)
 {
     physicsSimulator = new PhysicsSimulator(Mineral::MAX_RADIUS);
     mSoundMgr = new SoundManager();
@@ -18,6 +21,8 @@ GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), spaceShips(0), w
 //-------------------------------------------------------------------------------------
 GalactiCombat::~GalactiCombat(void)
 {
+    if(spaceShips.size() > 0 && spaceShips[0])
+    delete spaceShips[0];
     delete mInputMgr;
     delete mNetworkMgr;
     delete mGUIMgr;
@@ -35,6 +40,13 @@ void GalactiCombat::createCamera(void)
     // set the near clip distance
     mCamera->setNearClipDistance(5);
     mCamera->setFarClipDistance(500);
+    
+    // create player
+    spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
+                                  mSceneMgr->getRootSceneNode(), 100, 100, 100, 30, mCamera);
+    physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
+    // set camera to player
+    mInputMgr->setPlayerCamera(spaceShips[0]->getSceneNode(), mCamera->getParentSceneNode());
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createViewports(void)
@@ -43,39 +55,33 @@ void GalactiCombat::createViewports(void)
     Ogre::Viewport* vp = mWindow->addViewport(mCamera);
     vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
     // alter the camera aspect ratio to match the viewport
-    mCamera->setAspectRatio(Ogre::Real(vp->getActualWidth()) / Ogre::Real(vp->getActualHeight()));    
+    mCamera->setAspectRatio(Ogre::Real(vp->getActualWidth()) / Ogre::Real(vp->getActualHeight())); 
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::destroyScene(void)
 {
     while(spaceShips.size()>1) delete spaceShips.back(), spaceShips.pop_back();
-    while(!minerals.empty()) delete minerals.back(), minerals.pop_back();
     while(!walls.empty()) delete walls.back(), walls.pop_back();
+    while(!minerals.empty()) delete minerals.back(), minerals.pop_back();
     mSceneMgr->destroyAllEntities();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createScene(void)
 {
-    // create player
-    spaceShips.resize(1);
-    spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
-                                  mSceneMgr->getRootSceneNode(), 100, 100, 100, 30, mCamera);
-    physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
     // create floating minerals
     createMinerals();
+    
+    // create walls
+    createRoom();
+    
     // create enemy
     spaceShips.push_back(new SpaceShip("EnemySpaceShip", new ComputerSpaceShipController(), 
                                        mSceneMgr->getRootSceneNode(), 200, 200, 200 ));
     physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, false);
-    // create walls
-    createRoom();
     
-    // Lights!
-    createLights();
-    // Camera!
-    mInputMgr->setPlayerCamera(spaceShips[0]->getSceneNode(), mCamera->getParentSceneNode());
-    // Music!
-    mSoundMgr->playMusic("media/sounds/Level1_destination.wav");
+    // set the ambiance for the game
+    this->setLighting();
+    mSoundMgr->playMusic("media/sounds/Level1_destination.wav");   
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createMinerals(void)
@@ -97,15 +103,6 @@ void GalactiCombat::createMinerals(void)
         physicsSimulator->addGameObject(minerals[i], RESTITUTION);
         physicsSimulator->setGameObjectVelocity(minerals[i], Ogre::Vector3(vel_x, vel_y, vel_z));
     }
-}
-//-------------------------------------------------------------------------------------
-void GalactiCombat::createLights(void)
-{
-    // set scene lights' attributes
-    mSceneMgr->setAmbientLight(Ogre::ColourValue(0.4, 0.4, 0.4));
-    mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
-    // draw the skybox
-    mSceneMgr->setSkyBox(true, "Examples/SpaceSkyBox2");
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createRoom(void)
@@ -173,6 +170,25 @@ void GalactiCombat::createRoom(void)
     physicsSimulator->addGameObject(walls[5]);
 }
 //-------------------------------------------------------------------------------------
+void GalactiCombat::setLighting(void)
+{
+    // set light attributes
+    mSceneMgr->setAmbientLight(Ogre::ColourValue(0.4, 0.4, 0.4));
+    mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
+    
+    // draw the skybox
+    mSceneMgr->setSkyBox(true, "Examples/SpaceSkyBox2");
+}
+//-------------------------------------------------------------------------------------
+void GalactiCombat::loopBackgroundMusic(void) {
+    std::time_t currentTime = std::time(0);
+    std::time_t diff = currentTime - startTime;
+    if (diff != 0 && diff % 130 == 0) {
+        mSoundMgr->playMusic("media/sounds/cautious-path.wav");
+        startTime = currentTime;
+    }
+}
+//-------------------------------------------------------------------------------------
 void GalactiCombat::createFrameListener(void)
 {
     mInputMgr->inputSetup(mWindow, mGUIMgr);
@@ -193,7 +209,7 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
     mGUIMgr->getTrayMgr()->frameRenderingQueued(evt);
     
     // Only update the lobby list if the player is in the lobby
-    if (mGUIMgr->isInLobby()) {
+    if (mGUIMgr->isInLobby()) { //FIXME: HANDLE LOBBY LOGIC IN A SEPERATE METHOD
         if (!mGUIMgr->lobbyCountingDown()) {
             char* request = const_cast<char*>("15LIST_REQUEST");
             char *list = NULL;
@@ -202,7 +218,6 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
                 std::string allReady(list);
                 if (allReady.find("All players ready") != std::string::npos) {
                     mGUIMgr->startCountingDown();
-                    std::cout << "Destroying scene" << std::endl;
                     this->destroyScene();
                     startTime = prevTime = std::time(0);
                 }
@@ -229,7 +244,7 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
         // Update Visual components
         this->updateMinerals();
         this->updateSpaceShips();
-        //this->updateBullets(); //TODO
+        this->updateBullets();
         
         // Update GUI
         mGUIMgr->setTimeLabel(getCurrentTime()); // FIXME: TIME FROM SERVER
@@ -249,7 +264,7 @@ void GalactiCombat::updateFromServer(void)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
 {
-    // Update the physics for the ships
+    // Update the input for the ships
     for (int i = 0; i < spaceShips.size(); ++i) {
         Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(spaceShips[i]);
         Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(spaceShips[i]);
@@ -285,7 +300,7 @@ void GalactiCombat::gameLoop(float elapsedTime)
     }
     
     // Step the physics simulator
-    physicsSimulator->stepSimulation(elapsedTime, 5, 1.0f/60.0f);
+    physicsSimulator->stepSimulation(elapsedTime, MAX_SUB_STEPS, TIME_STEP);
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
@@ -360,13 +375,14 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 void GalactiCombat::updateBullets(void)
 {
     // Update all the bullets
-    for(int i = 0 ; i < bullets.size(); ++i)
+    for(std::deque<Bullet*>::iterator it = bullets.begin(); it!=bullets.end(); ++it)
     {
-        if(bullets[i]->hasHit())
+        if( (*it)->hasHit() )
         {
-            physicsSimulator->removeGameObject(bullets[i]);
-            delete bullets[i];
-            bullets.erase(bullets.begin() + i);
+            physicsSimulator->removeGameObject(*it);
+            delete *it;
+            bullets.erase(it);
+            break;
         }
     }
 }
@@ -380,15 +396,6 @@ void GalactiCombat::crazyEnergyInjection(void)
         vel_y = ((std::rand() % 500) + 500);
         vel_z = ((std::rand() % 500) + 500) * (std::rand() % 2 == 0 ? 1 : -1); 
         physicsSimulator->setGameObjectVelocity(minerals[i], Ogre::Vector3(vel_x, vel_y, vel_z));
-    }
-}
-//-------------------------------------------------------------------------------------
-void GalactiCombat::loopBackgroundMusic(void) {
-    std::time_t currentTime = std::time(0);
-    std::time_t diff = currentTime - startTime;
-    if (diff != 0 && diff % 130 == 0) {
-        mSoundMgr->playMusic("media/sounds/cautious-path.wav");
-        startTime = currentTime;
     }
 }
 //-------------------------------------------------------------------------------------

@@ -30,7 +30,8 @@ mPluginsCfg(Ogre::StringUtil::BLANK)
 //-------------------------------------------------------------------------------------
 BaseApplication::~BaseApplication(void)
 {
-    delete mRoot;
+    if(mRoot)
+        delete mRoot;
 }
 
 //-------------------------------------------------------------------------------------

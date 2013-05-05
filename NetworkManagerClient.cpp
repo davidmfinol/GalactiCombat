@@ -189,11 +189,11 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
     Packet outgoing;
     Packet infoPacket;
     outgoing.type = STATE;
-    outgoing.message = const_cast<char*>("NONE");
+    outgoing.message = const_cast<char*>("");
     char* incoming = NULL;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
 
-    std::cout << "About to request and receive data" << std::endl << std::endl;
+    //std::cout << "About to request and receive data" << std::endl << std::endl;
     if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
         infoPacket = NetworkUtil::charArrayToPacket(incoming);
         //std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
@@ -210,12 +210,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
             double pos_y = atof(message.substr(0, message.find(",")).c_str());
             message = message.substr(message.find(",") + 1);
             double pos_z = atof(message.substr(0, message.find(",")).c_str());
-            message = message.substr(message.find(",") + 1);
-            double vel_x = atof(message.substr(0, message.find(",")).c_str());
-            message = message.substr(message.find(",") + 1);
-            double vel_y = atof(message.substr(0, message.find(",")).c_str());
-            message = message.substr(message.find(",") + 1);
-            double vel_z = atof(message.substr(0, message.find(",")).c_str());
             message = message.substr(message.find(",") + 1);
             double rot_w = atof(message.substr(0, message.find(",")).c_str());
             message = message.substr(message.find(",") + 1);
@@ -247,14 +241,12 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
                 minerals.push_back(new Mineral(name, sceneManager->getRootSceneNode(), pos_x, pos_y, pos_z, radius));
                 minerals.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
             }
-            //std::cout << "Got the Mineral!" << std::endl;
         }
 
-        /*
-        else if(in.type == SPACESHIP)
-        {
-            //std::cout << "It was a spaceship." << std::endl;
-            std::string message(in.message);
+        int spaceShipAmount = atoi(message.substr(message.find(":") + 1, message.find(",")).c_str());
+
+        for (int i = 0; i < spaceShipAmount; i++) {
+            message = message.substr(message.find(",") + 1);
             std::string name = message.substr(0, message.find(","));
             message = message.substr(message.find(",") + 1);
             double pos_x = atof(message.substr(0, message.find(",")).c_str());
@@ -262,12 +254,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
             double pos_y = atof(message.substr(0, message.find(",")).c_str());
             message = message.substr(message.find(",") + 1);
             double pos_z = atof(message.substr(0, message.find(",")).c_str());
-            message = message.substr(message.find(",") + 1);
-            double vel_x = atof(message.substr(0, message.find(",")).c_str());
-            message = message.substr(message.find(",") + 1);
-            double vel_y = atof(message.substr(0, message.find(",")).c_str());
-            message = message.substr(message.find(",") + 1);
-            double vel_z = atof(message.substr(0, message.find(",")).c_str());
             message = message.substr(message.find(",") + 1);
             double rot_w = atof(message.substr(0, message.find(",")).c_str());
             message = message.substr(message.find(",") + 1);
@@ -285,12 +271,14 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
             {
                 spaceships[0]->getSceneNode()->getParentSceneNode()->setPosition(pos_x, pos_y, pos_z);
                 spaceships[0]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
-                break;
+                continue;
             }
-            for(int j = 1; j < spaceships.size(); ++j)
+            for(int j = 0; j < spaceships.size(); ++j)
             {
+                //std::cout << "Checking to see if " << name << " already exists." << std::endl;
                 if(spaceships[j]->getName() == name)
                 {
+                    //std::cout << "Exists." << std::endl;
                     found = true;
                     spaceships[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
                     spaceships[j]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
@@ -299,19 +287,13 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
             }
             if(!found)
             {
+                //std::cout << "Doesn't exist, create it." << std::endl;
                 ISpaceShipController* controller = new ClientSpaceShipController();
-                spaceships.push_back(new SpaceShip(name, sound, controller, sceneManager->getRootSceneNode()->createChildSceneNode(),size));
-                spaceships.back()->getSceneNode()->getParentSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                spaceships.push_back(new SpaceShip(name, controller, sceneManager->getRootSceneNode()->createChildSceneNode(), pos_x, pos_y, pos_z, size));
                 spaceships.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
             }
-            //std::cout << "Got the SpaceShip!" << std::endl;
         }
-        else if(in.type == WALL)
-        {
-            //std::cout << "It was a wall." << std::endl;
-        }
-        */
-
+        // TODO: WALLS AND BULLETS?
     }
     free(out);
     free(incoming);

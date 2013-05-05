@@ -232,8 +232,8 @@ void GalactiCombatServer::startServer(long portNo)
     if(verbose) std::cout << "Setting up game...." << std::endl;
     mRoot = new Ogre::Root();
     chooseSceneManager();
-    this->createServerRoom();
     this->createServerMinerals();
+    this->createServerRoom();
     
     host = SDLNet_ResolveIP(&ip);
     if(host == NULL)
@@ -257,15 +257,22 @@ void GalactiCombatServer::serverLoop(void)
         if(state == PLAY)
         {
             clock_gettime(CLOCK_MONOTONIC, &currTime);
-            float elapsedTime = currTime.tv_nsec - prevTime.tv_nsec;
+            float elapsedTime = (currTime.tv_sec*1000000000 + currTime.tv_nsec) - (prevTime.tv_sec*1000000000 + prevTime.tv_nsec);
             elapsedTime /= 1000000000; //convert from nanoseconds to seconds
-            if(elapsedTime == 0)
-                std::cerr << "Gameloop running with no elapsed time" << std::endl;
-            else
+            if(elapsedTime < TIME_STEP/2)
+                std::cerr << "Elapsed time between iterations of game loop too small.... Skipping iteration." << std::endl;
+            else if(elapsedTime < MAX_SUB_STEPS*TIME_STEP) 
+            {
                 if(verbose) std::cout << "Running the Game loop with elapsed time: " << elapsedTime << std::endl;
-            gameLoop(elapsedTime);
-            if(verbose) std::cout << "Game loop has been run." << std::endl;
-            prevTime = currTime;
+                gameLoop(elapsedTime);
+                if(verbose) std::cout << "Game loop has been run." << std::endl;
+                prevTime = currTime;
+            }
+            else
+            {
+                std::cerr << "Elapsed time between iterations of game loop too LARGE. Skipping iteration." << std::endl;
+                prevTime = currTime;
+            }
         }
         
         //get sockets ready for connection
@@ -435,11 +442,10 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     for (int in = 0; in < minerals.size(); in++) {
         std::string name = minerals[in]->getName();
         Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(minerals[in]);
-        Ogre::Vector3 vel = physicsSimulator->getGameObjectVelocity(minerals[in]);
         Ogre::Quaternion rot = physicsSimulator->getGameObjectOrientation(minerals[in]);
         double radius = minerals[in]->getRadius();
         char buffer[100];
-        sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, radius);
+        sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, rot.w, rot.x, rot.y, rot.z, radius);
         ss << buffer;
     }
 
@@ -448,11 +454,10 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     for (int in = 0; in < spaceShips.size(); in++) {
         std::string name = spaceShips[in]->getName();
         Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(spaceShips[in]);
-        Ogre::Vector3 vel = physicsSimulator->getGameObjectVelocity(spaceShips[in]);
         Ogre::Quaternion rot = physicsSimulator->getGameObjectOrientation(spaceShips[in]);
         double size = spaceShips[in]->getSize();
         char buffer[100];
-        sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, rot.w, rot.x, rot.y, rot.z, size);
+        sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, rot.w, rot.x, rot.y, rot.z, size);
         ss << buffer;
     }
 

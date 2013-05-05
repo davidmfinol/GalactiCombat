@@ -40,15 +40,18 @@ public:
     GalactiCombat(void);
     virtual ~GalactiCombat(void);
     
+    static const float MAX_SUB_STEPS;
+    static const float TIME_STEP;
+    
 protected:
     // Setup and cleanup
     virtual void createViewports(void);
     virtual void createCamera(void);
     virtual void destroyScene(void);
     virtual void createScene(void);
-    void createLights(void);
-    void createRoom(void);
     void createMinerals(void);
+    void createRoom(void);
+    void setLighting(void);
     void loopBackgroundMusic(void);
     
     // Ogre::FrameListener

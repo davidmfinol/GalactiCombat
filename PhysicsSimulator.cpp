@@ -45,12 +45,12 @@ void PhysicsSimulator::defineCollisionShapes(int maxSphereSize)
     // Default game object
     collisionShapes["Box"] = new btBoxShape(btVector3(btScalar(1.), btScalar(1.), btScalar(1.)));
     // Planes
-    collisionShapes["UNIT_X"] = new btStaticPlaneShape(btVector3(btScalar(1.),btScalar(0.),btScalar(0.)), btScalar(0.));
-    collisionShapes["NEGATIVE_UNIT_X"] = new btStaticPlaneShape(btVector3(btScalar(-1.),btScalar(0.),btScalar(0.)), btScalar(0.));
-    collisionShapes["UNIT_Y"] = new btStaticPlaneShape(btVector3(btScalar(0.),btScalar(1.),btScalar(0.)), btScalar(0.));
-    collisionShapes["NEGATIVE_UNIT_Y"] = new btStaticPlaneShape(btVector3(btScalar(0.),btScalar(-1.),btScalar(0.)), btScalar(0.));
-    collisionShapes["UNIT_Z"] = new btStaticPlaneShape(btVector3(btScalar(0.),btScalar(0.),btScalar(1.)), btScalar(0.));
-    collisionShapes["NEGATIVE_UNIT_Z"] = new btStaticPlaneShape(btVector3(btScalar(0.),btScalar(0.),btScalar(-1.)), btScalar(0.));
+    collisionShapes["UNIT_X"] = new btStaticPlaneShape(btVector3(btScalar(1.),btScalar(0.),btScalar(0.)), btScalar(1.));
+    collisionShapes["NEGATIVE_UNIT_X"] = new btStaticPlaneShape(btVector3(btScalar(-1.),btScalar(0.),btScalar(0.)), btScalar(1.));
+    collisionShapes["UNIT_Y"] = new btStaticPlaneShape(btVector3(btScalar(0.),btScalar(1.),btScalar(0.)), btScalar(1.));
+    collisionShapes["NEGATIVE_UNIT_Y"] = new btStaticPlaneShape(btVector3(btScalar(0.),btScalar(-1.),btScalar(0.)), btScalar(1.));
+    collisionShapes["UNIT_Z"] = new btStaticPlaneShape(btVector3(btScalar(0.),btScalar(0.),btScalar(1.)), btScalar(1.));
+    collisionShapes["NEGATIVE_UNIT_Z"] = new btStaticPlaneShape(btVector3(btScalar(0.),btScalar(0.),btScalar(-1.)), btScalar(1.));
     // Spheres
     for(int i = 1; i <= maxSphereSize; ++i) {
         std::ostringstream m;
