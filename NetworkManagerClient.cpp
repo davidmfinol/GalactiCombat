@@ -286,7 +286,39 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
                 spaceships.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
             }
         }
-        // TODO: WALLS AND BULLETS?
+
+        message = message.substr(message.find(",") + 1);
+        int bulletsAmount = atoi(message.substr(message.find(":") + 1, message.find(",")).c_str());
+        for (int i = 0; i < bulletsAmount; i++) {
+            message = message.substr(message.find(",") + 1);
+            std::string name = message.substr(0, message.find(","));
+            message = message.substr(message.find(",") + 1);
+            double pos_x = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double pos_y = atof(message.substr(0, message.find(",")).c_str());
+            message = message.substr(message.find(",") + 1);
+            double pos_z = atof(message.substr(0, message.find(",")).c_str());
+
+            // FIXME: THIS IS BAD, oh well
+            bool found = false;
+            for(int j = 0; j < bullets.size(); ++j)
+            {
+                //std::cout << "Checking to see if " << name << " already exists." << std::endl;
+                if(bullets[j]->getName() == name)
+                {
+                    //std::cout << "Exists." << std::endl;
+                    found = true;
+                    bullets[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                    break;
+                }
+            }
+            if(!found)
+            {
+                //std::cout << "Doesn't exist, create it." << std::endl;
+                bullets.push_back(new Bullet(name, sceneManager->getRootSceneNode(), NULL, pos_x, pos_y, pos_z));
+            }
+        }
+
     }
     free(out);
     free(incoming);
