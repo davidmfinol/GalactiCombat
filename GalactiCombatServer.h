@@ -30,7 +30,7 @@ public:
     std::vector<Client*> getClients();
     int findClientByName(std::string name);
     int findClientBySocket(TCPsocket sock);
-	int findClientByChannel(int channel);
+    int findClientByChannel(int channel);
     Client* addClient(TCPsocket sock, int channel, std::string name);
     void removeClient(int clientIndex);
     void sendToAll(char *buf, bool TCP);

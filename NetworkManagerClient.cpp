@@ -33,7 +33,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     }
     
     // Resolve the argument into an IPaddress type 
-    std::cout << "Connecting to " << host << " port " << port << std::endl;
+    //std::cout << "Connecting to " << host << " port " << port << std::endl;
     IPaddress ip;
     if(SDLNet_ResolveHost(&ip, host, port)==-1)
     {
@@ -43,7 +43,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     }
     
     // open the TCP socket
-    std::cout << "Opening server socket." << std::endl;
+    //std::cout << "Opening server socket." << std::endl;
     TCPServerSock = SDLNet_TCP_Open(&ip);
     if(!TCPServerSock)
     {
@@ -75,14 +75,14 @@ int NetworkManagerClient::connect(char *host, char *name)
         SDLNet_TCP_Close(TCPServerSock);
         exit(8);
     }
-    std::cout << "Sent " << out << std::endl;
+    //std::cout << "Sent " << out << std::endl;
     free(out);
     
     // store our connection info
     mName = name;
     serverIP = ip;
     connected = true;
-    std::cout << "Logged in as " << mName << std::endl;
+    //std::cout << "Logged in as " << mName << std::endl;
     //std::cout << "Exiting TCPConnect" << std::endl << std::endl;
 }
 
@@ -112,7 +112,7 @@ void NetworkManagerClient::quit()
     free(out);
 
     connected = false;
-    std::cout << "You have quit the game." << std::endl;
+    //std::cout << "You have quit the game." << std::endl;
     //std::cout << "Exiting quit" << std::endl << std::endl << std::endl;
 }
 
@@ -232,6 +232,7 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
             }
         }
 
+        message = message.substr(message.find(",") + 1);
         int spaceShipAmount = atoi(message.substr(message.find(":") + 1, message.find(",")).c_str());
 
         for (int i = 0; i < spaceShipAmount; i++) {
@@ -256,9 +257,12 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
             
             // FIXME: THIS IS BAD, oh well
             bool found = false;
+            std::cout << "Examining " << name << ". Our name is " << mName << std::endl;
             if(name == mName)
             {
+                std::cout << "Setting player at " << pos_x <<  " " << pos_y << " " << pos_z << std::endl;
                 spaceships[0]->getSceneNode()->getParentSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                std::cout << "With rotation " << rot_w <<  " " << rot_x << " " << rot_y << " " << rot_z << std::endl;
                 spaceships[0]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
                 continue;
             }

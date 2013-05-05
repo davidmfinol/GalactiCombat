@@ -478,7 +478,7 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
         Ogre::Quaternion rot = physicsSimulator->getGameObjectOrientation(spaceShips[in]);
         double size = spaceShips[in]->getSize();
         char buffer[100];
-        sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, rot.w, rot.x, rot.y, rot.z, size);
+        sprintf(buffer,"%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z, rot.w, rot.x, rot.y, rot.z, size);
         ss << buffer;
     }
 
@@ -521,7 +521,6 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     
     // clean-up
     free(outgoingMessage);
-
     free(packetMessage);
     if(verbose) std::cout << "Exiting receiveStatePacket" << std::endl << std::endl;
 }
