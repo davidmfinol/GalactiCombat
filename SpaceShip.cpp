@@ -8,14 +8,14 @@ const double SpaceShip::MIN_ENERGY = 0;
 const double SpaceShip::MAX_ENERGY = 100;
 
 //-------------------------------------------------------------------------------------
-SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x, int y, int z, double s, Ogre::Camera* cam)
-: brain(controller), camera(cam), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, entity, x, y, z, s)
+SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x, int y, int z, double s)
+: brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, entity, x, y, z, s)
 {
     setupSpaceShip();
 }
 //-------------------------------------------------------------------------------------
-SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x, int y, int z, double s, Ogre::Camera* cam)
-: brain(controller), camera(cam), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, "sphere.mesh", true, x, y, z, s)
+SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x, int y, int z, double s)
+: brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, "sphere.mesh", true, x, y, z, s)
 {
     setupSpaceShip();
 }
@@ -33,30 +33,29 @@ void SpaceShip::setupSpaceShip(void)
     std::ostringstream m;
     m << "Sphere" << (int)size;
     mShapeName = m.str();
-    
-    // attach a camera to the spaceship
-    if (camera) {
-        //Ogre::SceneNode* camPitchNode = mNode->createChildSceneNode("CameraPitchNode"); // Traditional Camera
-        Ogre::SceneNode* camPitchNode = mNode; // Rolling Camera
-        camPitchNode->attachObject(camera);
-        // create point light
-        Ogre::Light* pointLight = mNode->getCreator()->createLight(mName + "pointLight");
-        pointLight->setType(Ogre::Light::LT_POINT);
-        pointLight->setPosition(Ogre::Vector3(1, 1, 1));
-        pointLight->setDiffuseColour(0.4, 0.6, 0.8);
-        pointLight->setSpecularColour(0.4, 0.6, 0.8);
-        // create spot light
-        Ogre::Light* spotLight = mNode->getCreator()->createLight(mName + "spotLight");
-        spotLight->setType(Ogre::Light::LT_SPOTLIGHT);
-        spotLight->setDiffuseColour(1.0, 1.0, 1.0);
-        spotLight->setSpecularColour(1.0, 1.0, 1.0);
-        spotLight->setDirection(0, 0, -1);
-        spotLight->setPosition(Ogre::Vector3(0, -10, 100));
-        spotLight->setSpotlightRange(Ogre::Degree(35), Ogre::Degree(50));
-        // create special light effects on the spaceship
-        camPitchNode->attachObject(pointLight);
-        camPitchNode->attachObject(spotLight);
-    }
+}
+void SpaceShip::attachCamera(Ogre::Camera* camera)
+{
+    //Ogre::SceneNode* camPitchNode = mNode->createChildSceneNode("CameraPitchNode"); // Traditional Camera
+    Ogre::SceneNode* camPitchNode = mNode; // Rolling Camera
+    camPitchNode->attachObject(camera);
+    // create point light
+    Ogre::Light* pointLight = mNode->getCreator()->createLight(mName + "pointLight");
+    pointLight->setType(Ogre::Light::LT_POINT);
+    pointLight->setPosition(Ogre::Vector3(1, 1, 1));
+    pointLight->setDiffuseColour(0.4, 0.6, 0.8);
+    pointLight->setSpecularColour(0.4, 0.6, 0.8);
+    // create spot light
+    Ogre::Light* spotLight = mNode->getCreator()->createLight(mName + "spotLight");
+    spotLight->setType(Ogre::Light::LT_SPOTLIGHT);
+    spotLight->setDiffuseColour(1.0, 1.0, 1.0);
+    spotLight->setSpecularColour(1.0, 1.0, 1.0);
+    spotLight->setDirection(0, 0, -1);
+    spotLight->setPosition(Ogre::Vector3(0, -10, 100));
+    spotLight->setSpotlightRange(Ogre::Degree(35), Ogre::Degree(50));
+    // create special light effects on the spaceship
+    camPitchNode->attachObject(pointLight);
+    camPitchNode->attachObject(spotLight);
 }
 //-------------------------------------------------------------------------------------
 ISpaceShipController* SpaceShip::getController() const 

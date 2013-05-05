@@ -13,7 +13,7 @@ struct Client{
     TCPsocket sock;
     int channel;
     std::string name;
-    ClientSpaceShipController* inputController;
+    SpaceShip* ship;
     bool ready;
 };
 typedef struct Client Client; // allows Client struct to be used in C
@@ -55,8 +55,9 @@ private:
     void receiveConnectionPacket(int clientIndex, Packet& incoming);
     void receiveStatePacket(int clientIndex, Packet& incoming);
     void receivePlayerInputPacket(int clientIndex, Packet& incoming);
-    void receiveScorePacket(int clientIndex, Packet& incoming);
+    void receivePlayerRotatePacket(int clientIndex, Packet& incoming);
     void receiveReadyPacket(int clientIndex, Packet& incoming);
+    void receiveScorePacket(int clientIndex, Packet& incoming);
     
 };
 #endif //#ifndef __GalactiCombatServer_h_
