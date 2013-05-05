@@ -104,24 +104,12 @@ void NetworkManagerClient::quit()
 {
     //std::cout << "Entering quit" << std::endl << std::endl << std::endl;
     Packet outgoing;
-
     outgoing.type = CONNECTION;
     outgoing.message = const_cast<char*>("QUIT");
+
     char* out = NetworkUtil::PacketToCharArray(outgoing);
     while(!NetworkUtil::TCPSend(TCPServerSock, out)); // FIXME: what if server crashed?
     free(out);
-
-/*	//FIXME: Server doesn't receive any UDP packets.
-    UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
-    if(!UDPPack) return;
-
-	char *msg = NetworkUtil::PacketToCharArray(outgoing);
-    UDPPack->data = (Uint8*)msg;
-    UDPPack->len = strlen(msg) + 1;
-    UDPPack->address = serverIP;
-    NetworkUtil::UDPSend(UDPServerSock, -1, UDPPack);
-    SDLNet_FreePacket(UDPPack);
-*/
 
     connected = false;
     std::cout << "You have quit the game." << std::endl;
@@ -151,12 +139,11 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     
     outgoing.type = PLAYERINPUT;
     outgoing.message = &result;
-    
     char* out = NetworkUtil::PacketToCharArray(outgoing);
-    NetworkUtil::TCPSend(TCPServerSock, out);
-    free(out);
 
-/*	//FIXME: Server doesn't receive any UDP packets.
+    NetworkUtil::TCPSend(TCPServerSock, out);
+
+/*	//TODO: Use TCP to send input instead?
     UDPpacket *UDPPack = NetworkUtil::AllocPacket(sizeof(int)+1);
     if(!UDPPack) return;
 
@@ -167,6 +154,7 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
 	std::cout << "UDPSend player input." << std::endl;
     SDLNet_FreePacket(UDPPack);
 */
+    free(out);
     //std::cout << "Exiting sendPlayerInput" << std::endl << std::endl;
 }
 
@@ -181,6 +169,20 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
     char* incoming = NULL;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
 
+	//TODO: Use TCP to send request, but use UDP to receive data
+/*	//FIXME: Fix the other UDP bugs first.
+	UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
+	if(!UDPPack) return;
+
+	if(NetworkUtil::UDPReceive(UDPServerSock, UDPPack) > 0)
+	{
+		std::cout << "Received UDP Packet." << std::endl;
+		infoPacket = NetworkUtil::charArrayToPacket((char*)UDPPack->data);
+		SDLNet_FreePacket(UDPPack);
+	}
+	else
+		return;
+*/
     std::cout << "About to request and receive data" << std::endl << std::endl;
     if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
         infoPacket = NetworkUtil::charArrayToPacket(incoming);
@@ -304,19 +306,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
     free(out);
     free(incoming);
 
-/*	//FIXME: Fix the other UDP bugs first.
-	UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
-	if(!UDPPack) return;
-
-	if(NetworkUtil::UDPReceive(UDPServerSock, UDPPack) > 0)
-	{
-		std::cout << "Received UDP Packet." << std::endl;
-		infoPacket = NetworkUtil::charArrayToPacket((char*)UDPPack->data);
-		SDLNet_FreePacket(UDPPack);
-	}
-	else
-		return;
-*/
 
     //std::cout << "Exiting receiveData" << std::endl << std::endl;
 }
