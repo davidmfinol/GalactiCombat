@@ -68,7 +68,7 @@ Client* GalactiCombatServer::addClient(TCPsocket sock, int channel, std::string 
     
     double pos_x = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
     double pos_z = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
-    double pos_y = (std::rand() % (ROOM_HIGH - 500)) + 250;
+    double pos_y = (std::rand() % (ROOM_SIZE - 500)) + 250;
     spaceShips.push_back(new SpaceShip(name, clients.back()->inputController,
                                        mSceneMgr->getRootSceneNode(), NULL, pos_x, pos_y, pos_z, 30 ));
     physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, true);
@@ -172,7 +172,7 @@ void GalactiCombatServer::createServerMinerals()
         o << "ServerMineral" << i;
         pos_x = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
         pos_z = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1);
-        pos_y = (std::rand() % (ROOM_HIGH - 500)) + 250;
+        pos_y = (std::rand() % (ROOM_SIZE - 500)) + 250;
         radius = (std::rand() % (Mineral::MAX_RADIUS - Mineral::MIN_RADIUS + 1)) + Mineral::MIN_RADIUS;
         vel_x = ((std::rand() % 400) + 600) * (std::rand() % 2 == 0 ? 1 : -1);
         vel_y = ((std::rand() % 400) + 600) * (std::rand() % 2 == 0 ? 1 : -1);
@@ -192,23 +192,23 @@ void GalactiCombatServer::createServerRoom()
     physicsSimulator->addGameObject(walls[0]);
     
     // create ceiling
-    walls[1] = new GameObject ("ceiling", mSceneMgr->getRootSceneNode(), NULL, 0, ROOM_HIGH, 0, 0, "NEGATIVE_UNIT_Y");
+    walls[1] = new GameObject ("ceiling", mSceneMgr->getRootSceneNode(), NULL, 0, ROOM_SIZE, 0, 0, "NEGATIVE_UNIT_Y");
     physicsSimulator->addGameObject(walls[1]);
     
     // create front wall
-    walls[2] = new GameObject ("front", mSceneMgr->getRootSceneNode(), NULL, ROOM_SIZE/2, ROOM_HIGH/2, 0, 0, "NEGATIVE_UNIT_X");
+    walls[2] = new GameObject ("front", mSceneMgr->getRootSceneNode(), NULL, ROOM_SIZE/2, ROOM_SIZE/2, 0, 0, "NEGATIVE_UNIT_X");
     physicsSimulator->addGameObject(walls[2]);
     
     // create back wall
-    walls[3] = new GameObject ("back", mSceneMgr->getRootSceneNode(), NULL, -ROOM_SIZE/2, ROOM_HIGH/2, 0, 0, "UNIT_X");
+    walls[3] = new GameObject ("back", mSceneMgr->getRootSceneNode(), NULL, -ROOM_SIZE/2, ROOM_SIZE/2, 0, 0, "UNIT_X");
     physicsSimulator->addGameObject(walls[3]);
     
     // create left wall
-    walls[4] = new GameObject ("left", mSceneMgr->getRootSceneNode(), NULL, 0, ROOM_HIGH/2, -ROOM_SIZE/2, 0, "UNIT_Z");
+    walls[4] = new GameObject ("left", mSceneMgr->getRootSceneNode(), NULL, 0, ROOM_SIZE/2, -ROOM_SIZE/2, 0, "UNIT_Z");
     physicsSimulator->addGameObject(walls[4]);
     
     // create right wall
-    walls[5] = new GameObject ("right", mSceneMgr->getRootSceneNode(), NULL, 0, ROOM_HIGH/2, ROOM_SIZE/2, 0, "NEGATIVE_UNIT_Z");
+    walls[5] = new GameObject ("right", mSceneMgr->getRootSceneNode(), NULL, 0, ROOM_SIZE/2, ROOM_SIZE/2, 0, "NEGATIVE_UNIT_Z");
     physicsSimulator->addGameObject(walls[5]);
     if(verbose) std::cout << "Exiting createServerRoom" << std::endl << std::endl;
 }

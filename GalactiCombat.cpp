@@ -94,7 +94,7 @@ void GalactiCombat::createMinerals(void)
         o << "Mineral" << i;
         pos_x = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1); 
         pos_z = (std::rand() % (ROOM_SIZE/2 - 250)) * (std::rand() % 2 == 0 ? 1 : -1); 
-        pos_y = (std::rand() % (ROOM_HIGH - 500)) + 250; 
+        pos_y = (std::rand() % (ROOM_SIZE - 500)) + 250; 
         radius = (std::rand() % (Mineral::MAX_RADIUS/2 - Mineral::MIN_RADIUS+ 1)) + Mineral::MIN_RADIUS; 
         vel_x = (std::rand() % 10) * (std::rand() % 2 == 0 ? 1 : -1); 
         vel_y = (std::rand() % 5) * (std::rand() % 2 == 0 ? 1 : -1); 
@@ -131,43 +131,43 @@ void GalactiCombat::createRoom(void)
     Ogre::Entity* entCeiling = mSceneMgr->createEntity("CeilingEntity", "ceiling");
     entCeiling->setMaterialName("Examples/WaterStream");
     entCeiling->setCastShadows(false);
-    walls[1] = new GameObject ("ceiling", mSceneMgr->getRootSceneNode(), entCeiling, 0, ROOM_HIGH, 0, 0, "NEGATIVE_UNIT_Y");
+    walls[1] = new GameObject ("ceiling", mSceneMgr->getRootSceneNode(), entCeiling, 0, ROOM_SIZE, 0, 0, "NEGATIVE_UNIT_Y");
     physicsSimulator->addGameObject(walls[1]);
     
     // create front wall
     Ogre::MeshManager::getSingleton().createPlane("front", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                  front, ROOM_HIGH, ROOM_SIZE, 20, 20, true, 1, ROOM_HIGH/300, ROOM_SIZE/300, Ogre::Vector3::UNIT_Z); 
+                                                  front, ROOM_SIZE, ROOM_SIZE, 20, 20, true, 1, ROOM_SIZE/300, ROOM_SIZE/300, Ogre::Vector3::UNIT_Z); 
     Ogre::Entity* entFront = mSceneMgr->createEntity("frontEntity", "front");
     entFront->setMaterialName("Examples/WaterStream");
     entFront->setCastShadows(false);
-    walls[2] = new GameObject ("front", mSceneMgr->getRootSceneNode(), entFront, ROOM_SIZE/2, ROOM_HIGH/2, 0, 0, "NEGATIVE_UNIT_X");
+    walls[2] = new GameObject ("front", mSceneMgr->getRootSceneNode(), entFront, ROOM_SIZE/2, ROOM_SIZE/2, 0, 0, "NEGATIVE_UNIT_X");
     physicsSimulator->addGameObject(walls[2]);
     
     // create back wall
     Ogre::MeshManager::getSingleton().createPlane("back", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                  back, ROOM_HIGH, ROOM_SIZE, 20, 20, true, 1, ROOM_HIGH/300, ROOM_HIGH/300, Ogre::Vector3::UNIT_Z); 
+                                                  back, ROOM_SIZE, ROOM_SIZE, 20, 20, true, 1, ROOM_SIZE/300, ROOM_SIZE/300, Ogre::Vector3::UNIT_Z); 
     Ogre::Entity* entBack = mSceneMgr->createEntity("backEntity", "back");
     entBack->setMaterialName("Examples/WaterStream");
     entBack->setCastShadows(false);
-    walls[3] = new GameObject ("back", mSceneMgr->getRootSceneNode(), entBack, -ROOM_SIZE/2, ROOM_HIGH/2, 0, 0, "UNIT_X");
+    walls[3] = new GameObject ("back", mSceneMgr->getRootSceneNode(), entBack, -ROOM_SIZE/2, ROOM_SIZE/2, 0, 0, "UNIT_X");
     physicsSimulator->addGameObject(walls[3]);
     
     // create left wall
     Ogre::MeshManager::getSingleton().createPlane("left", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                  left, ROOM_HIGH, ROOM_SIZE, 20, 20, true, 1, ROOM_HIGH/300, ROOM_SIZE/300, Ogre::Vector3::UNIT_X); 
+                                                  left, ROOM_SIZE, ROOM_SIZE, 20, 20, true, 1, ROOM_SIZE/300, ROOM_SIZE/300, Ogre::Vector3::UNIT_X); 
     Ogre::Entity* entLeft = mSceneMgr->createEntity("leftEntity", "left");
     entLeft->setMaterialName("Examples/WaterStream");
     entLeft->setCastShadows(false);
-    walls[4] = new GameObject ("left", mSceneMgr->getRootSceneNode(), entLeft, 0, ROOM_HIGH/2, -ROOM_SIZE/2, 0, "UNIT_Z");
+    walls[4] = new GameObject ("left", mSceneMgr->getRootSceneNode(), entLeft, 0, ROOM_SIZE/2, -ROOM_SIZE/2, 0, "UNIT_Z");
     physicsSimulator->addGameObject(walls[4]);
     
     // create right wall
     Ogre::MeshManager::getSingleton().createPlane("right", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                  right, ROOM_HIGH, ROOM_SIZE, 20, 20, true, 1, ROOM_HIGH/300, ROOM_SIZE/300, Ogre::Vector3::UNIT_X); 
+                                                  right, ROOM_SIZE, ROOM_SIZE, 20, 20, true, 1, ROOM_SIZE/300, ROOM_SIZE/300, Ogre::Vector3::UNIT_X); 
     Ogre::Entity* entRight = mSceneMgr->createEntity("rightEntity", "right");
     entRight->setMaterialName("Examples/WaterStream");
     entRight->setCastShadows(false);
-    walls[5] = new GameObject ("right", mSceneMgr->getRootSceneNode(), entRight, 0, ROOM_HIGH/2, ROOM_SIZE/2, 0, "NEGATIVE_UNIT_Z");
+    walls[5] = new GameObject ("right", mSceneMgr->getRootSceneNode(), entRight, 0, ROOM_SIZE/2, ROOM_SIZE/2, 0, "NEGATIVE_UNIT_Z");
     physicsSimulator->addGameObject(walls[5]);
 }
 //-------------------------------------------------------------------------------------

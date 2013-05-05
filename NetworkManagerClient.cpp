@@ -108,7 +108,7 @@ void NetworkManagerClient::quit()
     outgoing.message = const_cast<char*>("QUIT");
 
     char* out = NetworkUtil::PacketToCharArray(outgoing);
-	NetworkUtil::TCPSend(TCPServerSock, out); // FIXME: what if server crashed?
+    NetworkUtil::TCPSend(TCPServerSock, out);
     free(out);
 
     connected = false;
