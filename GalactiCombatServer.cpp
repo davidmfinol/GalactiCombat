@@ -24,24 +24,37 @@ std::vector<Client*> GalactiCombatServer::getClients()
     return clients;
 }
 //-------------------------------------------------------------------------------------
-Client* GalactiCombatServer::findClientBySocket(TCPsocket sock)
+int GalactiCombatServer::findClientBySocket(TCPsocket sock)
 {
-    for(int i = 0; i < clients.size(); i++)
+	int i;
+    for(i = 0; i < clients.size(); i++)
         if(clients[i]->sock == sock)
-            return clients[i];
+            return i;
     std::cerr << "Failed to find with findClientBySocket" << std::endl << std::endl;
-    return 0;
+    return -1;
 }
 //-------------------------------------------------------------------------------------
-Client* GalactiCombatServer::findClientByName(std::string name)
+int GalactiCombatServer::findClientByName(std::string name)
 {
-    for(int i = 0; i < clients.size(); i++)
+	int i;
+    for(i = 0; i < clients.size(); i++)
         if(clients[i]->name == name)
-            return clients[i];
+            return i;
     std::cerr << "Failed to find with findClientByName - " << name << std::endl << std::endl;
-    return 0;
+    return -1;
 }
 //-------------------------------------------------------------------------------------
+
+int GalactiCombatServer::findClientByChannel(int channel)
+{
+	int i;
+    for(i = 0; i < clients.size(); i++)
+        if(clients[i]->channel == channel)
+            return i;
+    std::cerr << "Failed to find with findClientByChannel - "<<channel<<std::endl<<std::endl;
+    return -1;
+}
+
 Client* GalactiCombatServer::addClient(TCPsocket sock, int channel, std::string name)
 {
     if(verbose) std::cout << "Entering addClient - " << name << std::endl;
@@ -142,6 +155,7 @@ SDLNet_SocketSet GalactiCombatServer::createSockSet()
     SDLNet_TCP_AddSocket(set, TCPServerSock);
     for(int i = 0; i < clients.size(); i++)
         SDLNet_TCP_AddSocket(set, clients[i]->sock);
+//	SDLNet_UDP_AddSocket(set, UDPServerSock);	//FIXME: Game hangs on login
     
     if(verbose) std::cout << "Exiting createSockSet" << std::endl << std::endl;
     return set;
@@ -241,6 +255,7 @@ void GalactiCombatServer::startServer(long portNo)
     if(verbose) std::cout << "Host: " << host << std::endl;
     
     if(verbose) std::cout << "Exiting startServer" << std::endl << std::endl;
+	std::cout<<"Ready!"<<std::endl;
     serverLoop();
 }
 //-------------------------------------------------------------------------------------
@@ -311,6 +326,13 @@ void GalactiCombatServer::serverLoop(void)
                 //this->removeClient(i);
             }
         }
+/*		//UDP messages
+		for(int i = 0; i < clients.size(); i++)
+		{
+			if(verbose) std::cout<<"Checking for UDP messages."<<std::endl;
+			this->receiveData(-1);
+		}
+*/
     }
     if(verbose) std::cout << "Exiting serverLoop" << std::endl << std::endl;
 }
@@ -334,12 +356,8 @@ void GalactiCombatServer::listenForConnections()
             
             //bind UDP
             IPaddress *clientIP = SDLNet_TCP_GetPeerAddress(TCPsock);
-            int channel = SDLNet_UDP_Bind(UDPServerSock, -1, clientIP);
-            if(channel == -1)
-            {
-                std::cerr << "SDLNet_UDP_Bind done goofed: " << SDLNet_GetError() << std::endl;
-                exit(4);
-            }
+            int channel = NetworkUtil::UDPBind(UDPServerSock, -1, clientIP);
+            if(channel == -1) exit(4);	//error has occurred
             
             //add the client
             std::string name = pack.message;
@@ -368,33 +386,36 @@ void GalactiCombatServer::receiveData(int clientIndex)
     incoming.message = NULL;
     
 /*	//FIXME: Not receiving client's UDP packets.
-    UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
-    if(!UDPPack)
-    {
-            std::cerr << "SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
-            return;
-    }
-
-    //receive data from a socket, depending on the transport protocol being used
-    if(NetworkUtil::UDPReceive(UDPServerSock, UDPPack) > 0)
-    {
-            if(verbose) std::cout << "Received UDP packet from client " << clients[clientIndex]->name << std::endl;
-            incoming = NetworkUtil::charArrayToPacket((char*)UDPPack->data);
-			SDLNet_FreePacket(UDPPack);
-    }
-
-    else if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
+	if(clientIndex == -1)
+	{
+	    UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
+	    if(!UDPPack) return;
+		int received = NetworkUtil::UDPReceive(UDPServerSock, UDPPack);
+	    //receive data from a socket, depending on the transport protocol being used
+	    if(received > 0)
+	    {
+	            incoming = NetworkUtil::charArrayToPacket((char*)UDPPack->data);
+				int channel = UDPPack->channel;
+				clientIndex = this->findClientByChannel(channel);
+				std::cout<<"Received UDP message from "<<clients[clientIndex]->name<<": "<<incoming.message<<std::endl;
+				SDLNet_FreePacket(UDPPack);
+	    }
+		else
+			return;
+	}
+	else
+	{
 */
-    if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
-    {
-        incoming = NetworkUtil::charArrayToPacket(msg);
-        if(verbose) std::cout << "Received TCP message from " << clients[clientIndex]->name << ": " << msg << std::endl;
-        free(msg);
-        msg = NULL;
-    }
-    else
-        if(verbose) std::cout << "Did not receive TCP message from " << clients[clientIndex]->name << std::endl;
-
+	    if(NetworkUtil::TCPReceive(clients[clientIndex]->sock, &msg))
+	    {
+        	incoming = NetworkUtil::charArrayToPacket(msg);
+	        if(verbose) std::cout << "Received TCP message from " << clients[clientIndex]->name << ": " << msg << std::endl;
+	        free(msg);
+	        msg = NULL;
+    	}
+	    else
+	        if(verbose) std::cout << "Did not receive TCP message from " << clients[clientIndex]->name << std::endl;
+//	}
     //process the received message
     switch(incoming.type)
     {
@@ -468,13 +489,10 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     
     if(verbose) std::cout << "The state info is:             " << outgoing.message << std::endl;
 
-/*	FIXME: Still workin on it
-	UDPpacket *UDPPack = SDLNet_AllocPacket(65535);
-	if(!UDPPack)
-	{
-		if(verbose) std::cout<<"SDLNet_AllocPacket done goofed: " << SDLNet_GetError() << std::endl;
-		return;
-	}
+/*	//FIXME: Still workin on it
+
+	UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
+	if(!UDPPack) return;
 
 	char *msg = NetworkUtil::PacketToCharArray(outgoing);
 	UDPPack->data = (Uint8*)msg;
@@ -493,6 +511,7 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     
     // clean-up
     free(outgoingMessage);
+
     free(packetMessage);
     if(verbose) std::cout << "Exiting receiveStatePacket" << std::endl << std::endl;
 }
@@ -578,8 +597,20 @@ extern "C" {
         bool verbose = false;
         if(argc > 1)
         {
-            verbose = true;
-            std::cout << "Verbose Enabled" << std::endl;
+            if(strcmp(argv[1],"-v") || strcmp(argv[1],"--verbose"))
+			{
+				verbose = true;
+	            std::cout << "Verbose Enabled" << std::endl;
+			}
+			/*//TODO: Execution never reaches here.
+			else if(strcmp(argv[1],"-h") || strcmp(argv[1],"--help"))
+			{
+				std::cout<<std::endl<<"Usage: ./GalactiCombatServer [OPTION]"<<std::endl;
+				std::cout<<"  -h, --help       display this help text"<<std::endl;
+				std::cout<<"  -v, --verbose    print debug statements"<<std::endl;
+				return 0;
+			}
+			*/
         }
         GalactiCombatServer *server = new GalactiCombatServer(verbose);
         server->startServer(TCP_PORT);

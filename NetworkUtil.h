@@ -198,7 +198,7 @@ namespace NetworkUtil {
         result=SDLNet_TCP_Send(sock,&len,sizeof(len));
         
         if(result<sizeof(len)) {
-            std::cerr << "SDLNet_TCP_Send done goofed2:" << std::endl;
+            std::cerr << "SDLNet_TCP_Send done goofed: " << std::endl;
             if(SDLNet_GetError() && strlen(SDLNet_GetError())) // sometimes blank!
                 std::cerr << "\t- " << SDLNet_GetError() << std::endl;
             return(0);
@@ -211,7 +211,7 @@ namespace NetworkUtil {
         result=SDLNet_TCP_Send(sock,buf,len);
         
         if(result<len) {
-            std::cerr << "SDLNet_TCP_Send done goofed2:" << std::endl;
+            std::cerr << "SDLNet_TCP_Send done goofed: " << std::endl;
             if(SDLNet_GetError() && strlen(SDLNet_GetError())) // sometimes blank!
                 std::cerr << "\t- " << SDLNet_GetError() << std::endl;
             return(0);
@@ -236,10 +236,7 @@ namespace NetworkUtil {
         //std::cout << "Entering UDPSend" << std::endl;
         int numSent = SDLNet_UDP_Send(sock, channel, outgoing);
         if(!numSent)
-        {
             std::cerr << "SDLNet_UDP_Send done goofed: " << SDLNet_GetError() << std::endl;
-            exit(4);
-        }
         //std::cout << "Exiting UDPSend" << std::endl;
         return numSent;
     }
@@ -256,17 +253,25 @@ namespace NetworkUtil {
         //std::cout << "Entering UDPReceive" << std::endl;
         int received = SDLNet_UDP_Recv(sock, in);
         if(received < 0)
-        {
             std::cerr << "SDLNet_UDP_Recv done goofed: " << SDLNet_GetError() << std::endl;
-            exit(4);
-        }
-        if(received == 0)
-        {
-            std::cout << "UDPReceive: No packets received." << std::endl;
-        }
         //std::cout << "Exiting UDPReceive" << std::endl;
         return received;
     }
+
+	static UDPpacket *AllocPacket(int size)
+	{
+		UDPpacket *UDPpack = SDLNet_AllocPacket(size);
+		if(!UDPpack)
+			std::cerr<<"SDLNet_AllocPack done goofed: "<<SDLNet_GetError()<<std::endl;
+		return UDPpack;
+	}
+	static int UDPBind(UDPsocket sock, int channel, IPaddress *address)
+	{
+		int result = SDLNet_UDP_Bind(sock, channel, address);
+		if (result < 0)
+			std::cerr<<"SDLNet_UDP_Bind done goofed: "<<SDLNet_GetError()<<std::endl;
+		return result;
+	}
 }
 
 #endif //#ifndef __NetworkUtil_h
