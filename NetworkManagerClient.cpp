@@ -337,14 +337,28 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
                     //std::cout << "Exists." << std::endl;
                     found = true;
                     bullets[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                    //bullets[j]->setExist(true);
                     break;
                 }
             }
             if(!found)
             {
                 //std::cout << "Doesn't exist, create it." << std::endl;
-                bullets.push_back(new Bullet(name, sceneManager->getRootSceneNode(), NULL, pos_x, pos_y, pos_z));
+                Bullet* newBullet = new Bullet(name, sceneManager->getRootSceneNode(), NULL, pos_x, pos_y, pos_z);		
+                //newBullet->setExist(true);
+                bullets.push_back(newBullet);
             }
+            /*
+            for(std::deque<Bullet*>::iterator it = bullets.begin(); it!=bullets.end(); ++it)
+            {
+                if(!(*it)->getExist())
+                {
+                    delete *it;
+                    bullets.erase(it);
+                    break;
+                }
+            }
+            */
         }
 
     }
