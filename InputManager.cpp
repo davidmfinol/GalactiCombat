@@ -280,12 +280,17 @@ bool InputManager::mouseMoved( const OIS::MouseEvent &arg )
 {
     mGUIMgr->getTrayMgr()->injectMouseMove(arg);
     
-    if (!(mGUIMgr->isMainMenuOpened() || mGUIMgr->isWelcomeState() || mGUIMgr->isGameOver()))
+    float yaw = CAMERA_YAW * arg.state.X.rel;
+    float pitch = CAMERA_PITCH * arg.state.Y.rel;
+    
+    if(mNetworkMgr->isOnline())
+        mNetworkMgr->sendPlayerRotate(yaw, pitch);
+    else if (!(mGUIMgr->isMainMenuOpened() || mGUIMgr->isWelcomeState() || mGUIMgr->isGameOver()))
     {
         if(mCameraHorizontal) 
-            mCameraHorizontal->yaw(Ogre::Degree(CAMERA_YAW * arg.state.X.rel));
+            mCameraHorizontal->yaw(Ogre::Degree(yaw));
         if(mCameraVertical) 
-            mCameraVertical->pitch(Ogre::Degree(CAMERA_PITCH * arg.state.Y.rel), Ogre::Node::TS_LOCAL);
+            mCameraVertical->pitch(Ogre::Degree(pitch), Ogre::Node::TS_LOCAL);
     }
     
     return true;

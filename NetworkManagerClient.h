@@ -41,6 +41,7 @@ public:
     
     // Game Logic Transaction
     void sendPlayerInput(ISpaceShipController* controller);
+    void sendPlayerRotate(float yaw, float pitch);
     void receiveData(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&);
     
 protected:
