@@ -36,19 +36,17 @@ int NetworkManagerClient::connect(char *host, char *name)
     // Resolve the argument into an IPaddress type 
     //std::cout << "Connecting to " << host << " port " << port << std::endl;
     IPaddress ip;
-    if(SDLNet_ResolveHost(&ip, host, port)==-1)
+    if(NetworkUtil::ResolveHost(&ip, host, port)==-1)
     {
-        std::cerr << "SDLNet_ResolveHost done goofed: " << SDLNet_GetError() << std::endl;
         std::string exception = "fail_to_connect";
         throw exception;
     }
     
     // open the TCP socket
     //std::cout << "Opening TCP server socket." << std::endl;
-    TCPServerSock = SDLNet_TCP_Open(&ip);
+    TCPServerSock = NetworkUtil::TCPOpen(&ip);
     if(!TCPServerSock)
     {
-        std::cerr << "SDLNet_TCP_Open done goofed: " << SDLNet_GetError() << std::endl;
         SDLNet_Quit();
         SDL_Quit();
         std::string exception = "fail_to_connect";
@@ -57,10 +55,9 @@ int NetworkManagerClient::connect(char *host, char *name)
     
     // open the UDP socket
     //std::cout << "Opening UDP server socket." << std::endl;
-    UDPServerSock = SDLNet_UDP_Open(0);
+    UDPServerSock = NetworkUtil::UDPOpen(0);
     if(!UDPServerSock)
     {
-        std::cerr << "SDLNet_UDP_Open done goofed: " << SDLNet_GetError() << std::endl;
         SDLNet_Quit();
         SDL_Quit();
         std::string exception = "fail_to_connect";

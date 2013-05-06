@@ -220,25 +220,13 @@ void GalactiCombatServer::startServer(long portNo)
     
     isServer = true;
     
-    if(SDLNet_ResolveHost(&ip, NULL, port) == -1)
-    {
-        std::cerr << "SDLNet_ResolveHost done goofed: " << SDLNet_GetError() << std::endl;
-        exit(3);
-    }
+    if(NetworkUtil::ResolveHost(&ip, NULL, port)==-1) exit(3);
     
-    TCPServerSock = SDLNet_TCP_Open(&ip);
-    if(!TCPServerSock)
-    {
-        std::cerr << "SDLNet_TCP_Open done goofed: " << SDLNet_GetError() << std::endl;
-        exit(4);
-    }
+    TCPServerSock = NetworkUtil::TCPOpen(&ip);
+    if(!TCPServerSock) exit(4);
     
-    UDPServerSock = SDLNet_UDP_Open(0);
-    if(!UDPServerSock)
-    {
-        std::cerr << "SDLNet_UDP_Open done goofed: " << SDLNet_GetError() << std::endl;
-        exit(4);
-    }
+	UDPServerSock = NetworkUtil::UDPOpen(0);
+    if(!UDPServerSock) exit(4);
     
     //set up the game environment
     if(verbose) std::cout << "Setting up game...." << std::endl;
@@ -292,15 +280,10 @@ void GalactiCombatServer::serverLoop(void)
         if(verbose) std::cout << "Getting SocketSet." << std::endl;
         SDLNet_SocketSet set = this->createSockSet();
         if(verbose) std::cout << "Checking Number of Sockets Ready..." << std::endl;
-        int numReady = SDLNet_CheckSockets(set, (Uint32) - 1); //NOTE: This will block until there is some network activity.
+        int numReady = NetworkUtil::CheckSockets(set, (Uint32) - 1); //NOTE: This will block until there is some network activity.
         if(verbose) std::cout << "Number of Sockets Ready: " << numReady << std::endl;
-        if(numReady == -1)
-        {
-            std::cerr << "SDLNet_CheckSockets done goofed: " << SDLNet_GetError() << std::endl;
-            break;
-        }
-        if(!numReady)
-            continue;
+        if(numReady == -1) break;
+        if(!numReady) continue;
         
         //listen for new connections
         if(verbose) std::cout << "Checking this server's socket." << std::endl;

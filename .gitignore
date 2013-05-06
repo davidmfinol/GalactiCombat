@@ -59,6 +59,7 @@ stamp-h1
 *.swp
 
 # Visual Studio files
+*.opensdf
 *.sdf
 *.sln
 *.suo

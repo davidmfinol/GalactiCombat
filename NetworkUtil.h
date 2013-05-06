@@ -221,10 +221,9 @@ namespace NetworkUtil {
     
 
     /*
-    *           UDPSend(UDPsocket, UDPpacket*):
+    *           UDPSend(UDPsocket, int, UDPpacket*):
     *           Wrapper function for SDLNet_UDP_Send. If using channels, ensure that the
     *           UDPpacket argument has that information in the "channel" field.
-    *
     *           -sock: The UDPsocket to send the packet through.
     *           -channel: The socket's channel to send through. Use -1 if not using channels.
     *           -outgoing: The UDPpacket to send.
@@ -242,7 +241,6 @@ namespace NetworkUtil {
     /*
     *           UDPReceive(UDPsocket, UDPpacket, Uint32, Uint8, int):
     *           Wrapper function for SDLNet_UDP_Recv.
-    *
     *           -sock: The UDPsocket to listen on.
     *           -in: The incoming UDPpacket.
     */
@@ -274,6 +272,38 @@ namespace NetworkUtil {
         //std::cout << "Exiting UDPBind" << std::endl;
         return result;
     }
+
+	static int ResolveHost(IPaddress *address, char *host, Uint16 port)
+	{
+		int result = SDLNet_ResolveHost(address, host, port);
+		if(result == -1)
+			std::cerr<<"SDLNet_ResolveHost done goofed: "<<SDLNet_GetError()<<std::endl;
+		return result;
+	}
+
+	static TCPsocket TCPOpen(IPaddress *ip)
+	{
+		TCPsocket result = SDLNet_TCP_Open(ip);
+		if(!result)
+			std::cerr<<"SDLNet_TCP_Open done goofed: "<<SDLNet_GetError()<<std::endl;
+		return result;
+	}
+
+	static UDPsocket UDPOpen(Uint16 port)
+	{
+		UDPsocket result = SDLNet_UDP_Open(port);
+		if(!result)
+			std::cerr<<"SDLNet_UDP_Open done goofed: "<<SDLNet_GetError()<<std::endl;
+		return result;
+	}
+
+	static int CheckSockets(SDLNet_SocketSet set, Uint32 timeout)
+	{
+		int result = SDLNet_CheckSockets(set, timeout);
+		if(result == -1)
+			std::cerr<<"SDLNet_CheckSockets done goofed: "<<SDLNet_GetError()<<std::endl;
+		return result;
+	}
 }
 
 #endif //#ifndef __NetworkUtil_h
