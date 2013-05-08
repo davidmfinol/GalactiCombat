@@ -12,7 +12,8 @@ const float GalactiCombat::TIME_STEP = 1.0f/60.0f;
 //-------------------------------------------------------------------------------------
 GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), walls(6), spaceShips(0), bullets(0), isServer(false), startTime(0)
 {
-    physicsSimulator = new PhysicsSimulator(Mineral::MAX_RADIUS);
+    int maxSize = SpaceShip::MAX_SIZE > Mineral::MAX_RADIUS ? SpaceShip::MAX_SIZE : Mineral::MAX_RADIUS;
+    physicsSimulator = new PhysicsSimulator(maxSize);
     mSoundMgr = new SoundManager();
     mGUIMgr = new GUIManager(SpaceShip::MIN_ENERGY, SpaceShip::MAX_ENERGY);
     mNetworkMgr = new NetworkManagerClient();
@@ -44,7 +45,7 @@ void GalactiCombat::createCamera(void)
     // create player
     spaceShips.resize(1);
     spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
-                                  mSceneMgr->getRootSceneNode(), 100, 100, 100, 30);
+                                  mSceneMgr->getRootSceneNode(), 100, 100, 100);
     // set camera to player
     spaceShips[0]->attachCamera(mCamera);
     mInputMgr->setPlayerCamera(spaceShips[0]->getSceneNode(), mCamera->getParentSceneNode());
@@ -271,7 +272,7 @@ void GalactiCombat::updateFromServer(void)
     // Update visual components
     this->updateMinerals();
     this->updateSpaceShips();
-    //this->updateBullets();
+    this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
@@ -323,15 +324,14 @@ void GalactiCombat::gameLoop(float elapsedTime)
 void GalactiCombat::createBullet(SpaceShip* ship)
 {
     static std::time_t previousTimeStamp = 0;
-    std::time_t currentTimeStamp = std::time(0); // FIXME: THIS PREVENTS ALL SHIPS FROM SPAMMING BULLETS(SHOULD PUT THE CHECK IN APPROPRIATE ISPACESHIPCONTROLLER)
+    std::time_t currentTimeStamp = std::time(0); // FIXME: THIS PREVENTS ALL SHIPS FROM SPAMMING BULLETS(SHOULD PUT THE CHECK IN SHOOT() OF APPROPRIATE ISPACESHIPCONTROLLER)
     if (currentTimeStamp != previousTimeStamp) { 
         
         Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
         Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
         Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
-        pos += orientation*Ogre::Vector3(0, 0, 20); //float spaceShipSize = spaceShips->getSize(); // gonna need to know where to put bullet
-        velocity += orientation*Ogre::Vector3(0, 0, 20);
-        
+        pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
+        velocity += orientation*Ogre::Vector3(0, 0, -500);
         
         static int bulletID = 0;
         std::string bulletName("Bullet");
@@ -392,8 +392,7 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateBullets(void)
 {
-    //FIXME:
-    // Update all the bullets
+    // Update all the bullets so that they are deleted if they hit something
     for(std::deque<Bullet*>::iterator it = bullets.begin(); it<bullets.end(); ++it) {
         if( (*it)->hasHit() ) {
             physicsSimulator->removeGameObject(*it);
