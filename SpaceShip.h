@@ -31,6 +31,12 @@ public:
     virtual int getMass(void) const;
     virtual void collidedWith(GameObject*);
     virtual std::string getInternalType(void) const;
+
+    // Bullet control
+    bool bulletFlying(void);
+    bool isLifeOver(void);
+    void bulletCreated(void);
+    void bulletDestroyed(void);
     
     static const double ACCELERATION;
     static const double ENERGY_CONSUMPTION;
@@ -44,6 +50,7 @@ protected:
     double size;
     double sizeDifference;
     double energy;
+    std::time_t creation_time;
     
 private:
     void setupSpaceShip(void);

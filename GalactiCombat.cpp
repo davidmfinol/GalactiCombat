@@ -322,16 +322,13 @@ void GalactiCombat::gameLoop(float elapsedTime)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
 {
-    static std::time_t previousTimeStamp = 0;
-    std::time_t currentTimeStamp = std::time(0); // FIXME: THIS PREVENTS ALL SHIPS FROM SPAMMING BULLETS(SHOULD PUT THE CHECK IN APPROPRIATE ISPACESHIPCONTROLLER)
-    if (currentTimeStamp != previousTimeStamp) { 
-        
+    if (!ship->bulletFlying()) { 
+        ship->bulletCreated();
         Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
         Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
         Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
         pos += orientation*Ogre::Vector3(0, 0, 20); //float spaceShipSize = spaceShips->getSize(); // gonna need to know where to put bullet
         velocity += orientation*Ogre::Vector3(0, 0, 20);
-        
         
         static int bulletID = 0;
         std::string bulletName("Bullet");
@@ -346,8 +343,6 @@ void GalactiCombat::createBullet(SpaceShip* ship)
         physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
         physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
         bulletID++;
-        
-        previousTimeStamp = currentTimeStamp;
     }
 }
 //-------------------------------------------------------------------------------------
@@ -395,7 +390,8 @@ void GalactiCombat::updateBullets(void)
     //FIXME:
     // Update all the bullets
     for(std::deque<Bullet*>::iterator it = bullets.begin(); it<bullets.end(); ++it) {
-        if( (*it)->hasHit() ) {
+        if( (*it)->owner()->isLifeOver() ) {
+            (*it)->owner()->bulletDestroyed();
             physicsSimulator->removeGameObject(*it);
             physicsSimulator->deleteGameObject(*it);
             delete *it;
