@@ -6,13 +6,18 @@
 #ifndef __GalactiCombat_h_
 #define __GalactiCombat_h_
 
+#ifdef _WIN32
+#include <time.h>
+#else
+#include <sys/time.h>
+#endif
+
 #include <vector>
 #include <deque>
 #include <string>
 #include <sstream>
 #include <cstdlib>
 #include <stdlib.h>
-#include <sys/time.h>
 #include <stdio.h>
 
 #include "BaseApplication.h"

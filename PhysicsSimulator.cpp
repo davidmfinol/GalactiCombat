@@ -199,8 +199,13 @@ void PhysicsSimulator::stepSimulation(const float elapsedTime, int maxSubSteps, 
     for (int i=0;i<numManifolds;i++)
     {
         btPersistentManifold* contactManifold =  dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
-        btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold->getBody0());
+#ifdef _WIN32
+		btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
+        btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
+#else
+		btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold->getBody0());
         btCollisionObject* obB = static_cast<btCollisionObject*>(contactManifold->getBody1());
+#endif
         btRigidBody* bodyA = btRigidBody::upcast(obA);
         btRigidBody* bodyB = btRigidBody::upcast(obB);
         if (bodyA && bodyB)

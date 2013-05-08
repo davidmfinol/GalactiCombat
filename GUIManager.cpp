@@ -10,7 +10,6 @@ startSingle(0), startMulti(0), inputLabel(0), multiLabel(0), musicControl(0), so
 
 GUIManager::~GUIManager(void)
 {
-    if(mTrayMgr) delete mTrayMgr;
     if(welcomeBox) delete welcomeBox;
     if(gameoverBox) delete gameoverBox;
     if(menuLabel) delete menuLabel;
@@ -20,7 +19,7 @@ GUIManager::~GUIManager(void)
     if(inputLabel) delete inputLabel;
     if(startSingle) delete startSingle;
     if(startMulti) delete startMulti;
-    if(submitButton) delete submitButton;
+//	if(submitButton) delete submitButton;	//FIXME: Access violation
     if(musicButton) delete musicButton;
     if(quitButton) delete quitButton;
     if(gameoverQuitButton) delete gameoverQuitButton;
@@ -30,6 +29,7 @@ GUIManager::~GUIManager(void)
     if(lobbyPanel) delete lobbyPanel;
     if(lobbyReadyButton) delete lobbyReadyButton;
     if(lobbyQuitButton) delete lobbyQuitButton;
+	if(mTrayMgr) delete mTrayMgr;
 }
 
 void GUIManager::GUIsetup(NetworkManagerClient* network, SoundManager* sound, Ogre::RenderWindow* window, OIS::Mouse* mouse)
