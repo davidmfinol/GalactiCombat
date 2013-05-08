@@ -389,7 +389,7 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 void GalactiCombat::updateBullets(void)
 {
 	//FIXME: Visual C++ assertion failure: deque iterator not incrementable
-	for(std::deque<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it) {
+	for(std::deque<Bullet*>::iterator it = bullets.begin(); it < bullets.end(); ++it) {
         if( (*it)->getOwner()->isLifeOver() ) {
             (*it)->getOwner()->bulletDestroyed();
             physicsSimulator->removeGameObject(*it);

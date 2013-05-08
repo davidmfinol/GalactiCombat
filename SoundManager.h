@@ -2,8 +2,13 @@
 #define __SoundManager_h_
 
 #include <string>
+#ifdef _WIN32
+#include "SDL.h"
+#include "SDL_audio.h"
+#else
 #include "SDL/SDL.h"
 #include "SDL/SDL_audio.h"
+#endif
 
 #define NUM_SOUNDS 2
 
