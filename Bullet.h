@@ -13,6 +13,7 @@ public:
     virtual void collidedWith(GameObject*);
     virtual std::string getInternalType(void) const;
     bool hasHit() const;
+    SpaceShip* getOwner() { return _owner; }
     
     // Constants
     static const float LOSS;

@@ -1,0 +1,120 @@
+<scene exported_by="dmf684" previous_export_time="0" formatVersion="1.0.1" export_time="1367985769.8379576" >
+  <nodes >
+    <node name="Cube.003" >
+      <position x="-0.000000" y="0.000000" z="-0.000000" />
+      <rotation qz="-0.000000" qx="-1.000000" qy="0.000000" qw="0.000001" />
+      <scale x="0.045255" y="0.045255" z="0.045255" />
+      <user_data name="cycles_visibility" value='&lt;bpy id prop: owner="OBCube.003", name="cycles_visibility", address=0x7fcc421a0bf8&gt;' type="IDPropertyGroup" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <entity lock_trans_x="False" lock_trans_y="False" lock_trans_z="False" name="Cube.006" mass_radius="1.0" velocity_min="0.0" anisotropic_friction="False" ghost="False" actor="False" damping_trans="0.03999999910593033" friction_x="1.0" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" lock_rot_x="False" velocity_max="0.0" physics_type="STATIC" mass="1.0" friction_z="1.0" damping_rot="0.10000000149011612" friction_y="1.0" meshFile="Cube.006.mesh" >
+        <user_data name="cycles" value='&lt;bpy id prop: owner="MECube.006", name="cycles", address=0x7fcc3cfc7178&gt;' type="IDPropertyGroup" />
+      </entity>
+    </node>
+    <node name="Camera" >
+      <position x="4.357684" y="2.876822" z="4.152062" />
+      <rotation qz="-0.268969" qx="0.441909" qy="0.432727" qw="0.738322" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <camera name="Camera" fov="0.8797772364783485" projectionType="perspective" >
+        <clipping nearPlaneDist="0.10000000149011612" farPlaneDist="100.0" near="0.10000000149011612" far="100.0" />
+      </camera>
+    </node>
+    <node name="Hemi" >
+      <position x="5.134843" y="5.359649" z="-4.450134" />
+      <rotation qz="-0.165027" qx="-0.315125" qy="-0.433579" qw="0.827932" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Metal_Alloy.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/buttons.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Rear_Red_Tail_Lights.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Main_Hull.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Dark_Metal.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Radiator_Texture.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Red_Diffuse.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/White_Rear_Light.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Console_Glow.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Glass_Canopy.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Rear_Glass_Panel.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Danger_Decal_Mirrored.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Engine_Glow.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/69_Decal.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Cockpit_Main_Console.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Cockpit_Seats.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Forward_Facing_Light.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Danger_Decal.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Fulcrum_Decal_Mirrored.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Cockpit_Console_2.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/lower_buttons.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Radar_Screen.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/buttons_mirrored.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Blue_Panel_Light.material" />
+    </item>
+    <item type="material" >
+      <file name="/u/dmf684/Desktop/BlenderToOgre/Reg_Plate.material" />
+    </item>
+  </externals>
+  <environment >
+    <colourDiffuse g="0.05000000074505806" b="0.05000000074505806" r="0.05000000074505806" />
+    <colourBackground g="0.05000000074505806" b="0.05000000074505806" r="0.05000000074505806" />
+    <colourAmbient g="0.0" b="0.0" r="0.0" />
+  </environment>
+</scene>

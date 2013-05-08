@@ -6,6 +6,8 @@ const double SpaceShip::ENERGY_MINING = 10.0;
 const double SpaceShip::STARTING_ENERGY = 50;
 const double SpaceShip::MIN_ENERGY = 0;
 const double SpaceShip::MAX_ENERGY = 100;
+const int SpaceShip::MAX_SIZE = 500;
+const int SpaceShip::MIN_SIZE = 100;
 
 //-------------------------------------------------------------------------------------
 SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x, int y, int z, double s)
@@ -15,7 +17,7 @@ SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::
 }
 //-------------------------------------------------------------------------------------
 SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x, int y, int z, double s)
-: creation_time(0), brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, "sphere.mesh", true, x, y, z, s)
+: creation_time(0), brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, "SpaceShip.mesh", true, x, y, z, s)
 {
     setupSpaceShip();
 }

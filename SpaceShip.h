@@ -2,6 +2,7 @@
 #define __SpaceShip_h_
 
 #include <OgreCamera.h>
+#include <OgreMath.h>
 
 #include "GameObject.h"
 #include "ISpaceShipController.h"
@@ -10,8 +11,8 @@
 class SpaceShip : public GameObject {
     
 public:
-    SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x = 100, int y = 100, int z = 100, double s = 30);
-    SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x = 100, int y = 100, int z = 100, double s = 30);
+    SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x = 100, int y = 100, int z = 100, double s = 300);
+    SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x = 100, int y = 100, int z = 100, double s = 300);
     virtual ~SpaceShip(void);
     void attachCamera(Ogre::Camera* camera);
     
@@ -44,6 +45,8 @@ public:
     static const double STARTING_ENERGY;
     static const double MIN_ENERGY;
     static const double MAX_ENERGY;
+    static const int MAX_SIZE;
+    static const int MIN_SIZE;
     
 protected:
     ISpaceShipController* brain;

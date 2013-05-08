@@ -66,7 +66,7 @@ Client* GalactiCombatServer::addClient(TCPsocket sock, int channel, std::string 
     clients.back()->sock = sock;
     clients.back()->channel = channel;
     clients.back()->name = name;
-    clients.back()->ship = new SpaceShip(name, new ClientSpaceShipController(), mSceneMgr->getRootSceneNode(), NULL, pos_x, pos_y, pos_z, 30);
+    clients.back()->ship = new SpaceShip(name, new ClientSpaceShipController(), mSceneMgr->getRootSceneNode(), NULL, pos_x, pos_y, pos_z, 300);
     clients.back()->ready = false;
     spaceShips.push_back(clients.back()->ship);
     physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, false);
