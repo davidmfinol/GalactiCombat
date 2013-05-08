@@ -55,8 +55,9 @@ private:
     void receiveConnectionPacket(int clientIndex, Packet& incoming);
     void receiveStatePacket(int clientIndex, Packet& incoming);
     void receivePlayerInputPacket(int clientIndex, Packet& incoming);
-    void receivePlayerRotatePacket(int clientIndex, Packet& incoming);
+    void receivePlayerRotationPacket(int clientIndex, Packet& incoming);
     void receiveReadyPacket(int clientIndex, Packet& incoming);
+    void receiveWallsPacket(int clientIndex, Packet& incoming);
     void receiveScorePacket(int clientIndex, Packet& incoming);
     
 };

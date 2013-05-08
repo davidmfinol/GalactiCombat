@@ -228,6 +228,7 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
                 if (allReady.find("All players ready") != std::string::npos) {
                     mGUIMgr->startCountingDown();
                     this->destroyScene();
+                    this->createRoom();
                     this->createCamera();
                     this->createViewports();
                     this->setLighting();
@@ -328,8 +329,9 @@ void GalactiCombat::createBullet(SpaceShip* ship)
         Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
         Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
         Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
-        Ogre::Vector3 additionalVelocity = orientation*Ogre::Vector3(0, 0, 20);
-        //float spaceShipSize = spaceShips->getSize(); // gonna need to know where to put bullet
+        pos += orientation*Ogre::Vector3(0, 0, 20); //float spaceShipSize = spaceShips->getSize(); // gonna need to know where to put bullet
+        velocity += orientation*Ogre::Vector3(0, 0, 20);
+        
         
         static int bulletID = 0;
         std::string bulletName("Bullet");
@@ -337,12 +339,12 @@ void GalactiCombat::createBullet(SpaceShip* ship)
         sprintf(idChar, "%d", bulletID);
         bulletName += idChar;
         if(!isServer)
-            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x + 100, pos.y + 100, pos.z + 100)); //FIXME
+            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
         else
-            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x + 100, pos.y + 100, pos.z + 100)); //FIXME
+            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
         physicsSimulator->addGameObject(bullets.back());
-        //physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
-        //physicsSimulator->setGameObjectOrientation(bullets.back(), orientation); //FIXME
+        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
+        physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
         bulletID++;
         
         previousTimeStamp = currentTimeStamp;

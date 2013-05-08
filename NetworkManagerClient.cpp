@@ -154,28 +154,28 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     UDPPack->len = strlen(out) + 1;
     UDPPack->address = serverIP;
     NetworkUtil::UDPSend(UDPServerSock, -1, UDPPack);
-	std::cout << "UDPSend player input." << std::endl;
+    std::cout << "UDPSend player input." << std::endl;
     SDLNet_FreePacket(UDPPack);
 */
     free(out);
     //std::cout << "Exiting sendPlayerInput" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
-void NetworkManagerClient::sendPlayerRotate(Ogre::Real yaw, Ogre::Real pitch)
+void NetworkManagerClient::sendPlayerRotation(const Ogre::Quaternion& rotation)
 {
-    //std::cout << "Entering sendPlayerRotate" << std::endl << std::endl;
+    //std::cout << "Entering sendPlayerRotation" << std::endl << std::endl;
     Packet outgoing;
-    outgoing.type = PLAYERROTATE;
+    outgoing.type = PLAYERROTATION;
     
     char buffer[100];
-    sprintf(buffer,"%f,%f", yaw, pitch);
+    sprintf(buffer,"%f,%f,%f,%f", rotation.w, rotation.x, rotation.y, rotation.z);
     outgoing.message = buffer;
     
     char* out = NetworkUtil::PacketToCharArray(outgoing);
     NetworkUtil::TCPSend(TCPServerSock, out);
     
     free(out);
-    //std::cout << "Exiting sendPlayerRotate" << std::endl << std::endl;
+    //std::cout << "Exiting sendPlayerRotation" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::deque<Bullet*>& bullets)
@@ -282,7 +282,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
             if(name == mName)
             {
                 spaceships[0]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
-                spaceships[0]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
                 continue;
             }
             for(int j = 0; j < spaceships.size(); ++j)

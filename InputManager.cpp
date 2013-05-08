@@ -285,15 +285,15 @@ bool InputManager::mouseMoved( const OIS::MouseEvent &arg )
     
     if (!(mGUIMgr->isMainMenuOpened() || mGUIMgr->isWelcomeState() || mGUIMgr->isGameOver()))
     {
+        // move the camera
+        if(mCameraHorizontal) 
+            mCameraHorizontal->yaw(Ogre::Degree(yaw));
+        if(mCameraVertical) 
+            mCameraVertical->pitch(Ogre::Degree(pitch), Ogre::Node::TS_LOCAL);
+        
+        // tell the server of the new orientation
         if(mNetworkMgr->isOnline())
-            mNetworkMgr->sendPlayerRotate(yaw, pitch);
-        else
-        {
-            if(mCameraHorizontal) 
-                mCameraHorizontal->yaw(Ogre::Degree(yaw));
-            if(mCameraVertical) 
-                mCameraVertical->pitch(Ogre::Degree(pitch), Ogre::Node::TS_LOCAL);
-        }
+            mNetworkMgr->sendPlayerRotation(mCameraVertical->getOrientation());
     }
     
     return true;

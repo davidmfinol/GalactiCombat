@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <OgreSceneManager.h>
+#include <OgreQuaternion.h>
 
 #include "NetworkUtil.h"
 #include "GameObject.h"
@@ -42,7 +43,7 @@ public:
     
     // Game Logic Transaction
     void sendPlayerInput(ISpaceShipController* controller);
-    void sendPlayerRotate(Ogre::Real yaw, Ogre::Real pitch);
+    void sendPlayerRotation(const Ogre::Quaternion& rotation);
     void receiveData(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::deque<Bullet*>&);
     
 protected:

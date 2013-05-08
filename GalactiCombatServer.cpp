@@ -407,10 +407,12 @@ void GalactiCombatServer::receiveData(int clientIndex)
             receiveStatePacket(clientIndex, incoming); break;
         case PLAYERINPUT:
             receivePlayerInputPacket(clientIndex, incoming); break;
-        case PLAYERROTATE:    
-            receivePlayerRotatePacket(clientIndex, incoming); break;
+        case PLAYERROTATION:    
+            receivePlayerRotationPacket(clientIndex, incoming); break;
         case READY:
             receiveReadyPacket(clientIndex, incoming); break;
+        case WALLS:
+            receiveWallsPacket(clientIndex, incoming); break;
         case SCORE:
             receiveScorePacket(clientIndex, incoming); break;
         default:
@@ -518,23 +520,23 @@ void GalactiCombatServer::receivePlayerInputPacket(int clientIndex, Packet& inco
     if(verbose) std::cout << "Exiting receivePlayerInputPacket" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
-void GalactiCombatServer::receivePlayerRotatePacket(int clientIndex, Packet& incoming)
+void GalactiCombatServer::receivePlayerRotationPacket(int clientIndex, Packet& incoming)
 {
-    if(verbose) std::cout << "Entering receivePlayerRotatePacket" << std::endl;
+    if(verbose) std::cout << "Entering receivePlayerRotationPacket" << std::endl;
     
     std::string message(incoming.message);
-    Ogre::Real yaw = atof(message.substr(0, message.find(",")).c_str());
+    Ogre::Real w = atof(message.substr(0, message.find(",")).c_str());
     message = message.substr(message.find(",") + 1);
-    Ogre::Real pitch = atof(message.substr(0, message.find(",")).c_str());
+    Ogre::Real x = atof(message.substr(0, message.find(",")).c_str());
+    message = message.substr(message.find(",") + 1);
+    Ogre::Real y = atof(message.substr(0, message.find(",")).c_str());
+    message = message.substr(message.find(",") + 1);
+    Ogre::Real z = atof(message.substr(0, message.find(",")).c_str());
     
-    if(verbose) std::cout << "The rotation from " << clients[clientIndex]->name << " is " << yaw << " by " << pitch << std::endl;
-    Ogre::SceneNode* node = clients[clientIndex]->ship->getSceneNode();
-    node->yaw(Ogre::Degree(yaw)); 
-    node->pitch(Ogre::Degree(pitch), Ogre::Node::TS_LOCAL);
-    Ogre::Quaternion rotation = node->getOrientation();
-    physicsSimulator->setGameObjectOrientation(clients[clientIndex]->ship, rotation);
+    if(verbose) std::cout << "The rotation from " << clients[clientIndex]->name << " is " << w << "," << x << "," << y << "," << z << std::endl;
+    physicsSimulator->setGameObjectOrientation(clients[clientIndex]->ship, Ogre::Quaternion(w, x, y, z));
     
-    if(verbose) std::cout << "Exiting receivePlayerRotatePacket" << std::endl << std::endl;
+    if(verbose) std::cout << "Exiting receivePlayerRotationPacket" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
@@ -582,6 +584,13 @@ void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
         state = PLAY;
     }
     if(verbose) std::cout << "Exiting receiveReadyPacket" << std::endl << std::endl;
+}
+//-------------------------------------------------------------------------------------
+void GalactiCombatServer::receiveWallsPacket(int clientIndex, Packet& incoming)
+{
+    if(verbose) std::cout << "Entering receiveWallsPacket" << std::endl;
+    // FIXME: THIS PACKET TYPE DOESN'T SEEM TO BE NECESSARY
+    if(verbose) std::cout << "Exiting receiveWallsPacket" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombatServer::receiveScorePacket(int clientIndex, Packet& incoming)

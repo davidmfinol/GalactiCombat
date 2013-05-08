@@ -22,7 +22,7 @@
 #define STATE 11
 #define INFO 12
 #define PLAYERINPUT 13
-#define PLAYERROTATE 14
+#define PLAYERROTATION 14
 #define READY 15
 #define WALLS 16
 #define SCORE 17
@@ -36,20 +36,20 @@ typedef struct Packet Packet; // allows Packet struct to be used in C
 namespace NetworkUtil {
     
     /*
-    *           charArrayToPacket(char*):
-    *           This method takes a char array and parses it into a Packet.
-    *           The idea is that you can take the return value of TCPReceive() and use
-    *           this method to turn it into a usable Packet struct.
-    *
-    *           It's not very robust and doesn't check to make sure that the argument can actually
-    *           be converted into a Packet; it just assumes that it can. You may or may not
-    *           want to FIXME.
-    * 
-    *           As another NOTE, this method mallocs() a char* for the Packet.message.
-    *           When you release the packet, you need to free(packet.message).
-    *           Otherwise, you WILL have memory problems. Use with caution.
-    */
-    static Packet charArrayToPacket(char* msg)
+     *           charArrayToPacket(char*):
+     *           This method takes a char array and parses it into a Packet.
+     *           The idea is that you can take the return value of TCPReceive() and use
+     *           this method to turn it into a usable Packet struct.
+     *
+     *           It's not very robust and doesn't check to make sure that the argument can actually
+     *           be converted into a Packet; it just assumes that it can. You may or may not
+     *           want to FIXME.
+     * 
+     *           As another NOTE, this method mallocs() a char* for the Packet.message.
+     *           When you release the packet, you need to free(packet.message).
+     *           Otherwise, you WILL have memory problems. Use with caution.
+     */
+    inline Packet charArrayToPacket(char* msg)
     {
         //std::cout << "Entering charArrayToPacket" << std::endl;
         Packet pack;
@@ -77,20 +77,20 @@ namespace NetworkUtil {
     }
     
     /*
-    *           PacketToCharArray(Packet):
-    *           This method takes a Packet and converts it to an
-    *           array of chars. This makes it so that you can use it as the second
-    *           argument in TCPSend().
-    * 
-    *           NOTE: This method mallocs(). 
-    *           You need to free() when done with the charArray.
-    *           Otherwise, you WILL have memory problems. Use with caution.
-    *
-    *           -pack: the Packet to be converted
-    *
-    *           returns: the converted Packet
-    */
-    static char* PacketToCharArray(Packet pack)
+     *           PacketToCharArray(Packet):
+     *           This method takes a Packet and converts it to an
+     *           array of chars. This makes it so that you can use it as the second
+     *           argument in TCPSend().
+     * 
+     *           NOTE: This method mallocs(). 
+     *           You need to free() when done with the charArray.
+     *           Otherwise, you WILL have memory problems. Use with caution.
+     *
+     *           -pack: the Packet to be converted
+     *
+     *           returns: the converted Packet
+     */
+    inline char* PacketToCharArray(Packet pack)
     {
         //std::cout << "Entering PacketToCharArray" << std::endl;
         int messageLength = strlen(pack.message) + 1;
@@ -118,7 +118,7 @@ namespace NetworkUtil {
      *        -sock: the socket to listen on
      *        -buf: a pointer to a block of memory where the data can be stored
      */
-    static char* TCPReceive(TCPsocket sock, char **buf)
+    inline char* TCPReceive(TCPsocket sock, char **buf)
     {
         //std::cout << "Entering TCPReceive" << std::endl;
         Uint32 len,result;
@@ -132,13 +132,12 @@ namespace NetworkUtil {
         if(*buf)
             free(*buf);
         *buf=NULL;
-        
+            
         // receive the length of the string message
         result=SDLNet_TCP_Recv(sock,&len,sizeof(len));
-        if(result<sizeof(len))
-        {   
+        if(result<sizeof(len)) {   
             if(SDLNet_GetError() && strlen(SDLNet_GetError())) // sometimes blank!
-                std::cerr << "SDLNet_TCP_Recv done goofed: " << SDLNet_GetError() << std::endl;
+            std::cerr << "SDLNet_TCP_Recv done goofed: " << SDLNet_GetError() << std::endl;
             return(NULL);
         }   
         
@@ -156,14 +155,13 @@ namespace NetworkUtil {
         
         // get the string buffer over the socket
         result = SDLNet_TCP_Recv(sock,*buf,len);
-        if(result < len)
-        {   
+        if(result < len) {   
             if(SDLNet_GetError() && strlen(SDLNet_GetError())) // sometimes blank!
-                std::cerr << "SDLNet_TCP_Recv done goofed: " << SDLNet_GetError() << std::endl;
+            std::cerr << "SDLNet_TCP_Recv done goofed: " << SDLNet_GetError() << std::endl;
             free(*buf);
             buf=NULL;
         }   
-                    
+        
         // return the new buffer
         //std::cout << "Exiting TCPReceive" << std::endl;
         return(*buf);
@@ -179,7 +177,7 @@ namespace NetworkUtil {
      * 
      *        returns: the number of bytes sent, or 0 if error, or 1 if the second argument is empty
      */
-    static int TCPSend(TCPsocket sock, char *buf)
+    inline int TCPSend(TCPsocket sock, char *buf)
     {
         //std::cout << "Entering TCPSend" << std::endl;
         Uint32 len,result;
@@ -198,7 +196,7 @@ namespace NetworkUtil {
         if(result<sizeof(len)) {
             std::cerr << "SDLNet_TCP_Send done goofed: " << std::endl;
             if(SDLNet_GetError() && strlen(SDLNet_GetError())) // sometimes blank!
-                std::cerr << "\t- " << SDLNet_GetError() << std::endl;
+            std::cerr << "\t- " << SDLNet_GetError() << std::endl;
             return(0);
         }
         
@@ -211,7 +209,7 @@ namespace NetworkUtil {
         if(result<len) {
             std::cerr << "SDLNet_TCP_Send done goofed: " << std::endl;
             if(SDLNet_GetError() && strlen(SDLNet_GetError())) // sometimes blank!
-                std::cerr << "\t- " << SDLNet_GetError() << std::endl;
+            std::cerr << "\t- " << SDLNet_GetError() << std::endl;
             return(0);
         }
         
@@ -219,16 +217,16 @@ namespace NetworkUtil {
         return(result);
     }
     
-
+    
     /*
-    *           UDPSend(UDPsocket, int, UDPpacket*):
-    *           Wrapper function for SDLNet_UDP_Send. If using channels, ensure that the
-    *           UDPpacket argument has that information in the "channel" field.
-    *           -sock: The UDPsocket to send the packet through.
-    *           -channel: The socket's channel to send through. Use -1 if not using channels.
-    *           -outgoing: The UDPpacket to send.
-    */
-    static int UDPSend(UDPsocket sock, int channel, UDPpacket *outgoing)
+     *           UDPSend(UDPsocket, int, UDPpacket*):
+     *           Wrapper function for SDLNet_UDP_Send. If using channels, ensure that the
+     *           UDPpacket argument has that information in the "channel" field.
+     *           -sock: The UDPsocket to send the packet through.
+     *           -channel: The socket's channel to send through. Use -1 if not using channels.
+     *           -outgoing: The UDPpacket to send.
+     */
+    inline int UDPSend(UDPsocket sock, int channel, UDPpacket *outgoing)
     {
         //std::cout << "Entering UDPSend" << std::endl;
         int numSent = SDLNet_UDP_Send(sock, channel, outgoing);
@@ -237,14 +235,14 @@ namespace NetworkUtil {
         //std::cout << "Exiting UDPSend" << std::endl;
         return numSent;
     }
-
+    
     /*
-    *           UDPReceive(UDPsocket, UDPpacket, Uint32, Uint8, int):
-    *           Wrapper function for SDLNet_UDP_Recv.
-    *           -sock: The UDPsocket to listen on.
-    *           -in: The incoming UDPpacket.
-    */
-    static int UDPReceive(UDPsocket sock, UDPpacket *in)
+     *           UDPReceive(UDPsocket, UDPpacket, Uint32, Uint8, int):
+     *           Wrapper function for SDLNet_UDP_Recv.
+     *           -sock: The UDPsocket to listen on.
+     *           -in: The incoming UDPpacket.
+     */
+    inline int UDPReceive(UDPsocket sock, UDPpacket *in)
     {
         //std::cout << "Entering UDPReceive" << std::endl;
         int received = SDLNet_UDP_Recv(sock, in);
@@ -253,8 +251,8 @@ namespace NetworkUtil {
         //std::cout << "Exiting UDPReceive" << std::endl;
         return received;
     }
-
-    static UDPpacket *AllocPacket(int size)
+    
+    inline UDPpacket *AllocPacket(int size)
     {
         //std::cout << "Entering AllocPacket" << std::endl;
         UDPpacket *UDPpack = SDLNet_AllocPacket(size);
@@ -263,7 +261,7 @@ namespace NetworkUtil {
         //std::cout << "Exiting AllocPacket" << std::endl;
         return UDPpack;
     }
-    static int UDPBind(UDPsocket sock, int channel, IPaddress *address)
+    inline int UDPBind(UDPsocket sock, int channel, IPaddress *address)
     {
         //std::cout << "Entering UDPBind" << std::endl;
         int result = SDLNet_UDP_Bind(sock, channel, address);
@@ -272,38 +270,38 @@ namespace NetworkUtil {
         //std::cout << "Exiting UDPBind" << std::endl;
         return result;
     }
-
-	static int ResolveHost(IPaddress *address, char *host, Uint16 port)
-	{
-		int result = SDLNet_ResolveHost(address, host, port);
-		if(result == -1)
-			std::cerr<<"SDLNet_ResolveHost done goofed: "<<SDLNet_GetError()<<std::endl;
-		return result;
-	}
-
-	static TCPsocket TCPOpen(IPaddress *ip)
-	{
-		TCPsocket result = SDLNet_TCP_Open(ip);
-		if(!result)
-			std::cerr<<"SDLNet_TCP_Open done goofed: "<<SDLNet_GetError()<<std::endl;
-		return result;
-	}
-
-	static UDPsocket UDPOpen(Uint16 port)
-	{
-		UDPsocket result = SDLNet_UDP_Open(port);
-		if(!result)
-			std::cerr<<"SDLNet_UDP_Open done goofed: "<<SDLNet_GetError()<<std::endl;
-		return result;
-	}
-
-	static int CheckSockets(SDLNet_SocketSet set, Uint32 timeout)
-	{
-		int result = SDLNet_CheckSockets(set, timeout);
-		if(result == -1)
-			std::cerr<<"SDLNet_CheckSockets done goofed: "<<SDLNet_GetError()<<std::endl;
-		return result;
-	}
+    
+    inline int ResolveHost(IPaddress *address, char *host, Uint16 port)
+    {
+        int result = SDLNet_ResolveHost(address, host, port);
+        if(result == -1)
+            std::cerr<<"SDLNet_ResolveHost done goofed: "<<SDLNet_GetError()<<std::endl;
+        return result;
+    }
+    
+    inline TCPsocket TCPOpen(IPaddress *ip)
+    {
+        TCPsocket result = SDLNet_TCP_Open(ip);
+        if(!result)
+            std::cerr<<"SDLNet_TCP_Open done goofed: "<<SDLNet_GetError()<<std::endl;
+        return result;
+    }
+    
+    inline UDPsocket UDPOpen(Uint16 port)
+    {
+        UDPsocket result = SDLNet_UDP_Open(port);
+        if(!result)
+            std::cerr<<"SDLNet_UDP_Open done goofed: "<<SDLNet_GetError()<<std::endl;
+        return result;
+    }
+    
+    inline int CheckSockets(SDLNet_SocketSet set, Uint32 timeout)
+    {
+        int result = SDLNet_CheckSockets(set, timeout);
+        if(result == -1)
+            std::cerr<<"SDLNet_CheckSockets done goofed: "<<SDLNet_GetError()<<std::endl;
+        return result;
+    }
 }
 
 #endif //#ifndef __NetworkUtil_h
