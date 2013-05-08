@@ -14,7 +14,9 @@ public:
     virtual std::string getInternalType(void) const;
     bool hasHit() const;
     SpaceShip* getOwner() { return _owner; }
-    
+    bool exist() { return state; }
+    void setExist(bool b) { state = b; }
+
     // Constants
     static const float LOSS;
     static const float GAIN;
@@ -22,6 +24,7 @@ public:
 protected:
     bool _hasHit;
     SpaceShip* _owner;
+    bool state;
 };
 
 #endif //#ifndef __Bullet_h_

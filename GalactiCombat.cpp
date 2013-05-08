@@ -388,7 +388,6 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateBullets(void)
 {
-    // Update all the bullets so that they are deleted if they hit something
     for(std::deque<Bullet*>::iterator it = bullets.begin(); it<bullets.end(); ++it) {
         if( (*it)->getOwner()->isLifeOver() ) {
             (*it)->getOwner()->bulletDestroyed();
