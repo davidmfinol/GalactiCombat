@@ -470,9 +470,9 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
 
     // pack the bullets
     ss << "bullets:" << bullets.size() << ",";
-    for (int in = 0; in < bullets.size(); in++) {
-        std::string name = bullets[in]->getName();
-        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(bullets[in]);
+    for (std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it) {
+        std::string name = (*it)->getName();
+        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(*it);
         char buffer[100];
         sprintf(buffer,"%s,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z);
         ss << buffer;

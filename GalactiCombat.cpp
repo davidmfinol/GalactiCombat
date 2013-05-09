@@ -12,8 +12,7 @@ const float GalactiCombat::TIME_STEP = 1.0f/60.0f;
 //-------------------------------------------------------------------------------------
 GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), walls(6), spaceShips(0), bullets(0), isServer(false), startTime(0)
 {
-    int maxSize = SpaceShip::MAX_SIZE > Mineral::MAX_RADIUS ? SpaceShip::MAX_SIZE : Mineral::MAX_RADIUS;
-    physicsSimulator = new PhysicsSimulator(maxSize);
+    physicsSimulator = new PhysicsSimulator(Mineral::MAX_RADIUS, SpaceShip::MAX_SIZE);
     mSoundMgr = new SoundManager();
     mGUIMgr = new GUIManager(SpaceShip::MIN_ENERGY, SpaceShip::MAX_ENERGY);
     mNetworkMgr = new NetworkManagerClient();
@@ -36,8 +35,8 @@ void GalactiCombat::createCamera(void)
     // create the camera
     mCamera = mSceneMgr->createCamera("PlayerCam");
     // set its position, direction  
-    mCamera->setPosition(Ogre::Vector3(0,100,400));
-    mCamera->lookAt(Ogre::Vector3(0,0,0));
+    mCamera->setPosition(Ogre::Vector3(0,150,300));
+    mCamera->lookAt(Ogre::Vector3(0,100,0));
     // set the near clip distance
     mCamera->setNearClipDistance(5);
     mCamera->setFarClipDistance(500);
@@ -95,11 +94,6 @@ void GalactiCombat::createPlayer(void)
     spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
                                   mSceneMgr->getRootSceneNode(), 200, 200, 200);
     physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
-    
-    // make camera look at player
-    Ogre::Vector3 pos = spaceShips[0]->getSceneNode()->getPosition();
-    mCamera->setPosition(Ogre::Vector3(0, pos.y + 100, pos.z + 400));
-    mCamera->lookAt(pos);
     
     // set camera to player
     spaceShips[0]->attachCamera(mCamera);
@@ -291,11 +285,14 @@ void GalactiCombat::updateFromServer(void)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
 {
-    // Update the input for the ships
+    // Update the ships
     for (int i = 0; i < spaceShips.size(); ++i) {
+        // Orientation is handled by Ogre
+        physicsSimulator->setGameObjectOrientation(spaceShips[i], spaceShips[i]->getSceneNode()->getOrientation());
+        
+        // Handle input
         Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(spaceShips[i]);
         Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(spaceShips[i]);
-        
         if(spaceShips[i]->getController()->left()) {
             velocity -= orientation.xAxis()*elapsedTime*SpaceShip::ACCELERATION;
             spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
@@ -321,8 +318,7 @@ void GalactiCombat::gameLoop(float elapsedTime)
             spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
         }
         physicsSimulator->setGameObjectVelocity(spaceShips[i], velocity);
-        
-        if(spaceShips[i]->getController()->shoot()) 
+        if(spaceShips[i]->getController()->shoot())
             this->createBullet(spaceShips[i]);
     }
     
@@ -337,8 +333,8 @@ void GalactiCombat::gameLoop(float elapsedTime)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
 {
-    if(!ship->bulletFlying()) { 
-        ship->bulletCreated();
+    if(ship->canShoot()) { 
+        ship->shootBullet();
         Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
         Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
         Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
@@ -402,10 +398,10 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateBullets(void)
 {
-	//FIXME: Visual C++ assertion failure: deque iterator not incrementable
-	for(std::deque<Bullet*>::iterator it = bullets.begin(); it < bullets.end(); ++it) {
-        if( (*it)->getOwner()->isLifeOver() ) {
-            (*it)->getOwner()->bulletDestroyed();
+    for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it) {
+        if( (*it)->isLifeOver() ) {
+            if((*it)->getOwner())
+                (*it)->getOwner()->bulletDestroyed();
             physicsSimulator->removeGameObject(*it);
             physicsSimulator->deleteGameObject(*it);
             delete *it;
@@ -419,9 +415,9 @@ void GalactiCombat::crazyEnergyInjection(void)
     int i, vel_x, vel_y, vel_z;
     
     for (i = 0; i < minerals.size(); i++) {
-        vel_x = ((std::rand() % 500) + 500) * (std::rand() % 2 == 0 ? 1 : -1); 
-        vel_y = ((std::rand() % 500) + 500);
-        vel_z = ((std::rand() % 500) + 500) * (std::rand() % 2 == 0 ? 1 : -1); 
+        vel_x = ((std::rand() % 10) + 10) * (std::rand() % 2 == 0 ? 1 : -1); 
+        vel_y = ((std::rand() % 10) + 10);
+        vel_z = ((std::rand() % 10) + 10) * (std::rand() % 2 == 0 ? 1 : -1); 
         physicsSimulator->setGameObjectVelocity(minerals[i], Ogre::Vector3(vel_x, vel_y, vel_z));
     }
 }
@@ -441,14 +437,12 @@ std::string GalactiCombat::getCurrentTime(void)
         sec = 59;
         mGUIMgr->resetTimerDone();
     }
-    /* === Crazy Energy Injection ===
     if (min != 0 && sec <= 10) {
         if (sec == 0) {
             crazyEnergyInjection();
         }
         mGUIMgr->countDown(sec, INJECT_CODE);
     }
-    ================================= */
     if (min == 0 && sec <= 10) {
         if (sec == 0) {
             mGUIMgr->gameOver(spaceShips[0]->getSize());

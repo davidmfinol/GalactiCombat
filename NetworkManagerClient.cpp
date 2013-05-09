@@ -178,7 +178,7 @@ void NetworkManagerClient::sendPlayerRotation(const Ogre::Quaternion& rotation)
     //std::cout << "Exiting sendPlayerRotation" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
-void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::deque<Bullet*>& bullets)
+void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::list<Bullet*>& bullets)
 {
     //std::cout << "Entering receiveData" << std::endl << std::endl;
     static int iii = 0;
@@ -306,9 +306,12 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
         }
 
         // Bullets
+        for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it)
+            (*it)->setExist(false);
+        
         message = message.substr(message.find(",") + 1);
         int bulletsAmount = atoi(message.substr(message.find(":") + 1, message.find(",")).c_str());
-        for (int i = 0; i < bulletsAmount; i++)
+        for (int i = 0; i < bulletsAmount; ++i)
         {
             message = message.substr(message.find(",") + 1);
             std::string name = message.substr(0, message.find(","));
@@ -321,15 +324,15 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
 
             // FIXME: THIS IS BAD, oh well
             bool found = false;
-            for(int j = 0; j < bullets.size(); ++j)
+            for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it)
             {
                 //std::cout << "Checking to see if " << name << " already exists." << std::endl;
-                if(bullets[j]->getName() == name)
+                if((*it)->getName() == name)
                 {
                     //std::cout << "Exists." << std::endl;
                     found = true;
-                    bullets[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
-                    bullets[j]->setExist(true);
+                    (*it)->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                    (*it)->setExist(true);
                     break;
                 }
             }
@@ -339,14 +342,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
                 Bullet* newBullet = new Bullet(name, sceneManager->getRootSceneNode(), NULL, pos_x, pos_y, pos_z);		
                 newBullet->setExist(true);
                 bullets.push_back(newBullet);
-            }
-        }
-        for(std::deque<Bullet*>::iterator it = bullets.begin(); it<bullets.end(); ++it) {
-            bool exist = (*it)->exist();
-            (*it)->setExist(false); // prepare for the next call to receiveData()
-            if( !exist ) {
-                delete *it;
-                it = bullets.erase(it);
             }
         }
     }

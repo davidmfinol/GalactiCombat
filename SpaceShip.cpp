@@ -11,22 +11,22 @@ const int SpaceShip::MIN_SIZE = 100;
 
 //-------------------------------------------------------------------------------------
 SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x, int y, int z, double s)
-: creation_time(0), brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, entity, x, y, z, s)
+: brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), lastShotTime(0), GameObject(name, parentNode, entity, x, y, z, s)
 {
     setupSpaceShip();
 }
 //-------------------------------------------------------------------------------------
 SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x, int y, int z, double s)
-: creation_time(0), brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, "SpaceShip.mesh", true, x, y, z, s)
+: brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), lastShotTime(0), GameObject(name, parentNode, "SpaceShip.mesh", true, x, y, z, s)
 {
     setupSpaceShip();
 }
 //-------------------------------------------------------------------------------------
-SpaceShip::~SpaceShip(void) 
+SpaceShip::~SpaceShip() 
 {
 }
 //-------------------------------------------------------------------------------------
-void SpaceShip::setupSpaceShip(void)
+void SpaceShip::setupSpaceShip()
 {
     // scale the spaceship
     mNode->scale(Ogre::Vector3(size * 0.1, size * 0.1, size * 0.1));
@@ -70,24 +70,19 @@ double SpaceShip::getEnergy() const
     return energy;
 }
 //-------------------------------------------------------------------------------------
-bool SpaceShip::bulletFlying()
+bool SpaceShip::canShoot()
 {
-    return creation_time;
+    return std::time(0) != lastShotTime;
 }
 //-------------------------------------------------------------------------------------
-bool SpaceShip::isLifeOver()
+void SpaceShip::shootBullet()
 {
-    return std::time(0) >= (creation_time + 3);
-}
-//-------------------------------------------------------------------------------------
-void SpaceShip::bulletCreated()
-{
-    creation_time = std::time(0);
+    lastShotTime = std::time(0);
 }
 //-------------------------------------------------------------------------------------
 void SpaceShip::bulletDestroyed()
 {
-    creation_time = 0;
+    // TODO: WE GAIN MASS?
 }
 //-------------------------------------------------------------------------------------
 void SpaceShip::adjustEnergy(double e) 
@@ -97,12 +92,12 @@ void SpaceShip::adjustEnergy(double e)
     energy = energy < MIN_ENERGY ? MIN_ENERGY : energy;
 }
 //-------------------------------------------------------------------------------------
-double SpaceShip::getSize(void) const
+double SpaceShip::getSize() const
 {
     return size;
 }
 //-------------------------------------------------------------------------------------
-double SpaceShip::getSizeDifference(void) const
+double SpaceShip::getSizeDifference() const
 {
     return sizeDifference;
 }
@@ -148,7 +143,7 @@ void SpaceShip::collidedWith(GameObject* other)
     }
 }
 //-------------------------------------------------------------------------------------
-std::string SpaceShip::getInternalType(void) const
+std::string SpaceShip::getInternalType() const
 {
     return "SpaceShip";
 }
