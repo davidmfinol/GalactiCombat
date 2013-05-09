@@ -48,6 +48,7 @@ protected:
     virtual void createCamera(void);
     virtual void destroyScene(void);
     virtual void createScene(void);
+    void createPlayer(void);
     void createMinerals(void);
     void createRoom(void);
     void setLighting(void);

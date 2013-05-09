@@ -293,7 +293,7 @@ bool InputManager::mouseMoved( const OIS::MouseEvent &arg )
         
         // tell the server of the new orientation
         if(mNetworkMgr->isOnline())
-            mNetworkMgr->sendPlayerRotation(mCameraVertical->getOrientation());
+            mNetworkMgr->sendPlayerRotation(mCameraHorizontal->getOrientation());
     }
     
     return true;

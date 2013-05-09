@@ -29,11 +29,11 @@ SpaceShip::~SpaceShip(void)
 void SpaceShip::setupSpaceShip(void)
 {
     // scale the spaceship
-    mNode->scale(Ogre::Vector3(size * 0.01, size * 0.01, size * 0.01));
+    mNode->scale(Ogre::Vector3(size * 0.1, size * 0.1, size * 0.1));
     
     // define shape name
     std::ostringstream m;
-    m << "Sphere" << (int)size;
+    m << "SpaceShip" << (int)size;
     mShapeName = m.str();
 }
 void SpaceShip::attachCamera(Ogre::Camera* camera)

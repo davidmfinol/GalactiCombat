@@ -41,17 +41,6 @@ void GalactiCombat::createCamera(void)
     // set the near clip distance
     mCamera->setNearClipDistance(5);
     mCamera->setFarClipDistance(500);
-    
-    // create player
-    spaceShips.resize(1);
-    spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
-                                  mSceneMgr->getRootSceneNode(), 100, 100, 100);
-    // set camera to player
-    spaceShips[0]->attachCamera(mCamera);
-    mInputMgr->setPlayerCamera(spaceShips[0]->getSceneNode(), mCamera->getParentSceneNode());
-    
-    // we may as well add the player now
-    physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createViewports(void)
@@ -77,20 +66,44 @@ void GalactiCombat::destroyScene(void)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createScene(void)
 {
+    // create player
+    createPlayer();
+    
     // create floating minerals
     createMinerals();
     
     // create walls
     createRoom();
     
-    // create enemy
+    // create enemies
     spaceShips.push_back(new SpaceShip("EnemySpaceShip", new ComputerSpaceShipController(), 
-                                       mSceneMgr->getRootSceneNode(), 200, 200, 200 ));
+                                       mSceneMgr->getRootSceneNode(), 500, 500, 500 ));
+    physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, false);
+    spaceShips.push_back(new SpaceShip("EnemySpaceShip2", new ComputerSpaceShipController(), 
+                                       mSceneMgr->getRootSceneNode(), 1000, 1000, 1000 ));
     physicsSimulator->addGameObject(spaceShips.back(), RESTITUTION, true, false);
     
     // set the ambiance for the game
     this->setLighting();
     mSoundMgr->playMusic("media/sounds/Level1_destination.wav");   
+}
+//-------------------------------------------------------------------------------------
+void GalactiCombat::createPlayer(void)
+{
+    // create player
+    spaceShips.resize(1);
+    spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
+                                  mSceneMgr->getRootSceneNode(), 200, 200, 200);
+    physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
+    
+    // make camera look at player
+    Ogre::Vector3 pos = spaceShips[0]->getSceneNode()->getPosition();
+    mCamera->setPosition(Ogre::Vector3(0, pos.y + 100, pos.z + 400));
+    mCamera->lookAt(pos);
+    
+    // set camera to player
+    spaceShips[0]->attachCamera(mCamera);
+    mInputMgr->setPlayerCamera(spaceShips[0]->getSceneNode(), mCamera->getParentSceneNode());
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createMinerals(void)
@@ -233,6 +246,7 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
                     this->createCamera();
                     this->createViewports();
                     this->setLighting();
+                    this->createPlayer();
                     startTime = prevTime = std::time(0);
                 }
             }

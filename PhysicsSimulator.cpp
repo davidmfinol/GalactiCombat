@@ -57,14 +57,19 @@ void PhysicsSimulator::defineCollisionShapes(int maxSphereSize)
         m << "Sphere" << i;
         collisionShapes[m.str()] = new btSphereShape(btScalar(i));
     }
+    // SpaceShips!
+    for(int i = 1; i <= maxSphereSize; ++i) {
+        std::ostringstream m;
+        m << "SpaceShip" << i;
+        collisionShapes[m.str()] = new btSphereShape(btScalar(i));
+    }
 }
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::addGameObject (GameObject* obj, double restitution, bool activeKinematic, bool allowRotation) 
 {
     // Determine shape
     std::map<std::string, btCollisionShape*>::iterator it = collisionShapes.find(obj->getShapeName());
-    if(it==collisionShapes.end()) 
-    {
+    if(it==collisionShapes.end()) {
         std::cerr << "Error: Shape for " << obj->getName() << " not defined. Game Object not added." << std::endl;
         return;
     }
@@ -84,8 +89,7 @@ void PhysicsSimulator::addGameObject (GameObject* obj, double restitution, bool 
     transform.setOrigin(btVector3(pos.x, pos.y, pos.z));
     
     // Do we already know this game object?
-    if(!gameObjects.count(obj))
-    {
+    if(!gameObjects.count(obj)) {
         // Create the rigidbody
         OgreMotionState* state = new OgreMotionState(transform, obj->getSceneNode(), allowRotation);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, state, shape, inertia);
@@ -96,8 +100,7 @@ void PhysicsSimulator::addGameObject (GameObject* obj, double restitution, bool 
         gameObjects[obj] = body;
         rigidBodies[body] = obj;
     }
-    else
-    {
+    else {
         // Update the rigidbody
         gameObjects[obj]->setCenterOfMassTransform(transform);
         gameObjects[obj]->setCollisionShape(shape);
@@ -105,8 +108,7 @@ void PhysicsSimulator::addGameObject (GameObject* obj, double restitution, bool 
     }
     
     // Kinematic and dynamic objects that we want to always keep track of
-    if(activeKinematic)
-    {
+    if(activeKinematic) {
         if(!isDynamic)
             gameObjects[obj]->setCollisionFlags( gameObjects[obj]->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT); 
         gameObjects[obj]->setActivationState(DISABLE_DEACTIVATION);
@@ -182,13 +184,11 @@ void PhysicsSimulator::stepSimulation(const float elapsedTime, int maxSubSteps, 
     dynamicsWorld->stepSimulation(elapsedTime, maxSubSteps, fixedTimestep);
     
     // Correct the orientation of objects that we don't allow changed orientation
-    for (int j=dynamicsWorld->getNumCollisionObjects()-1; j>=0 ;j--)
-    {
+    for (int j=dynamicsWorld->getNumCollisionObjects()-1; j>=0 ;j--) {
         btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[j];
         btRigidBody* body = btRigidBody::upcast(obj);
         OgreMotionState* motionState = (OgreMotionState*) body->getMotionState();
-        if (body && motionState && !motionState->allowsRotation())
-        {
+        if (body && motionState && !motionState->allowsRotation()) {
             Ogre::Quaternion rot = rigidBodies[body]->getSceneNode()->getOrientation();
             this->setGameObjectOrientation(rigidBodies[body], rot);
         }
@@ -196,15 +196,13 @@ void PhysicsSimulator::stepSimulation(const float elapsedTime, int maxSubSteps, 
     
     // Inform all game objects that have collided of that fact
     int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
-    for (int i=0;i<numManifolds;i++)
-    {
+    for (int i=0;i<numManifolds;i++) {
         btPersistentManifold* contactManifold =  dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
         btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold->getBody0());
         btCollisionObject* obB = static_cast<btCollisionObject*>(contactManifold->getBody1());
         btRigidBody* bodyA = btRigidBody::upcast(obA);
         btRigidBody* bodyB = btRigidBody::upcast(obB);
-        if (bodyA && bodyB)
-        {
+        if (bodyA && bodyB) {
             rigidBodies[bodyA]->collidedWith(rigidBodies[bodyB]);
             rigidBodies[bodyB]->collidedWith(rigidBodies[bodyA]);
         }

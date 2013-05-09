@@ -53,6 +53,7 @@ libtool
 ltmain.sh
 missing
 stamp-h1
+ogre.cfg
 
 # Text editor temp files
 *~
