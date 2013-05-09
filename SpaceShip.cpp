@@ -11,13 +11,13 @@ const int SpaceShip::MIN_SIZE = 100;
 
 //-------------------------------------------------------------------------------------
 SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x, int y, int z, double s)
-: brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, entity, x, y, z, s)
+: creation_time(0), brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, entity, x, y, z, s)
 {
     setupSpaceShip();
 }
 //-------------------------------------------------------------------------------------
 SpaceShip::SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x, int y, int z, double s)
-: brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, "SpaceShip.mesh", true, x, y, z, s)
+: creation_time(0), brain(controller), size(s), sizeDifference(0), energy(STARTING_ENERGY), GameObject(name, parentNode, "SpaceShip.mesh", true, x, y, z, s)
 {
     setupSpaceShip();
 }
@@ -68,6 +68,26 @@ ISpaceShipController* SpaceShip::getController() const
 double SpaceShip::getEnergy() const 
 {
     return energy;
+}
+//-------------------------------------------------------------------------------------
+bool SpaceShip::bulletFlying()
+{
+    return creation_time;
+}
+//-------------------------------------------------------------------------------------
+bool SpaceShip::isLifeOver()
+{
+    return std::time(0) >= (creation_time + 3);
+}
+//-------------------------------------------------------------------------------------
+void SpaceShip::bulletCreated()
+{
+    creation_time = std::time(0);
+}
+//-------------------------------------------------------------------------------------
+void SpaceShip::bulletDestroyed()
+{
+    creation_time = 0;
 }
 //-------------------------------------------------------------------------------------
 void SpaceShip::adjustEnergy(double e) 

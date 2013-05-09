@@ -9,8 +9,13 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#ifdef _WIN32
+#include "SDL.h"
+#include "SDL_net.h"
+#else
 #include "SDL/SDL.h"
 #include "SDL/SDL_net.h"
+#endif
 
 #define ERROR 0xff
 #define TIMEOUT 5000 //five seconds

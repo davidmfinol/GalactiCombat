@@ -337,10 +337,8 @@ void GalactiCombat::gameLoop(float elapsedTime)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
 {
-    static std::time_t previousTimeStamp = 0;
-    std::time_t currentTimeStamp = std::time(0); // FIXME: THIS PREVENTS ALL SHIPS FROM SPAMMING BULLETS(SHOULD PUT THE CHECK IN SHOOT() OF APPROPRIATE ISPACESHIPCONTROLLER)
-    if (currentTimeStamp != previousTimeStamp) { 
-        
+    if(!ship->bulletFlying()) { 
+        ship->bulletCreated();
         Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
         Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
         Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
@@ -360,8 +358,6 @@ void GalactiCombat::createBullet(SpaceShip* ship)
         physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
         physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
         bulletID++;
-        
-        previousTimeStamp = currentTimeStamp;
     }
 }
 //-------------------------------------------------------------------------------------
@@ -406,9 +402,10 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateBullets(void)
 {
-    // Update all the bullets so that they are deleted if they hit something
-    for(std::deque<Bullet*>::iterator it = bullets.begin(); it<bullets.end(); ++it) {
-        if( (*it)->hasHit() ) {
+	//FIXME: Visual C++ assertion failure: deque iterator not incrementable
+	for(std::deque<Bullet*>::iterator it = bullets.begin(); it < bullets.end(); ++it) {
+        if( (*it)->getOwner()->isLifeOver() ) {
+            (*it)->getOwner()->bulletDestroyed();
             physicsSimulator->removeGameObject(*it);
             physicsSimulator->deleteGameObject(*it);
             delete *it;

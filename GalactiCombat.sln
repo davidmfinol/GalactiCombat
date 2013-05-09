@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GalactiCombat", "GalactiCombat.vcxproj", "{A2F498E9-D878-C835-CDE1-C7764590B446}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GalactiCombatServer", "GameServer\GalactiCombatServer.vcxproj", "{3A915D92-24E8-0781-59E6-F39390D7CB4D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2F498E9-D878-C835-CDE1-C7764590B446}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A2F498E9-D878-C835-CDE1-C7764590B446}.Debug|Win32.Build.0 = Debug|Win32
+		{A2F498E9-D878-C835-CDE1-C7764590B446}.Release|Win32.ActiveCfg = Release|Win32
+		{A2F498E9-D878-C835-CDE1-C7764590B446}.Release|Win32.Build.0 = Release|Win32
+		{3A915D92-24E8-0781-59E6-F39390D7CB4D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3A915D92-24E8-0781-59E6-F39390D7CB4D}.Debug|Win32.Build.0 = Debug|Win32
+		{3A915D92-24E8-0781-59E6-F39390D7CB4D}.Release|Win32.ActiveCfg = Release|Win32
+		{3A915D92-24E8-0781-59E6-F39390D7CB4D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
