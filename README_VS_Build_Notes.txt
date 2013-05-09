@@ -16,7 +16,8 @@ Bullet download: http://code.google.com/p/bullet/
 $(SDL_HOME):
 Make sure that this points to the base directory of
 the SDL library. Additionally, make sure that the include 
-directory contains SDL.h, SDL_audio.h, and SDL_net.h.
+directory contains SDL.h, SDL_audio.h, and SDL_net.h and that
+lib/x86/ contains SDL_net.dll and SDL_net.lib.
 
 SDL download: http://www.libsdl.org/
 SDL_net download: http://www.libsdl.org/projects/SDL_net/
