@@ -177,10 +177,25 @@ void NetworkManagerClient::sendPlayerRotation(const Ogre::Quaternion& rotation)
     free(out);
     //std::cout << "Exiting sendPlayerRotation" << std::endl << std::endl;
 }
+
 //-------------------------------------------------------------------------------------
-void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::list<Bullet*>& bullets)
+void NetworkManagerClient::receiveData()
 {
-    //std::cout << "Entering receiveData" << std::endl << std::endl;
+	if(!SDLNet_SocketReady(TCPServerSock)) return;
+
+	char *inc = NULL;
+	Packet incoming;
+	NetworkUtil::TCPReceive(TCPServerSock, &inc);
+	incoming = NetworkUtil::charArrayToPacket(inc);
+	if(incoming.type == CONNECTION)
+	{
+		std::cout << incoming.message << std::endl;
+	}
+}
+//-------------------------------------------------------------------------------------
+void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::list<Bullet*>& bullets)
+{
+    //std::cout << "Entering requestGameState" << std::endl << std::endl;
     static int iii = 0;
     Packet outgoing;
     Packet infoPacket;
@@ -348,6 +363,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
     free(incoming);
 
 
-    //std::cout << "Exiting receiveData" << std::endl << std::endl;
+    //std::cout << "Exiting requestGameState" << std::endl << std::endl;
 }
 

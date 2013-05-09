@@ -101,7 +101,7 @@ void GalactiCombatServer::removeClient(int i)
 void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
 {
     if(verbose) std::cout << "Entering sendToAll" << std::endl;
-    useTCP = true;	//NOTE: temporary
+    useTCP = true;	//NOTE: temporary, hopefully
     //UDPpacket *UDPPack;//TODO
     
     if(!buf || !clients.size())
@@ -112,7 +112,7 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
         if(useTCP)
         {
             if(NetworkUtil::TCPSend(clients[cindex]->sock, buf)) {
-                //if(verbose) std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
+                if(verbose) std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
                 cindex++;
             }
             else
@@ -433,8 +433,20 @@ void GalactiCombatServer::receiveConnectionPacket(int clientIndex, Packet& incom
     if(verbose) std::cout << "Entering receiveConnectionPacket" << std::endl;
     if(!strcmp(incoming.message, "QUIT"))
     {
-        if(verbose) std::cout << clients[clientIndex]->name << " has quit the game!" << std::endl;
-        this->removeClient(clientIndex); 
+		std::stringstream ss;
+		ss << clients[clientIndex]->name << " has quit the game!";
+        this->removeClient(clientIndex);
+
+		char *message = (char*)malloc(ss.str().length() + 1);
+		strcpy(message, ss.str().c_str());
+        if(verbose) std::cout << message << std::endl;
+
+		Packet outgoing;
+		outgoing.type = CONNECTION;
+		outgoing.message = message;
+		this->sendToAll(NetworkUtil::PacketToCharArray(outgoing), true);
+
+		free(message);
     }
     else
         std::cerr << "Received a non-quit connection packet from " << clients[clientIndex]->name << " after first connection." << std::endl;
