@@ -52,7 +52,7 @@ int NetworkManagerClient::connect(char *host, char *name)
         std::string exception = "fail_to_connect";
         throw exception;
     }
-    
+   /* 
     // open the UDP socket
     //std::cout << "Opening UDP server socket." << std::endl;
     UDPServerSock = NetworkUtil::UDPOpen(0);
@@ -63,7 +63,7 @@ int NetworkManagerClient::connect(char *host, char *name)
         std::string exception = "fail_to_connect";
         throw exception;
     }
-    
+    */
     // login with a name
     Packet pack;
     pack.type = CONNECTION;
@@ -188,9 +188,8 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
     outgoing.message = const_cast<char*>("");
     char* incoming = NULL;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
-
+/*
 	//TODO: Use TCP to send request, but use UDP to receive data
-/*	//FIXME: Fix the other UDP bugs first.
 	UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
 	if(!UDPPack) return;
 
