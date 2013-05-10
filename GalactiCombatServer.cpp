@@ -167,7 +167,7 @@ SDLNet_SocketSet GalactiCombatServer::createSockSet()
     SDLNet_TCP_AddSocket(set, TCPServerSock);
     for(int i = 0; i < clients.size(); i++)
         if(SDLNet_TCP_AddSocket(set, clients[i]->sock) == -1)
-			std::cerr<<"SDLNet_TCP_AddSocket done goofed: "<<SDLNet_GetError()<<std::endl;
+            std::cerr<<"SDLNet_TCP_AddSocket done goofed: "<<SDLNet_GetError()<<std::endl;
 //	SDLNet_UDP_AddSocket(set, UDPServerSock);	//TODO: Uncomment when working on UDP.
     
     if(verbose) std::cout << "Exiting createSockSet" << std::endl << std::endl;
@@ -362,16 +362,16 @@ void GalactiCombatServer::listenForConnections()
             free(pack.message);
 
             // Server crashes when names conflict.
-			int sameName = 0;
-			std::string oldName = name;
-			while(this->findClientByName(name) != -1)
-			{
-				if(verbose) std::cout<<"There is already a user named "<<name<<"."<<std::endl;
-				std::stringstream ss;
-				ss<<oldName<<sameName;
-				sameName++;
-				name = ss.str();
-			}
+            int sameName = 0;
+            std::string oldName = name;
+            while(this->findClientByName(name) != -1)
+            {
+                    if(verbose) std::cout<<"There is already a user named "<<name<<"."<<std::endl;
+                    std::stringstream ss;
+                    ss<<oldName<<sameName;
+                    sameName++;
+                    name = ss.str();
+            }
             Client* client = this->addClient(TCPsock, channel, name);
             
             if(verbose) std::cout << name << " has logged in!" << std::endl;
@@ -456,22 +456,22 @@ void GalactiCombatServer::receiveConnectionPacket(int clientIndex, Packet& incom
     if(verbose) std::cout << "Entering receiveConnectionPacket" << std::endl;
     if(!strcmp(incoming.message, "QUIT"))
     {
-		std::stringstream ss;
-		ss << clients[clientIndex]->name << " has quit the game!";
-		if(verbose) std::cout<<ss<<std::endl;
+        std::stringstream ss;
+        ss << clients[clientIndex]->name << " has quit the game!";
+        if(verbose) std::cout<<ss<<std::endl;
         this->removeClient(clientIndex);
-		/*
-		//FIXME:Cause of segfault?
-		char *message = (char*)malloc(ss.str().length() + 1);
-		strcpy(message, ss.str().c_str());
+            /*
+            //FIXME:Cause of segfault?
+            char *message = (char*)malloc(ss.str().length() + 1);
+            strcpy(message, ss.str().c_str());
 
         Packet outgoing;
         outgoing.type = CONNECTION;
         outgoing.message = message;
         this->sendToAll(NetworkUtil::PacketToCharArray(outgoing), true);
 
-		free(message);
-		*/
+            free(message);
+            */
     }
     else
         std::cerr << "Received a non-quit connection packet from " << clients[clientIndex]->name << " after first connection." << std::endl;
