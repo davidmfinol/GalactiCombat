@@ -278,6 +278,7 @@ void GalactiCombat::updateFromServer(void)
     // Contact server
 //    mNetworkMgr->receiveData();
     mNetworkMgr->requestGameState(mSceneMgr, minerals, spaceShips, bullets);
+
     // Update visual components
     this->updateMinerals();
     this->updateSpaceShips();
