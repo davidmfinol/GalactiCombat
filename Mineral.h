@@ -22,6 +22,7 @@ public:
     virtual void collidedWith(GameObject*);
     virtual std::string getInternalType(void) const;
     
+    // Constants
     static const int MAX_RADIUS;
     static const int MIN_RADIUS;
     static const double RADIUS_INCREASE;

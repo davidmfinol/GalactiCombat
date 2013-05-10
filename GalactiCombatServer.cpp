@@ -88,7 +88,7 @@ void GalactiCombatServer::removeClient(int i)
     //spaceShips.erase(spaceShips.begin() + i);
     
     //Unbind the UDP socket
-    SDLNet_UDP_Unbind(UDPServerSock, clients[i]->channel);
+    //SDLNet_UDP_Unbind(UDPServerSock, clients[i]->channel);
     
     // Remove the client from our list of clients
     SDLNet_TCP_Close(clients[i]->sock);
@@ -101,8 +101,8 @@ void GalactiCombatServer::removeClient(int i)
 void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
 {
     if(verbose) std::cout << "Entering sendToAll" << std::endl;
-    useTCP = true;	//NOTE: temporary
-    UDPpacket *UDPPack;
+    useTCP = true;	//NOTE: temporary, hopefully
+    //UDPpacket *UDPPack;//TODO
     
     if(!buf || !clients.size())
         return;
@@ -112,7 +112,7 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
         if(useTCP)
         {
             if(NetworkUtil::TCPSend(clients[cindex]->sock, buf)) {
-                //if(verbose) std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
+                if(verbose) std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
                 cindex++;
             }
             else
@@ -122,8 +122,9 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
                 std::cerr << "Disconnected" << std::endl;
             }
         }
+		/*
         else //using UDP
-            {
+        {
                 UDPPack = SDLNet_AllocPacket(65535);
                 UDPPack->channel = clients[cindex]->channel;
                 UDPPack->data = (Uint8*)buf;
@@ -131,7 +132,8 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
                 NetworkUtil::UDPSend(UDPServerSock, clients[cindex]->channel, UDPPack);
                 if(verbose) std::cout << "UDPSend."<<std::endl;
                 SDLNet_FreePacket(UDPPack);
-            }
+        }
+		*/
     }
     
     if(verbose) std::cout << "Exiting sendToAll" << std::endl << std::endl;
@@ -153,7 +155,7 @@ SDLNet_SocketSet GalactiCombatServer::createSockSet()
     SDLNet_TCP_AddSocket(set, TCPServerSock);
     for(int i = 0; i < clients.size(); i++)
         SDLNet_TCP_AddSocket(set, clients[i]->sock);
-//	SDLNet_UDP_AddSocket(set, UDPServerSock);	//FIXME: Game hangs on login
+//	SDLNet_UDP_AddSocket(set, UDPServerSock);	//TODO: Game hangs on login
     
     if(verbose) std::cout << "Exiting createSockSet" << std::endl << std::endl;
     return set;
@@ -224,10 +226,12 @@ void GalactiCombatServer::startServer(long portNo)
     
     TCPServerSock = NetworkUtil::TCPOpen(&ip);
     if(!TCPServerSock) exit(4);
-    
+
+    /*
 	UDPServerSock = NetworkUtil::UDPOpen(0);
     if(!UDPServerSock) exit(4);
-    
+    */
+
     //set up the game environment
     if(verbose) std::cout << "Setting up game...." << std::endl;
     mRoot = new Ogre::Root();
@@ -307,7 +311,7 @@ void GalactiCombatServer::serverLoop(void)
                 //this->removeClient(i);
             }
         }
-/*		//UDP messages
+/*		//TODO: UDP messages
 		for(int i = 0; i < clients.size(); i++)
 		{
 			if(verbose) std::cout<<"Checking for UDP messages."<<std::endl;
@@ -336,10 +340,10 @@ void GalactiCombatServer::listenForConnections()
             }
             
             //bind UDP
-            IPaddress *clientIP = SDLNet_TCP_GetPeerAddress(TCPsock);
-            int channel = NetworkUtil::UDPBind(UDPServerSock, -1, clientIP);
-            if(channel == -1) exit(4);	//error has occurred
-            
+            //IPaddress *clientIP = SDLNet_TCP_GetPeerAddress(TCPsock);
+            //int channel = NetworkUtil::UDPBind(UDPServerSock, -1, clientIP);
+            //if(channel == -1) exit(4);	//error has occurred
+            int channel = -1;
             //add the client
             std::string name = pack.message;
             free(pack.message);
@@ -347,7 +351,7 @@ void GalactiCombatServer::listenForConnections()
             Client* client = this->addClient(TCPsock, channel, name);
             
             if(verbose) std::cout << name << " has logged in!" << std::endl;
-            if(verbose) std::cout << name << " has been bound to channel " << channel << "." << std::endl;
+//			if(verbose) std::cout << name << " has been bound to channel " << channel << "." << std::endl;
             if(verbose) std::cout << clients.size() << " players are logged in." << std::endl;
         }
         else
@@ -366,7 +370,7 @@ void GalactiCombatServer::receiveData(int clientIndex)
     Packet incoming;
     incoming.message = NULL;
     
-/*	//FIXME: Not receiving client's UDP packets.
+/*	//TODO: Not receiving client's UDP packets.
 	if(clientIndex == -1)
 	{
 	    UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
@@ -429,8 +433,20 @@ void GalactiCombatServer::receiveConnectionPacket(int clientIndex, Packet& incom
     if(verbose) std::cout << "Entering receiveConnectionPacket" << std::endl;
     if(!strcmp(incoming.message, "QUIT"))
     {
-        if(verbose) std::cout << clients[clientIndex]->name << " has quit the game!" << std::endl;
-        this->removeClient(clientIndex); 
+		std::stringstream ss;
+		ss << clients[clientIndex]->name << " has quit the game!";
+        this->removeClient(clientIndex);
+
+		char *message = (char*)malloc(ss.str().length() + 1);
+		strcpy(message, ss.str().c_str());
+        if(verbose) std::cout << message << std::endl;
+
+		Packet outgoing;
+		outgoing.type = CONNECTION;
+		outgoing.message = message;
+		this->sendToAll(NetworkUtil::PacketToCharArray(outgoing), true);
+
+		free(message);
     }
     else
         std::cerr << "Received a non-quit connection packet from " << clients[clientIndex]->name << " after first connection." << std::endl;
@@ -470,9 +486,9 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
 
     // pack the bullets
     ss << "bullets:" << bullets.size() << ",";
-    for (int in = 0; in < bullets.size(); in++) {
-        std::string name = bullets[in]->getName();
-        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(bullets[in]);
+    for (std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it) {
+        std::string name = (*it)->getName();
+        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(*it);
         char buffer[100];
         sprintf(buffer,"%s,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z);
         ss << buffer;
@@ -485,7 +501,7 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     
     if(verbose) std::cout << "The state info is:             " << outgoing.message << std::endl;
 
-/*	//FIXME: Still workin on it
+/*	//TODO: UDP still broken
 
 	UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
 	if(!UDPPack) return;

@@ -44,7 +44,8 @@ public:
     // Game Logic Transaction
     void sendPlayerInput(ISpaceShipController* controller);
     void sendPlayerRotation(const Ogre::Quaternion& rotation);
-    void receiveData(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::deque<Bullet*>&);
+	void receiveData();
+    void requestGameState(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::list<Bullet*>&);
     
 protected:
     TCPsocket TCPServerSock;

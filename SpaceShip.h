@@ -34,9 +34,8 @@ public:
     virtual std::string getInternalType(void) const;
 
     // Bullet control
-    bool bulletFlying(void);
-    bool isLifeOver(void);
-    void bulletCreated(void);
+    bool canShoot(void);
+    void shootBullet(void);
     void bulletDestroyed(void);
     
     static const double ACCELERATION;
@@ -53,7 +52,7 @@ protected:
     double size;
     double sizeDifference;
     double energy;
-    std::time_t creation_time;
+    std::time_t lastShotTime;
     
 private:
     void setupSpaceShip(void);

@@ -13,7 +13,7 @@
 #endif
 
 #include <vector>
-#include <deque>
+#include <list>
 #include <string>
 #include <sstream>
 #include <cstdlib>
@@ -79,7 +79,7 @@ protected:
     std::vector<GameObject*> walls;
     std::vector<Mineral*> minerals;
     std::vector<SpaceShip*> spaceShips;
-    std::deque<Bullet*> bullets;
+    std::list<Bullet*> bullets;
     
     // For music
     std::time_t startTime;

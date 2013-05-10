@@ -1,7 +1,7 @@
 #include "PhysicsSimulator.h"
 
 //-------------------------------------------------------------------------------------
-PhysicsSimulator::PhysicsSimulator(int maxSphereSize)
+PhysicsSimulator::PhysicsSimulator(int maxSphereSize, int maxShipSize)
 {
     // The following initialization is required by bullet
     // It is based off the HelloWorld.cpp Demo from bullet
@@ -14,7 +14,7 @@ PhysicsSimulator::PhysicsSimulator(int maxSphereSize)
     dynamicsWorld->setGravity(btVector3(0, 0, 0));
     
     // We cache all possible shapes here for better performance
-    defineCollisionShapes(maxSphereSize);
+    defineCollisionShapes(maxSphereSize, maxShipSize);
 }
 //-------------------------------------------------------------------------------------
 PhysicsSimulator::~PhysicsSimulator(void) 
@@ -40,7 +40,7 @@ PhysicsSimulator::~PhysicsSimulator(void)
     delete collisionConfiguration;
 }
 //-------------------------------------------------------------------------------------
-void PhysicsSimulator::defineCollisionShapes(int maxSphereSize)
+void PhysicsSimulator::defineCollisionShapes(int maxSphereSize, int maxShipSize)
 {
     // Default box
     collisionShapes["Box"] = new btBoxShape(btVector3(btScalar(1.), btScalar(1.), btScalar(1.)));
@@ -58,10 +58,10 @@ void PhysicsSimulator::defineCollisionShapes(int maxSphereSize)
         collisionShapes[m.str()] = new btSphereShape(btScalar(i));
     }
     // SpaceShips!
-    for(int i = 1; i <= maxSphereSize; ++i) {
+    for(int i = 1; i <= maxShipSize; ++i) {
         std::ostringstream m;
         m << "SpaceShip" << i;
-        collisionShapes[m.str()] = new btSphereShape(btScalar(i));
+        collisionShapes[m.str()] = new btCapsuleShape(btScalar(i*.2), btScalar(i*.3));
     }
 }
 //-------------------------------------------------------------------------------------
@@ -120,16 +120,20 @@ void PhysicsSimulator::addGameObject (GameObject* obj, double restitution, bool 
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::removeGameObject (GameObject* obj) 
 {
-    dynamicsWorld->removeRigidBody(gameObjects[obj]);
+    std::map<GameObject*, btRigidBody*>::iterator it = gameObjects.find(obj);
+    if(it != gameObjects.end())
+        dynamicsWorld->removeRigidBody(it->second);
 }
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::deleteGameObject (GameObject* obj) 
 {
-    btRigidBody* body = gameObjects[obj];
-    rigidBodies.erase(body);
-    delete gameObjects[obj]->getMotionState();
-    delete gameObjects[obj];
-    gameObjects.erase(obj);
+    std::map<GameObject*, btRigidBody*>::iterator it = gameObjects.find(obj);
+    if(it != gameObjects.end()) {
+        rigidBodies.erase(it->second);
+        delete it->second->getMotionState();
+        delete it->second;
+        gameObjects.erase(it);
+    }
 }
 //-------------------------------------------------------------------------------------
 Ogre::Vector3 PhysicsSimulator::getGameObjectPosition(GameObject* obj)
@@ -199,10 +203,10 @@ void PhysicsSimulator::stepSimulation(const float elapsedTime, int maxSubSteps, 
     for (int i=0;i<numManifolds;i++) {
         btPersistentManifold* contactManifold =  dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
 #ifdef _WIN32
-		btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
+        btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
         btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
 #else
-		btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold->getBody0());
+        btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold->getBody0());
         btCollisionObject* obB = static_cast<btCollisionObject*>(contactManifold->getBody1());
 #endif
         btRigidBody* bodyA = btRigidBody::upcast(obA);
