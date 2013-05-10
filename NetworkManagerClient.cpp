@@ -45,7 +45,7 @@ int NetworkManagerClient::connect(char *host, char *name)
         std::string exception = "fail_to_connect";
         throw exception;
     }
-
+	/*
 	set = SDLNet_AllocSocketSet(1);
 	if(!set){
 		std::cerr<<"SDLNet_AllocSocketSet done goofed: "<<SDLNet_GetError()<<std::endl;
@@ -59,7 +59,7 @@ int NetworkManagerClient::connect(char *host, char *name)
 		SDLNet_Quit();
 		throw exception;
 	}
-	
+	*/	
    /* 
     // open the UDP socket
     //std::cout << "Opening UDP server socket." << std::endl;
