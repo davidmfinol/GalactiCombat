@@ -44,7 +44,7 @@ public:
     // Game Logic Transaction
     void sendPlayerInput(ISpaceShipController* controller);
     void sendPlayerRotation(const Ogre::Quaternion& rotation);
-	void receiveData();
+    void receiveData();
     void requestGameState(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::list<Bullet*>&);
     
 protected:
@@ -53,6 +53,6 @@ protected:
     IPaddress serverIP;
     std::string mName;
     bool connected;
-	SDLNet_SocketSet set;
+    SDLNet_SocketSet set;
 };
 #endif //#ifndef __NetworkManagerClient_h_
