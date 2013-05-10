@@ -24,20 +24,13 @@ int NetworkManagerClient::connect(char *host, char *name)
     //std::cout << "Entering connect" << std::endl << std::endl;
     Uint16 port = (Uint16) TCP_PORT;
     
-    SDLNet_SocketSet set = SDLNet_AllocSocketSet(1);
-    if(!set)
-    {
-        std::cerr << "SDLNet_AllocSocketSet done goofed: " << SDLNet_GetError() << std::endl;
-        SDLNet_Quit();
-        SDL_Quit();
-        exit(4); //most of the time this is a major error, but do what you want.
-    }
-    
     // Resolve the argument into an IPaddress type 
     //std::cout << "Connecting to " << host << " port " << port << std::endl;
     IPaddress ip;
     if(NetworkUtil::ResolveHost(&ip, host, port)==-1)
     {
+		SDLNet_Quit();
+		//SDL_Quit();
         std::string exception = "fail_to_connect";
         throw exception;
     }
@@ -48,11 +41,26 @@ int NetworkManagerClient::connect(char *host, char *name)
     if(!TCPServerSock)
     {
         SDLNet_Quit();
-        SDL_Quit();
+        //SDL_Quit();
         std::string exception = "fail_to_connect";
         throw exception;
     }
-    
+
+	set = SDLNet_AllocSocketSet(1);
+	if(!set){
+		std::cerr<<"SDLNet_AllocSocketSet done goofed: "<<SDLNet_GetError()<<std::endl;
+		std::string exception = "fail_to_connect";
+		SDLNet_Quit();
+		throw exception;
+	}
+	if(SDLNet_TCP_AddSocket(set, TCPServerSock) == -1){
+		std::cerr<<"SDLNet_TCP_AddSocket done goofed: "<<SDLNet_GetError()<<std::endl;
+		std::string exception = "fail_to_connect";
+		SDLNet_Quit();
+		throw exception;
+	}
+	
+   /* 
     // open the UDP socket
     //std::cout << "Opening UDP server socket." << std::endl;
     UDPServerSock = NetworkUtil::UDPOpen(0);
@@ -63,7 +71,7 @@ int NetworkManagerClient::connect(char *host, char *name)
         std::string exception = "fail_to_connect";
         throw exception;
     }
-    
+    */
     // login with a name
     Packet pack;
     pack.type = CONNECTION;
@@ -72,6 +80,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     if(!NetworkUtil::TCPSend(TCPServerSock, out))
     {
         SDLNet_TCP_Close(TCPServerSock);
+		std::cerr<<"Something done goofed when trying to connect to server."<<std::endl;
         exit(8);
     }
     //std::cout << "Sent " << out << std::endl;
@@ -177,10 +186,26 @@ void NetworkManagerClient::sendPlayerRotation(const Ogre::Quaternion& rotation)
     free(out);
     //std::cout << "Exiting sendPlayerRotation" << std::endl << std::endl;
 }
+
 //-------------------------------------------------------------------------------------
-void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::list<Bullet*>& bullets)
+void NetworkManagerClient::receiveData()
 {
-    //std::cout << "Entering receiveData" << std::endl << std::endl;
+	if(!NetworkUtil::CheckSockets(set, 0)) return;
+	std::cout<<"Entering receiveData."<<std::endl;
+	char *inc = NULL;
+	Packet incoming;
+	NetworkUtil::TCPReceive(TCPServerSock, &inc);
+	incoming = NetworkUtil::charArrayToPacket(inc);
+	if(incoming.type == CONNECTION)
+	{
+		std::cout << incoming.message << std::endl;
+	}
+	std::cout<<"Exiting receiveData."<<std::endl;
+}
+//-------------------------------------------------------------------------------------
+void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::list<Bullet*>& bullets)
+{
+    //std::cout << "Entering requestGameState" << std::endl << std::endl;
     static int iii = 0;
     Packet outgoing;
     Packet infoPacket;
@@ -188,9 +213,8 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
     outgoing.message = const_cast<char*>("");
     char* incoming = NULL;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
-
-	//TODO: Use TCP to send request, but use UDP to receive data
-/*	//FIXME: Fix the other UDP bugs first.
+/*
+	//TODO: Use TCP to send request, but use UDP to receive data.
 	UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
 	if(!UDPPack) return;
 
@@ -349,6 +373,6 @@ void NetworkManagerClient::receiveData(Ogre::SceneManager* sceneManager, std::ve
     free(incoming);
 
 
-    //std::cout << "Exiting receiveData" << std::endl << std::endl;
+    //std::cout << "Exiting requestGameState" << std::endl << std::endl;
 }
 

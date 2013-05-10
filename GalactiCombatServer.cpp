@@ -30,7 +30,7 @@ int GalactiCombatServer::findClientBySocket(TCPsocket sock)
     for(i = 0; i < clients.size(); i++)
         if(clients[i]->sock == sock)
             return i;
-    std::cerr << "Failed to find with findClientBySocket" << std::endl << std::endl;
+    if(verbose) std::cout << "Failed to find with findClientBySocket" << std::endl << std::endl;
     return -1;
 }
 //-------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ int GalactiCombatServer::findClientByName(std::string name)
     for(i = 0; i < clients.size(); i++)
         if(clients[i]->name == name)
             return i;
-    std::cerr << "Failed to find with findClientByName - " << name << std::endl << std::endl;
+    if(verbose) std::cout << "Failed to find with findClientByName - " << name << std::endl << std::endl;
     return -1;
 }
 //-------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ void GalactiCombatServer::removeClient(int i)
     //spaceShips.erase(spaceShips.begin() + i);
     
     //Unbind the UDP socket
-    SDLNet_UDP_Unbind(UDPServerSock, clients[i]->channel);
+    //SDLNet_UDP_Unbind(UDPServerSock, clients[i]->channel);
     
     // Remove the client from our list of clients
     SDLNet_TCP_Close(clients[i]->sock);
@@ -101,18 +101,31 @@ void GalactiCombatServer::removeClient(int i)
 void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
 {
     if(verbose) std::cout << "Entering sendToAll" << std::endl;
-    useTCP = true;	//NOTE: temporary
-    UDPpacket *UDPPack;
+    useTCP = true;	//NOTE: temporary, hopefully
+    //UDPpacket *UDPPack;	//TODO: Uncomment when working on UDP
     
-    if(!buf || !clients.size())
+    if(!buf){
+		if(verbose){
+			std::cout<<"Message is empty!"<<std::endl;
+			std::cout<<"Exiting sendToAll"<<std::endl;
+		}
         return;
+	}
+
+	if(!clients.size()){
+		if(verbose){
+			std::cout<<"No clients to send to!"<<std::endl;
+			std::cout<<"Exiting sendToAll"<<std::endl;
+		}
+		return;
+	}
     
     for(int cindex = 0; cindex < clients.size(); )
     {
         if(useTCP)
         {
             if(NetworkUtil::TCPSend(clients[cindex]->sock, buf)) {
-                //if(verbose) std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
+                if(verbose) std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
                 cindex++;
             }
             else
@@ -122,8 +135,9 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
                 std::cerr << "Disconnected" << std::endl;
             }
         }
+		/*
         else //using UDP
-            {
+        {
                 UDPPack = SDLNet_AllocPacket(65535);
                 UDPPack->channel = clients[cindex]->channel;
                 UDPPack->data = (Uint8*)buf;
@@ -131,7 +145,8 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
                 NetworkUtil::UDPSend(UDPServerSock, clients[cindex]->channel, UDPPack);
                 if(verbose) std::cout << "UDPSend."<<std::endl;
                 SDLNet_FreePacket(UDPPack);
-            }
+        }
+		*/
     }
     
     if(verbose) std::cout << "Exiting sendToAll" << std::endl << std::endl;
@@ -142,8 +157,7 @@ SDLNet_SocketSet GalactiCombatServer::createSockSet()
     if(verbose) std::cout << "Entering createSockSet" << std::endl;
     static SDLNet_SocketSet set = NULL;
     
-    if(set)
-        SDLNet_FreeSocketSet(set);
+    if(set) SDLNet_FreeSocketSet(set);
     set = SDLNet_AllocSocketSet(clients.size() + 1);
     if(!set)
     {
@@ -152,8 +166,9 @@ SDLNet_SocketSet GalactiCombatServer::createSockSet()
     }
     SDLNet_TCP_AddSocket(set, TCPServerSock);
     for(int i = 0; i < clients.size(); i++)
-        SDLNet_TCP_AddSocket(set, clients[i]->sock);
-//	SDLNet_UDP_AddSocket(set, UDPServerSock);	//FIXME: Game hangs on login
+        if(SDLNet_TCP_AddSocket(set, clients[i]->sock) == -1)
+			std::cerr<<"SDLNet_TCP_AddSocket done goofed: "<<SDLNet_GetError()<<std::endl;
+//	SDLNet_UDP_AddSocket(set, UDPServerSock);	//TODO: Uncomment when working on UDP.
     
     if(verbose) std::cout << "Exiting createSockSet" << std::endl << std::endl;
     return set;
@@ -224,10 +239,12 @@ void GalactiCombatServer::startServer(long portNo)
     
     TCPServerSock = NetworkUtil::TCPOpen(&ip);
     if(!TCPServerSock) exit(4);
-    
+
+    /*
 	UDPServerSock = NetworkUtil::UDPOpen(0);
     if(!UDPServerSock) exit(4);
-    
+    */
+
     //set up the game environment
     if(verbose) std::cout << "Setting up game...." << std::endl;
     mRoot = new Ogre::Root();
@@ -307,7 +324,7 @@ void GalactiCombatServer::serverLoop(void)
                 //this->removeClient(i);
             }
         }
-/*		//UDP messages
+/*		//TODO: UDP messages
 		for(int i = 0; i < clients.size(); i++)
 		{
 			if(verbose) std::cout<<"Checking for UDP messages."<<std::endl;
@@ -336,18 +353,28 @@ void GalactiCombatServer::listenForConnections()
             }
             
             //bind UDP
-            IPaddress *clientIP = SDLNet_TCP_GetPeerAddress(TCPsock);
-            int channel = NetworkUtil::UDPBind(UDPServerSock, -1, clientIP);
-            if(channel == -1) exit(4);	//error has occurred
-            
+            //IPaddress *clientIP = SDLNet_TCP_GetPeerAddress(TCPsock);
+            //int channel = NetworkUtil::UDPBind(UDPServerSock, -1, clientIP);
+            //if(channel == -1) exit(4);	//error has occurred
+            int channel = -1;//TODO: Remove this line when working on UDP.
             //add the client
             std::string name = pack.message;
             free(pack.message);
-            // TODO: FIXME: add some checks for repeated names. Could cause crash
+
+            // Server crashes when names conflict.
+			int sameName = 0;
+			std::string oldName = name;
+			while(this->findClientByName(name) != -1)
+			{
+				if(verbose) std::cout<<"There is already a user named "<<name<<"."<<std::endl;
+				std::stringstream ss;
+				ss<<oldName<<sameName;
+				sameName++;
+				name = ss.str();
+			}
             Client* client = this->addClient(TCPsock, channel, name);
             
             if(verbose) std::cout << name << " has logged in!" << std::endl;
-            if(verbose) std::cout << name << " has been bound to channel " << channel << "." << std::endl;
             if(verbose) std::cout << clients.size() << " players are logged in." << std::endl;
         }
         else
@@ -366,7 +393,7 @@ void GalactiCombatServer::receiveData(int clientIndex)
     Packet incoming;
     incoming.message = NULL;
     
-/*	//FIXME: Not receiving client's UDP packets.
+/*	//TODO: Not receiving client's UDP packets.
 	if(clientIndex == -1)
 	{
 	    UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
@@ -429,8 +456,20 @@ void GalactiCombatServer::receiveConnectionPacket(int clientIndex, Packet& incom
     if(verbose) std::cout << "Entering receiveConnectionPacket" << std::endl;
     if(!strcmp(incoming.message, "QUIT"))
     {
-        if(verbose) std::cout << clients[clientIndex]->name << " has quit the game!" << std::endl;
-        this->removeClient(clientIndex); 
+		std::stringstream ss;
+		ss << clients[clientIndex]->name << " has quit the game!";
+        this->removeClient(clientIndex);
+
+		char *message = (char*)malloc(ss.str().length() + 1);
+		strcpy(message, ss.str().c_str());
+        if(verbose) std::cout << message << std::endl;
+
+		Packet outgoing;
+		outgoing.type = CONNECTION;
+		outgoing.message = message;
+		this->sendToAll(NetworkUtil::PacketToCharArray(outgoing), true);
+
+		free(message);
     }
     else
         std::cerr << "Received a non-quit connection packet from " << clients[clientIndex]->name << " after first connection." << std::endl;
@@ -485,7 +524,7 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
     
     if(verbose) std::cout << "The state info is:             " << outgoing.message << std::endl;
 
-/*	//FIXME: Still workin on it
+/*	//TODO: UDP still broken
 
 	UDPpacket *UDPPack = NetworkUtil::AllocPacket(65535);
 	if(!UDPPack) return;

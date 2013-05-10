@@ -275,7 +275,8 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
-    mNetworkMgr->receiveData(mSceneMgr, minerals, spaceShips, bullets);
+	mNetworkMgr->receiveData();
+    mNetworkMgr->requestGameState(mSceneMgr, minerals, spaceShips, bullets);
     // Update visual components
     this->updateMinerals();
     this->updateSpaceShips();
@@ -337,25 +338,25 @@ void GalactiCombat::gameLoop(float elapsedTime)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
 {
-    Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
-    Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
-    Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
-    pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
-    velocity += orientation*Ogre::Vector3(0, 0, -500);
-    
-    static int bulletID = 0;
-    std::string bulletName("Bullet");
-    char idChar[4];
-    sprintf(idChar, "%d", bulletID);
-    bulletName += idChar;
-    if(!isServer)
-        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
-    else
-        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
-    physicsSimulator->addGameObject(bullets.back());
-    physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
-    physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
-    bulletID++;
+        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
+        Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
+        Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
+        pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
+        velocity += orientation*Ogre::Vector3(0, 0, -5000);
+        
+        static int bulletID = 0;
+        std::string bulletName("Bullet");
+        char idChar[4];
+        sprintf(idChar, "%d", bulletID);
+        bulletName += idChar;
+        if(!isServer)
+            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
+        else
+            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
+        physicsSimulator->addGameObject(bullets.back());
+        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
+        physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
+        bulletID++;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateSpaceShips(void)
