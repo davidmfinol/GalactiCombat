@@ -441,8 +441,7 @@ void GalactiCombatServer::receiveData(int clientIndex)
             receiveWallsPacket(clientIndex, incoming); break;
         case SCORE:
             receiveScorePacket(clientIndex, incoming); break;
-        default:
-            //std::cerr << "Unrecognized Packet type from " << clients[clientIndex]->name << std::endl;
+        //default: std::cerr << "Unrecognized Packet type from " << clients[clientIndex]->name << std::endl;
     }
     if(incoming.message)
         free(incoming.message);
