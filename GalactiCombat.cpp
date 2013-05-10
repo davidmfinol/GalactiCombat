@@ -263,9 +263,14 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
         if(mNetworkMgr->isOnline())
             updateFromServer();
         
+        // These parts always need to be updated
+        this->updateMinerals();
+        this->updateSpaceShips();
+        this->updateBullets();
+        
         // Update GUI
         mGUIMgr->setTimeLabel(getCurrentTime()); // FIXME: TIME FROM SERVER
-        mGUIMgr->informEnergy(spaceShips[0]->getEnergy());// FIXME: ENERGY FROM SERVER
+        mGUIMgr->informEnergy(spaceShips[0]->getEnergy());
         
         // Background music
         this->loopBackgroundMusic();
@@ -275,14 +280,8 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
-    // Contact server
-//    mNetworkMgr->receiveData();
+    //mNetworkMgr->receiveData();
     mNetworkMgr->requestGameState(mSceneMgr, minerals, spaceShips, bullets);
-
-    // Update visual components
-    this->updateMinerals();
-    this->updateSpaceShips();
-    this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
@@ -331,34 +330,29 @@ void GalactiCombat::gameLoop(float elapsedTime)
     
     // Step the physics simulator
     physicsSimulator->stepSimulation(elapsedTime, MAX_SUB_STEPS, TIME_STEP);
-    
-    // Update after physics
-    this->updateMinerals();
-    this->updateSpaceShips();
-    this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
 {
-        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
-        Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
-        Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
-        pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
-        velocity += orientation*Ogre::Vector3(0, 0, -5000);
-        
-        static int bulletID = 0;
-        std::string bulletName("Bullet");
-        char idChar[4];
-        sprintf(idChar, "%d", bulletID);
-        bulletName += idChar;
-        if(!isServer)
-            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
-        else
-            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
-        physicsSimulator->addGameObject(bullets.back());
-        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
-        physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
-        bulletID++;
+    Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
+    Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
+    Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
+    pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
+    velocity += orientation*Ogre::Vector3(0, 0, -5000);
+    
+    static int bulletID = 0;
+    std::string bulletName("Bullet");
+    char idChar[4];
+    sprintf(idChar, "%d", bulletID);
+    bulletName += idChar;
+    if(!isServer)
+        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
+    else
+        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
+    physicsSimulator->addGameObject(bullets.back());
+    physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
+    physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
+    bulletID++;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateSpaceShips(void)
@@ -439,12 +433,6 @@ std::string GalactiCombat::getCurrentTime(void)
         min = 4;
         sec = 59;
         mGUIMgr->resetTimerDone();
-    }
-    if (min != 0 && sec <= 10) {
-        if (sec == 0) {
-            crazyEnergyInjection();
-        }
-        mGUIMgr->countDown(sec, INJECT_CODE);
     }
     if (min == 0 && sec <= 10) {
         if (sec == 0) {

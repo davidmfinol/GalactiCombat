@@ -71,6 +71,18 @@ double SpaceShip::getEnergy() const
     return energy;
 }
 //-------------------------------------------------------------------------------------
+void SpaceShip::adjustEnergy(double e) 
+{
+    energy += e;
+    energy = energy > MAX_ENERGY ? MAX_ENERGY : energy;
+    energy = energy < MIN_ENERGY ? MIN_ENERGY : energy;
+}
+//-------------------------------------------------------------------------------------
+void SpaceShip::setEnergy(double e)
+{
+    energy = e;
+}
+//-------------------------------------------------------------------------------------
 bool SpaceShip::canShoot()
 {
     return std::time(0) != lastShotTime;
@@ -80,13 +92,6 @@ void SpaceShip::shootBullet()
 {
     lastShotTime = std::time(0);
     adjustEnergy(BULLET_COST);
-}
-//-------------------------------------------------------------------------------------
-void SpaceShip::adjustEnergy(double e) 
-{
-    energy += e;
-    energy = energy > MAX_ENERGY ? MAX_ENERGY : energy;
-    energy = energy < MIN_ENERGY ? MIN_ENERGY : energy;
 }
 //-------------------------------------------------------------------------------------
 double SpaceShip::getSize() const

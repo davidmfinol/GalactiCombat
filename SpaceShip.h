@@ -21,16 +21,17 @@ public:
     
     // SpaceShip has energy
     double getEnergy(void) const;
-    void adjustEnergy(double);
+    void adjustEnergy(double e);
+    void setEnergy(double e);
     
     // SpaceShip size varies
     double getSize(void) const;
     double getSizeDifference(void) const;
-    void adjustSize(double);
+    void adjustSize(double s);
     
     // Phyics collaboration
     virtual int getMass(void) const;
-    virtual void collidedWith(GameObject*);
+    virtual void collidedWith(GameObject* other);
     virtual std::string getInternalType(void) const;
 
     // Bullet control

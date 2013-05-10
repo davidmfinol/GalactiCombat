@@ -104,32 +104,29 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
     useTCP = true;	//NOTE: temporary, hopefully
     //UDPpacket *UDPPack;	//TODO: Uncomment when working on UDP
     
-    if(!buf){
-		if(verbose){
-			std::cout<<"Message is empty!"<<std::endl;
-			std::cout<<"Exiting sendToAll"<<std::endl;
-		}
+    if(!buf) {
+        if(verbose) {
+            std::cout<<"Message is empty!"<<std::endl;
+            std::cout<<"Exiting sendToAll"<<std::endl;
+        }
         return;
-	}
+    }
 
-	if(!clients.size()){
-		if(verbose){
-			std::cout<<"No clients to send to!"<<std::endl;
-			std::cout<<"Exiting sendToAll"<<std::endl;
-		}
-		return;
-	}
+    if(!clients.size()) {
+        if(verbose) {
+            std::cout<<"No clients to send to!"<<std::endl;
+            std::cout<<"Exiting sendToAll"<<std::endl;
+        }
+        return;
+    }
     
-    for(int cindex = 0; cindex < clients.size(); )
-    {
-        if(useTCP)
-        {
+    for(int cindex = 0; cindex < clients.size(); ) {
+        if(useTCP) {
             if(NetworkUtil::TCPSend(clients[cindex]->sock, buf)) {
                 if(verbose) std::cout << "Sent message '" << buf << "' to " << clients[cindex]->name << std::endl;
                 cindex++;
             }
-            else
-            {
+            else {
                 std::cerr << "Failed to send message '" << buf << "' to " << clients[cindex]->name << std::endl;
                 this->removeClient(cindex);
                 std::cerr << "Disconnected" << std::endl;
@@ -282,6 +279,9 @@ void GalactiCombatServer::serverLoop(void)
             {
                 if(verbose) std::cout << "Running the Game loop with elapsed time: " << elapsedTime << std::endl;
                 gameLoop(elapsedTime);
+                updateMinerals();
+                updateSpaceShips();
+                updateBullets();
                 if(verbose) std::cout << "Game loop has been run." << std::endl;
                 prevTime = currTime;
             }
@@ -350,6 +350,7 @@ void GalactiCombatServer::listenForConnections()
                 std::cerr << "Connection Error. Someone sent something other than a CONNECTION packet as a new socket." << std::endl;
                 return;
             }
+            free(msg);
             
             //bind UDP
             //IPaddress *clientIP = SDLNet_TCP_GetPeerAddress(TCPsock);
@@ -516,6 +517,10 @@ void GalactiCombatServer::receiveStatePacket(int clientIndex, Packet& incoming)
         sprintf(buffer,"%s,%.1f,%.1f,%.1f,", const_cast<char*>(name.c_str()), pos.x, pos.y, pos.z);
         ss << buffer;
     }
+    
+    char buffer[20];
+    sprintf(buffer,"%f", clients[clientIndex]->ship->getEnergy());
+    ss << buffer;
 
     // pack the message
     char* packetMessage = (char*)malloc(ss.str().length() + 1);
@@ -658,19 +663,19 @@ extern "C" {
         if(argc > 1)
         {
             if(strcmp(argv[1],"-v") || strcmp(argv[1],"--verbose"))
-			{
-				verbose = true;
-	            std::cout << "Verbose Enabled" << std::endl;
-			}
-			/*//TODO: Execution never reaches here.
-			else if(strcmp(argv[1],"-h") || strcmp(argv[1],"--help"))
-			{
-				std::cout<<std::endl<<"Usage: ./GalactiCombatServer [OPTION]"<<std::endl;
-				std::cout<<"  -h, --help       display this help text"<<std::endl;
-				std::cout<<"  -v, --verbose    print debug statements"<<std::endl;
-				return 0;
-			}
-			*/
+            {
+                verbose = true;
+                std::cout << "Verbose Enabled" << std::endl;
+            }
+            /*//TODO: Execution never reaches here.
+            else if(strcmp(argv[1],"-h") || strcmp(argv[1],"--help"))
+            {
+                std::cout<<std::endl<<"Usage: ./GalactiCombatServer [OPTION]"<<std::endl;
+                std::cout<<"  -h, --help       display this help text"<<std::endl;
+                std::cout<<"  -v, --verbose    print debug statements"<<std::endl;
+                return 0;
+            }
+            */
         }
         GalactiCombatServer *server = new GalactiCombatServer(verbose);
         server->startServer(TCP_PORT);

@@ -42,7 +42,7 @@ public:
     void quit();
     
     // Game Logic Transaction
-    void sendPlayerInput(ISpaceShipController* controller);
+    void sendPlayerInput(ISpaceShipController* ship);
     void sendPlayerRotation(const Ogre::Quaternion& rotation);
     void receiveData();
     void requestGameState(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::list<Bullet*>&);
