@@ -241,7 +241,7 @@ void GalactiCombatServer::startServer(long portNo)
     if(!TCPServerSock) exit(4);
 
     /*
-	UDPServerSock = NetworkUtil::UDPOpen(0);
+    UDPServerSock = NetworkUtil::UDPOpen(0);
     if(!UDPServerSock) exit(4);
     */
 
@@ -258,7 +258,7 @@ void GalactiCombatServer::startServer(long portNo)
     if(verbose) std::cout << "Host: " << host << std::endl;
     
     if(verbose) std::cout << "Exiting startServer" << std::endl << std::endl;
-	std::cout<<"Ready!"<<std::endl;
+    std::cout<<"Ready!"<<std::endl;
     serverLoop();
 }
 //-------------------------------------------------------------------------------------
@@ -456,20 +456,20 @@ void GalactiCombatServer::receiveConnectionPacket(int clientIndex, Packet& incom
     if(verbose) std::cout << "Entering receiveConnectionPacket" << std::endl;
     if(!strcmp(incoming.message, "QUIT"))
     {
-		std::stringstream ss;
-		ss << clients[clientIndex]->name << " has quit the game!";
+        std::stringstream ss;
+        ss << clients[clientIndex]->name << " has quit the game!";
         this->removeClient(clientIndex);
 
-		char *message = (char*)malloc(ss.str().length() + 1);
-		strcpy(message, ss.str().c_str());
+        char *message = (char*)malloc(ss.str().length() + 1);
+        strcpy(message, ss.str().c_str());
         if(verbose) std::cout << message << std::endl;
 
-		Packet outgoing;
-		outgoing.type = CONNECTION;
-		outgoing.message = message;
-		this->sendToAll(NetworkUtil::PacketToCharArray(outgoing), true);
+        Packet outgoing;
+        outgoing.type = CONNECTION;
+        outgoing.message = message;
+        this->sendToAll(NetworkUtil::PacketToCharArray(outgoing), true);
 
-		free(message);
+        free(message);
     }
     else
         std::cerr << "Received a non-quit connection packet from " << clients[clientIndex]->name << " after first connection." << std::endl;
@@ -628,7 +628,7 @@ void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
 void GalactiCombatServer::receiveWallsPacket(int clientIndex, Packet& incoming)
 {
     if(verbose) std::cout << "Entering receiveWallsPacket" << std::endl;
-    // FIXME: THIS PACKET TYPE DOESN'T SEEM TO BE NECESSARY
+    // TODO: THIS PACKET TYPE WON'T BE NECESSARY UNTIL WALLS DIFFER
     if(verbose) std::cout << "Exiting receiveWallsPacket" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
