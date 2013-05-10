@@ -190,17 +190,17 @@ void NetworkManagerClient::sendPlayerRotation(const Ogre::Quaternion& rotation)
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::receiveData()
 {
-	if(!NetworkUtil::CheckSockets(set, 0)) return;
-	std::cout<<"Entering receiveData."<<std::endl;
-	char *inc = NULL;
-	Packet incoming;
-	NetworkUtil::TCPReceive(TCPServerSock, &inc);
-	incoming = NetworkUtil::charArrayToPacket(inc);
-	if(incoming.type == CONNECTION)
-	{
-		std::cout << incoming.message << std::endl;
-	}
-	std::cout<<"Exiting receiveData."<<std::endl;
+    if(!NetworkUtil::CheckSockets(set, 0)) return;
+    std::cout<<"Entering receiveData."<<std::endl;
+    char *inc = NULL;
+    Packet incoming;
+    NetworkUtil::TCPReceive(TCPServerSock, &inc);
+    incoming = NetworkUtil::charArrayToPacket(inc);
+    if(incoming.type == CONNECTION)
+    {
+        std::cout << incoming.message << std::endl;
+    }
+    std::cout<<"Exiting receiveData."<<std::endl;
 }
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::list<Bullet*>& bullets)
