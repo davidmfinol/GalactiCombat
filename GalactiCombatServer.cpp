@@ -157,8 +157,7 @@ SDLNet_SocketSet GalactiCombatServer::createSockSet()
     if(verbose) std::cout << "Entering createSockSet" << std::endl;
     static SDLNet_SocketSet set = NULL;
     
-    if(set)
-        SDLNet_FreeSocketSet(set);
+    if(set) SDLNet_FreeSocketSet(set);
     set = SDLNet_AllocSocketSet(clients.size() + 1);
     if(!set)
     {
@@ -167,8 +166,9 @@ SDLNet_SocketSet GalactiCombatServer::createSockSet()
     }
     SDLNet_TCP_AddSocket(set, TCPServerSock);
     for(int i = 0; i < clients.size(); i++)
-        SDLNet_TCP_AddSocket(set, clients[i]->sock);
-//	SDLNet_UDP_AddSocket(set, UDPServerSock);	//TODO: Game hangs on login
+        if(SDLNet_TCP_AddSocket(set, clients[i]->sock) == -1)
+			std::cerr<<"SDLNet_TCP_AddSocket done goofed: "<<SDLNet_GetError()<<std::endl;
+//	SDLNet_UDP_AddSocket(set, UDPServerSock);	//TODO: Uncomment when working on UDP.
     
     if(verbose) std::cout << "Exiting createSockSet" << std::endl << std::endl;
     return set;

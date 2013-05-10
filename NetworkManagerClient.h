@@ -53,5 +53,6 @@ protected:
     IPaddress serverIP;
     std::string mName;
     bool connected;
+	SDLNet_SocketSet set;
 };
 #endif //#ifndef __NetworkManagerClient_h_
