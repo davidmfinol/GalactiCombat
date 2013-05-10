@@ -277,9 +277,8 @@ void GalactiCombatServer::serverLoop(void)
             clock_gettime(CLOCK_MONOTONIC, &currTime);
             float elapsedTime = (currTime.tv_sec*1000000000 + currTime.tv_nsec) - (prevTime.tv_sec*1000000000 + prevTime.tv_nsec);
             elapsedTime /= 1000000000; //convert from nanoseconds to seconds
-            if(elapsedTime < TIME_STEP/2)
-                std::cerr << "Elapsed time between iterations of game loop too small.... Skipping iteration." << std::endl;
-            else if(elapsedTime < MAX_SUB_STEPS*TIME_STEP) 
+            //if(elapsedTime < TIME_STEP/2) std::cerr << "Elapsed time between iterations of game loop too small.... Skipping iteration." << std::endl;
+            if(elapsedTime >= TIME_STEP/2 && elapsedTime < MAX_SUB_STEPS*TIME_STEP) 
             {
                 if(verbose) std::cout << "Running the Game loop with elapsed time: " << elapsedTime << std::endl;
                 gameLoop(elapsedTime);
@@ -443,7 +442,7 @@ void GalactiCombatServer::receiveData(int clientIndex)
         case SCORE:
             receiveScorePacket(clientIndex, incoming); break;
         default:
-            std::cerr << "Unrecognized Packet type from " << clients[clientIndex]->name << std::endl;
+            //std::cerr << "Unrecognized Packet type from " << clients[clientIndex]->name << std::endl;
     }
     if(incoming.message)
         free(incoming.message);
