@@ -30,7 +30,7 @@ int GalactiCombatServer::findClientBySocket(TCPsocket sock)
     for(i = 0; i < clients.size(); i++)
         if(clients[i]->sock == sock)
             return i;
-    std::cerr << "Failed to find with findClientBySocket" << std::endl << std::endl;
+    if(verbose) std::cout << "Failed to find with findClientBySocket" << std::endl << std::endl;
     return -1;
 }
 //-------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ int GalactiCombatServer::findClientByName(std::string name)
     for(i = 0; i < clients.size(); i++)
         if(clients[i]->name == name)
             return i;
-    std::cerr << "Failed to find with findClientByName - " << name << std::endl << std::endl;
+    if(verbose) std::cout << "Failed to find with findClientByName - " << name << std::endl << std::endl;
     return -1;
 }
 //-------------------------------------------------------------------------------------
@@ -102,10 +102,23 @@ void GalactiCombatServer::sendToAll(char *buf, bool useTCP)
 {
     if(verbose) std::cout << "Entering sendToAll" << std::endl;
     useTCP = true;	//NOTE: temporary, hopefully
-    //UDPpacket *UDPPack;//TODO
+    //UDPpacket *UDPPack;	//TODO: Uncomment when working on UDP
     
-    if(!buf || !clients.size())
+    if(!buf){
+		if(verbose){
+			std::cout<<"Message is empty!"<<std::endl;
+			std::cout<<"Exiting sendToAll"<<std::endl;
+		}
         return;
+	}
+
+	if(!clients.size()){
+		if(verbose){
+			std::cout<<"No clients to send to!"<<std::endl;
+			std::cout<<"Exiting sendToAll"<<std::endl;
+		}
+		return;
+	}
     
     for(int cindex = 0; cindex < clients.size(); )
     {
@@ -343,15 +356,25 @@ void GalactiCombatServer::listenForConnections()
             //IPaddress *clientIP = SDLNet_TCP_GetPeerAddress(TCPsock);
             //int channel = NetworkUtil::UDPBind(UDPServerSock, -1, clientIP);
             //if(channel == -1) exit(4);	//error has occurred
-            int channel = -1;
+            int channel = -1;//TODO: Remove this line when working on UDP.
             //add the client
             std::string name = pack.message;
             free(pack.message);
-            // TODO: FIXME: add some checks for repeated names. Could cause crash
+
+            // Server crashes when names conflict.
+			int sameName = 0;
+			std::string oldName = name;
+			while(this->findClientByName(name) != -1)
+			{
+				if(verbose) std::cout<<"There is already a user named "<<name<<"."<<std::endl;
+				std::stringstream ss;
+				ss<<oldName<<sameName;
+				sameName++;
+				name = ss.str();
+			}
             Client* client = this->addClient(TCPsock, channel, name);
             
             if(verbose) std::cout << name << " has logged in!" << std::endl;
-//			if(verbose) std::cout << name << " has been bound to channel " << channel << "." << std::endl;
             if(verbose) std::cout << clients.size() << " players are logged in." << std::endl;
         }
         else

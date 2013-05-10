@@ -337,10 +337,10 @@ void GalactiCombat::createBullet(SpaceShip* ship)
     if(ship->canShoot()) { 
         ship->shootBullet();
         Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
-        Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
+		Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
         Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
         pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
-        velocity += orientation*Ogre::Vector3(0, 0, -500);
+        velocity += orientation*Ogre::Vector3(0, 0, -5000);
         
         static int bulletID = 0;
         std::string bulletName("Bullet");

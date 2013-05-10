@@ -72,6 +72,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     if(!NetworkUtil::TCPSend(TCPServerSock, out))
     {
         SDLNet_TCP_Close(TCPServerSock);
+		std::cerr<<"Something done goofed when trying to connect to server."<<std::endl;
         exit(8);
     }
     //std::cout << "Sent " << out << std::endl;
@@ -182,7 +183,7 @@ void NetworkManagerClient::sendPlayerRotation(const Ogre::Quaternion& rotation)
 void NetworkManagerClient::receiveData()
 {
 	if(!SDLNet_SocketReady(TCPServerSock)) return;
-
+	std::cout<<"Entering receiveData."<<std::endl;
 	char *inc = NULL;
 	Packet incoming;
 	NetworkUtil::TCPReceive(TCPServerSock, &inc);
@@ -191,6 +192,7 @@ void NetworkManagerClient::receiveData()
 	{
 		std::cout << incoming.message << std::endl;
 	}
+	std::cout<<"Exiting receiveData."<<std::endl;
 }
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::list<Bullet*>& bullets)
