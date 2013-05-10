@@ -92,7 +92,7 @@ void SoundManager::close(void)
     SDL_PauseAudio(1);
     SDL_CloseAudio();
     for(int i = 0; i < NUM_SOUNDS; i++)
-        SDL_FreeWAV(sounds[i].data);
+        if(sounds[i].data) SDL_FreeWAV(sounds[i].data);
     memset(sounds, 0, sizeof(sounds));
 }
 

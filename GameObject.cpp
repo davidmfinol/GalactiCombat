@@ -23,12 +23,14 @@ GameObject::GameObject(std::string name, Ogre::SceneNode* parentNode, std::strin
 //-------------------------------------------------------------------------------------
 GameObject::~GameObject(void) 
 {
+	/*
     if(mEntity)
     {
         mNode->detachObject(mEntity);
         mNode->getCreator()->destroyEntity(mEntity);
     }
     mNode->getCreator()->destroySceneNode(mNode);
+	*/
 }
 //-------------------------------------------------------------------------------------
 std::string GameObject::getName(void) const
