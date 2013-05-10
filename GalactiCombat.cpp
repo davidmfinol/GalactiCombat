@@ -265,7 +265,6 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
         
         // Update GUI
         mGUIMgr->setTimeLabel(getCurrentTime()); // FIXME: TIME FROM SERVER
-        // TODO: mGUIMgr->informSize(spaceShips[0]->getSize());
         mGUIMgr->informEnergy(spaceShips[0]->getEnergy());// FIXME: ENERGY FROM SERVER
         
         // Background music
@@ -291,35 +290,40 @@ void GalactiCombat::gameLoop(float elapsedTime)
         physicsSimulator->setGameObjectOrientation(spaceShips[i], spaceShips[i]->getSceneNode()->getOrientation());
         
         // Handle input
-        Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(spaceShips[i]);
-        Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(spaceShips[i]);
-        if(spaceShips[i]->getController()->left()) {
-            velocity -= orientation.xAxis()*elapsedTime*SpaceShip::ACCELERATION;
-            spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
+        if(spaceShips[i]->getEnergy() > 0) {
+            Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(spaceShips[i]);
+            Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(spaceShips[i]);
+            if(spaceShips[i]->getController()->left()) {
+                velocity -= orientation.xAxis()*elapsedTime*SpaceShip::ACCELERATION;
+                spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
+            }
+            if(spaceShips[i]->getController()->right()) {
+                velocity += orientation.xAxis()*elapsedTime*SpaceShip::ACCELERATION;
+                spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
+            }
+            if(spaceShips[i]->getController()->up()) {
+                velocity += orientation.yAxis()*elapsedTime*SpaceShip::ACCELERATION;
+                spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
+            }
+            if(spaceShips[i]->getController()->down()) {
+                velocity -= orientation.yAxis()*elapsedTime*SpaceShip::ACCELERATION;
+                spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
+            }
+            if(spaceShips[i]->getController()->forward()) {
+                velocity -= orientation.zAxis()*elapsedTime*SpaceShip::ACCELERATION;
+                spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
+            }
+            if(spaceShips[i]->getController()->back()) {
+                velocity += orientation.zAxis()*elapsedTime*SpaceShip::ACCELERATION;
+                spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
+            }
+            physicsSimulator->setGameObjectVelocity(spaceShips[i], velocity);
+            
+            if(spaceShips[i]->getController()->shoot() && spaceShips[i]->canShoot()) {
+                spaceShips[i]->shootBullet();
+                this->createBullet(spaceShips[i]);
+            }
         }
-        if(spaceShips[i]->getController()->right()) {
-            velocity += orientation.xAxis()*elapsedTime*SpaceShip::ACCELERATION;
-            spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
-        }
-        if(spaceShips[i]->getController()->up()) {
-            velocity += orientation.yAxis()*elapsedTime*SpaceShip::ACCELERATION;
-            spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
-        }
-        if(spaceShips[i]->getController()->down()) {
-            velocity -= orientation.yAxis()*elapsedTime*SpaceShip::ACCELERATION;
-            spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
-        }
-        if(spaceShips[i]->getController()->forward()) {
-            velocity -= orientation.zAxis()*elapsedTime*SpaceShip::ACCELERATION;
-            spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
-        }
-        if(spaceShips[i]->getController()->back()) {
-            velocity += orientation.zAxis()*elapsedTime*SpaceShip::ACCELERATION;
-            spaceShips[i]->adjustEnergy(elapsedTime*SpaceShip::ENERGY_CONSUMPTION);
-        }
-        physicsSimulator->setGameObjectVelocity(spaceShips[i], velocity);
-        if(spaceShips[i]->getController()->shoot())
-            this->createBullet(spaceShips[i]);
     }
     
     // Step the physics simulator
@@ -333,47 +337,45 @@ void GalactiCombat::gameLoop(float elapsedTime)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
 {
-    if(ship->canShoot()) { 
-        ship->shootBullet();
-        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
-        Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
-        Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
-        pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
-        velocity += orientation*Ogre::Vector3(0, 0, -500);
-        
-        static int bulletID = 0;
-        std::string bulletName("Bullet");
-        char idChar[4];
-        sprintf(idChar, "%d", bulletID);
-        bulletName += idChar;
-        if(!isServer)
-            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
-        else
-            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
-        physicsSimulator->addGameObject(bullets.back());
-        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
-        physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
-        bulletID++;
-    }
+    Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
+    Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
+    Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
+    pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
+    velocity += orientation*Ogre::Vector3(0, 0, -500);
+    
+    static int bulletID = 0;
+    std::string bulletName("Bullet");
+    char idChar[4];
+    sprintf(idChar, "%d", bulletID);
+    bulletName += idChar;
+    if(!isServer)
+        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
+    else
+        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
+    physicsSimulator->addGameObject(bullets.back());
+    physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
+    physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
+    bulletID++;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateSpaceShips(void)
 {
-    //TODO:
-    //if(!isServer)
+    for (int i = 0; i < spaceShips.size(); ++i) {
+        double diff = spaceShips[i]->getSizeDifference();
+        if(diff!=0) {
+            physicsSimulator->removeGameObject(spaceShips[i]);
+            spaceShips[i]->adjustSize(diff);
+            physicsSimulator->addGameObject(spaceShips[i], RESTITUTION, true, false);
+        }
+    }
+    //TODO: SOUNDEFFECTS!
+    //if(!isServer) {
     //if (camera) mSoundMgr->playSound("media/sounds/bell.wav");
-    //if (camera) mSoundMgr->playSound("media/sounds/bounce.wav");
-    //adjustSpaceShipMaterial()
-}
-//-------------------------------------------------------------------------------------
-void GalactiCombat::adjustSpaceShipMaterial(SpaceShip* ship)
-{
-    //TODO:
+    //if (camera) mSoundMgr->playSound("media/sounds/bounce.wav");}
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateMinerals(void)
 {
-    // Update all the minerals
     for (int i = 0; i < minerals.size(); ++i) {
         double diff = minerals[i]->getRadiusDifference();
         if(diff!=0) {
@@ -400,8 +402,6 @@ void GalactiCombat::updateBullets(void)
 {
     for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it) {
         if( (*it)->isLifeOver() ) {
-            if((*it)->getOwner())
-                (*it)->getOwner()->bulletDestroyed();
             physicsSimulator->removeGameObject(*it);
             physicsSimulator->deleteGameObject(*it);
             delete *it;
@@ -415,9 +415,9 @@ void GalactiCombat::crazyEnergyInjection(void)
     int i, vel_x, vel_y, vel_z;
     
     for (i = 0; i < minerals.size(); i++) {
-        vel_x = ((std::rand() % 10) + 10) * (std::rand() % 2 == 0 ? 1 : -1); 
-        vel_y = ((std::rand() % 10) + 10);
-        vel_z = ((std::rand() % 10) + 10) * (std::rand() % 2 == 0 ? 1 : -1); 
+        vel_x = ((std::rand() % 500) + 500) * (std::rand() % 2 == 0 ? 1 : -1); 
+        vel_y = ((std::rand() % 500) + 500);
+        vel_z = ((std::rand() % 500) + 500) * (std::rand() % 2 == 0 ? 1 : -1); 
         physicsSimulator->setGameObjectVelocity(minerals[i], Ogre::Vector3(vel_x, vel_y, vel_z));
     }
 }

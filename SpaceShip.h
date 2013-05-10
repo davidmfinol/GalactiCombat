@@ -36,10 +36,11 @@ public:
     // Bullet control
     bool canShoot(void);
     void shootBullet(void);
-    void bulletDestroyed(void);
     
+    // Constants
     static const double ACCELERATION;
     static const double ENERGY_CONSUMPTION;
+    static const double BULLET_COST;
     static const double ENERGY_MINING;
     static const double STARTING_ENERGY;
     static const double MIN_ENERGY;

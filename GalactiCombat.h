@@ -34,7 +34,7 @@
 
 #define ROOM_SIZE 5000
 #define RESTITUTION 0.9
-#define MINERALS_AMOUNT 10
+#define MINERALS_AMOUNT 80
 #define INJECT_CODE 2
 #define OVER_CODE 3
 
@@ -70,7 +70,6 @@ protected:
     void updateMinerals(void);
     void adjustMineralMaterial(Mineral* mineral);
     void updateSpaceShips(void);
-    void adjustSpaceShipMaterial(SpaceShip* ship);
     void updateBullets(void);
     void crazyEnergyInjection(void);
     std::string getCurrentTime(void);

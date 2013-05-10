@@ -28,6 +28,12 @@ void Bullet::collidedWith(GameObject* other)
         ((SpaceShip*)other)->adjustSize(LOSS);
         _owner->adjustSize(GAIN);
     }
+    if(other->getInternalType() == "Mineral")
+    {
+        _hasHit = true;
+        ((Mineral*)other)->adjustRadius(LOSS);
+        _owner->adjustEnergy(GAIN);
+    }
 }
 //-------------------------------------------------------------------------------------
 std::string Bullet::getInternalType(void) const

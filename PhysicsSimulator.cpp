@@ -128,12 +128,12 @@ void PhysicsSimulator::removeGameObject (GameObject* obj)
 void PhysicsSimulator::deleteGameObject (GameObject* obj) 
 {
     std::map<GameObject*, btRigidBody*>::iterator it = gameObjects.find(obj);
-    if(it != gameObjects.end()) {
-        rigidBodies.erase(it->second);
-        delete it->second->getMotionState();
-        delete it->second;
-        gameObjects.erase(it);
-    }
+    if(it == gameObjects.end())
+        return;
+    rigidBodies.erase(it->second);
+    delete it->second->getMotionState();
+    delete it->second;
+    gameObjects.erase(it);
 }
 //-------------------------------------------------------------------------------------
 Ogre::Vector3 PhysicsSimulator::getGameObjectPosition(GameObject* obj)
@@ -156,29 +156,38 @@ Ogre::Quaternion PhysicsSimulator::getGameObjectOrientation(GameObject* obj)
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::setGameObjectPosition(GameObject* obj, const Ogre::Vector3& pos)
 {
+    std::map<GameObject*, btRigidBody*>::iterator it = gameObjects.find(obj);
+    if(it == gameObjects.end())
+        return;
     btVector3 btPos = btVector3(pos.x, pos.y, pos.z);
-    btTransform transform = gameObjects[obj]->getCenterOfMassTransform();
+    btTransform transform = it->second->getCenterOfMassTransform();
     transform.setOrigin(btPos);
-    gameObjects[obj]->setCenterOfMassTransform(transform);
+    it->second->setCenterOfMassTransform(transform);
     
-    OgreMotionState* objectMotionState = (OgreMotionState*) gameObjects[obj]->getMotionState();
+    OgreMotionState* objectMotionState = (OgreMotionState*) it->second->getMotionState();
     objectMotionState->setPosition(btPos);
 }
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::setGameObjectVelocity(GameObject* obj, const Ogre::Vector3& vel)
 {
+    std::map<GameObject*, btRigidBody*>::iterator it = gameObjects.find(obj);
+    if(it == gameObjects.end())
+        return;
     btVector3 btVel(vel.x, vel.y, vel.z);
-    gameObjects[obj]->setLinearVelocity(btVel);
+    it->second->setLinearVelocity(btVel);
 }
 //-------------------------------------------------------------------------------------
 void PhysicsSimulator::setGameObjectOrientation(GameObject* obj, const Ogre::Quaternion& rot)
 {
+    std::map<GameObject*, btRigidBody*>::iterator it = gameObjects.find(obj);
+    if(it == gameObjects.end())
+        return;
     btQuaternion btRot(rot.x, rot.y, rot.z, rot.w);
-    btTransform transform = gameObjects[obj]->getCenterOfMassTransform();
+    btTransform transform = it->second->getCenterOfMassTransform();
     transform.setRotation(btRot);
-    gameObjects[obj]->setCenterOfMassTransform(transform);
+    it->second->setCenterOfMassTransform(transform);
     
-    OgreMotionState* objectMotionState = (OgreMotionState*) gameObjects[obj]->getMotionState();
+    OgreMotionState* objectMotionState = (OgreMotionState*) it->second->getMotionState();
     objectMotionState->setOrientation(btRot);
 }
 //-------------------------------------------------------------------------------------

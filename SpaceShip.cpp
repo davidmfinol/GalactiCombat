@@ -2,6 +2,7 @@
 
 const double SpaceShip::ACCELERATION = 200;
 const double SpaceShip::ENERGY_CONSUMPTION = -1;
+const double SpaceShip::BULLET_COST = -10;
 const double SpaceShip::ENERGY_MINING = 10.0;
 const double SpaceShip::STARTING_ENERGY = 50;
 const double SpaceShip::MIN_ENERGY = 0;
@@ -78,11 +79,7 @@ bool SpaceShip::canShoot()
 void SpaceShip::shootBullet()
 {
     lastShotTime = std::time(0);
-}
-//-------------------------------------------------------------------------------------
-void SpaceShip::bulletDestroyed()
-{
-    // TODO: WE GAIN MASS?
+    adjustEnergy(BULLET_COST);
 }
 //-------------------------------------------------------------------------------------
 void SpaceShip::adjustEnergy(double e) 
@@ -104,21 +101,19 @@ double SpaceShip::getSizeDifference() const
 //-------------------------------------------------------------------------------------
 void SpaceShip::adjustSize(double s) 
 {
-    /*
     // scale the spaceship to the new size
-    double originalSize = 100 / size;
-    //size += r;
-    //size = size < minSpaceShipSize ? minSpaceShipSize : size;
-    //size = size > maxSpaceShipSize ? maxSpaceShipSize : size;
-    double reScale = size * 0.01;
+    double originalSize = 10 / size;
+    size += s;
+    size = size < MIN_SIZE ? MIN_SIZE : size;
+    size = size > MAX_SIZE ? MAX_SIZE : size;
+    double reScale = size * 0.1;
     mNode->scale(Ogre::Vector3(originalSize * reScale, originalSize * reScale, originalSize * reScale));
     
     // reset size/shape
     std::ostringstream m;
-    m << "Sphere" << (int)size;
+    m << "SpaceShip" << (int)size;
     mShapeName = m.str();
     sizeDifference = 0;
-    */
 }
 //-------------------------------------------------------------------------------------
 int SpaceShip::getMass() const 
@@ -135,9 +130,17 @@ void SpaceShip::collidedWith(GameObject* other)
                 energy += ENERGY_MINING;
                 energy = energy > MAX_ENERGY ? MAX_ENERGY : energy;
             }
-            else if(((Mineral*)other)->getRadius() > size) { // mineral is too large; take damage
-                //sizeDifference = RADIUS_DECREASE;
-            }
+            mCollisionTimeStamp = currentTimeStamp;
+        }
+    }
+    
+    if("SpaceShip" == other->getInternalType()) {
+        std::time_t currentTimeStamp = std::time(0);
+        if (currentTimeStamp != mCollisionTimeStamp) { // We are bullies: bigger gets bigger, smaller gets smaller
+            if(((SpaceShip*)other)->getSize() < size)
+                sizeDifference = 10;
+            else if(((SpaceShip*)other)->getSize() > size)
+                sizeDifference = -10;
             mCollisionTimeStamp = currentTimeStamp;
         }
     }
