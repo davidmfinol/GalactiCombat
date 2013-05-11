@@ -1,7 +1,7 @@
 #include "SpaceShip.h"
 
-const double SpaceShip::ACCELERATION = 250;
-const double SpaceShip::ENERGY_CONSUMPTION = -1;
+const double SpaceShip::ACCELERATION = 300;
+const double SpaceShip::ENERGY_CONSUMPTION = -0.1;
 const double SpaceShip::BULLET_COST = -2;
 const double SpaceShip::ENERGY_MINING = 10.0;
 const double SpaceShip::STARTING_ENERGY = 50;
