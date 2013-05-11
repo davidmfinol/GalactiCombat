@@ -499,10 +499,7 @@ std::string GalactiCombat::getCurrentTime(void)
     if (min == 0 && sec <= 10) {
         if (sec == 0) {
             mGUIMgr->gameOver(spaceShips[0]->getSize());
-            if(!mNetworkMgr->isOnline()) {
-                this->destroyScene();
-                this->createScene();
-            }
+            // FIXME: RECREATE SCENE
         }
         mGUIMgr->countDown(sec, OVER_CODE);
     }

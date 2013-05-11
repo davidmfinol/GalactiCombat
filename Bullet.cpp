@@ -1,7 +1,7 @@
 #include "Bullet.h"
 
-const float Bullet::LOSS = -10.0f;
-const float Bullet::GAIN = 20.0f;
+const float Bullet::LOSS = -5.0f;
+const float Bullet::GAIN = 5.0f;
 
 //-------------------------------------------------------------------------------------
 Bullet::Bullet (std::string name, Ogre::SceneNode* parentNode, Ogre::Entity* entity, SpaceShip* owner, int x, int y, int z)
