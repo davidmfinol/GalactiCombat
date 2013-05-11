@@ -3,8 +3,7 @@
 //-------------------------------------------------------------------------------------
 NetworkManagerClient::NetworkManagerClient(void) : connected(false)
 {
-    if(SDL_Init(0) != 0)
-    {
+    if(SDL_Init(0) != 0) {
         std::cerr << "SDL_Init done goofed: " << SDL_GetError() << std::endl;
         exit(1);
     }
@@ -144,7 +143,6 @@ std::string NetworkManagerClient::getPlayerScores()
 {
     return scores; //"name,score;"
 }
-
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::resetReadyState()
 {

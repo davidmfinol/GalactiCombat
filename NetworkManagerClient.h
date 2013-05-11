@@ -33,9 +33,6 @@ class NetworkManagerClient {
 public:
     NetworkManagerClient();
     virtual ~NetworkManagerClient();
-	
-	std::string getPlayerScores();
-	void sendPlayerScore(double score);
     
     // Connection Data
     int connect(char *host, char *name);
@@ -49,9 +46,11 @@ public:
     void sendPlayerRotation(const Ogre::Quaternion& rotation);
     void receiveData();
     void requestGameState(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::list<Bullet*>&);
+    std::string getPlayerScores();
+    void sendPlayerScore(double score);
     
 protected:
-	std::string scores;
+    std::string scores;
     TCPsocket TCPServerSock;
     UDPsocket UDPServerSock;
     IPaddress serverIP;

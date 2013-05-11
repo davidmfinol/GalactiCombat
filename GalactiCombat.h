@@ -34,7 +34,7 @@
 
 #define ROOM_SIZE 5000
 #define RESTITUTION 0.9
-#define MINERALS_AMOUNT 80
+#define MINERALS_AMOUNT 10
 #define INJECT_CODE 2
 #define OVER_CODE 3
 
