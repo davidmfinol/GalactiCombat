@@ -10,7 +10,7 @@ startSingle(0), startMulti(0), inputLabel(0), multiLabel(0), musicControl(0), so
 
 GUIManager::~GUIManager(void)
 {
-	/*//FIXME: Segfault
+	//FIXME: Segfault
     if(welcomeBox) delete welcomeBox;
     if(gameoverBox) delete gameoverBox;
     if(menuLabel) delete menuLabel;
@@ -31,7 +31,7 @@ GUIManager::~GUIManager(void)
     if(lobbyReadyButton) delete lobbyReadyButton;
     if(lobbyQuitButton) delete lobbyQuitButton;
 	if(mTrayMgr) delete mTrayMgr;
-	*/
+	
 }
 
 void GUIManager::GUIsetup(NetworkManagerClient* network, SoundManager* sound, Ogre::RenderWindow* window, OIS::Mouse* mouse)
