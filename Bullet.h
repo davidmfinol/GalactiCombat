@@ -18,8 +18,10 @@ public:
     void setExist(bool b);
 
     // Constants
-    static const float LOSS;
-    static const float GAIN;
+    static const float SIZE_LOSS;
+    static const float SIZE_GAIN;
+    static const float RADIUS_LOSS;
+    static const float ENERGY_GAIN;
     
 protected:
     bool _hasHit;

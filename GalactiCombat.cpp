@@ -481,20 +481,14 @@ std::string GalactiCombat::getCurrentTime(void)
     static std::time_t startTime = std::time(0);
     static std::time_t prevTime = startTime;
     std::time_t currentTime = std::time(0);
-    static int min = 0;
-    static int sec = 10;
+    static int min = 2;
+    static int sec = 59;
     if (mGUIMgr->resetTimer()) {
         startTime = std::time(0);
         prevTime = startTime;
-        min = 0;
+        min = 2;
         sec = 59;
         mGUIMgr->resetTimerDone();
-    }
-    if (min != 0 && sec <= 10) {
-        if (sec == 0) {
-            crazyEnergyInjection();
-        }
-        mGUIMgr->countDown(sec, INJECT_CODE);
     }
     if (min == 0 && sec <= 10) {
         if (sec == 0) {
