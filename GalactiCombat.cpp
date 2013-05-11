@@ -90,6 +90,13 @@ void GalactiCombat::createScene(void)
 void GalactiCombat::createPlayer(void)
 {
     // create player
+	/* //FIXME: MEMORY LEAK
+    if(spaceShips.size() > 0 && spaceShips[0]) {
+        physicsSimulator->removeGameObject(spaceShips[0]);
+        physicsSimulator->deleteGameObject(spaceShips[0]);
+        delete spaceShips[0];
+    }
+	*/
     spaceShips.resize(1);
     spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
                                   mSceneMgr->getRootSceneNode(), 200, 200, 200);
