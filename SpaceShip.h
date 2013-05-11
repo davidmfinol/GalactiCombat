@@ -14,6 +14,9 @@ public:
     SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, Ogre::Entity* entity, int x = 100, int y = 100, int z = 100, double s = 300);
     SpaceShip (std::string name, ISpaceShipController* controller, Ogre::SceneNode* parentNode, int x = 100, int y = 100, int z = 100, double s = 300);
     virtual ~SpaceShip(void);
+    
+    // Some helper functions
+    void reset(void);
     void attachCamera(Ogre::Camera* camera);
     
     // The controller is used to make decisions

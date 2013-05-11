@@ -24,8 +24,6 @@ GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), walls(6), spaceS
 GalactiCombat::~GalactiCombat(void)
 {
     std::cout << "Entering ~GalactiCombat" << std::endl;
-    if(spaceShips.size() > 0 && spaceShips[0])
-        delete spaceShips[0];
     delete mInputMgr;
     delete mNetworkMgr;
     delete mGUIMgr;
@@ -63,9 +61,24 @@ void GalactiCombat::createViewports(void)
 void GalactiCombat::destroyScene(void)
 {
     std::cout << "Entering destroyScene" << std::endl;
-    while(spaceShips.size()>1) delete spaceShips.back(), spaceShips.pop_back();
-    while(!walls.empty()) delete walls.back(), walls.pop_back();
-    while(!minerals.empty()) delete minerals.back(), minerals.pop_back();
+    while(!spaceShips.empty()) {
+        physicsSimulator->removeGameObject(spaceShips.back());
+        physicsSimulator->deleteGameObject(spaceShips.back());
+        delete spaceShips.back();
+        spaceShips.pop_back();
+    }
+    while(!walls.empty()) {
+        physicsSimulator->removeGameObject(walls.back());
+        physicsSimulator->deleteGameObject(walls.back());
+        delete walls.back();
+        walls.pop_back();
+    }
+    while(!minerals.empty()) {
+        physicsSimulator->removeGameObject(minerals.back());
+        physicsSimulator->deleteGameObject(minerals.back());
+        delete minerals.back();
+        minerals.pop_back();
+    }
     mSceneMgr->destroyAllEntities();
     mSceneMgr->destroyAllCameras();
     mSceneMgr->destroyAllLights();
@@ -102,21 +115,17 @@ void GalactiCombat::createScene(void)
 void GalactiCombat::createPlayer(void)
 {
     std::cout << "Entering createPlayer" << std::endl;
-    // create player
-	/* //FIXME: MEMORY LEAK
-    if(spaceShips.size() > 0 && spaceShips[0]) {
-        physicsSimulator->removeGameObject(spaceShips[0]);
-        physicsSimulator->deleteGameObject(spaceShips[0]);
-        delete spaceShips[0];
-    }
-	*/
     spaceShips.resize(1);
+    std::cout << "creating player" << std::endl;
     spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
                                   mSceneMgr->getRootSceneNode(), 200, 200, 200);
+    std::cout << "did it" << std::endl;
     physicsSimulator->addGameObject(spaceShips[0], RESTITUTION, true, false);
     
     // set camera to player
+    std::cout << "attaching camera" << std::endl;
     spaceShips[0]->attachCamera(mCamera);
+    std::cout << "did it" << std::endl;
     mInputMgr->setPlayerCamera(spaceShips[0]->getSceneNode(), mCamera->getParentSceneNode());
     std::cout << "Exiting createPlayer" << std::endl;
 }
@@ -126,6 +135,7 @@ void GalactiCombat::createMinerals(void)
     std::cout << "Entering createMinerals" << std::endl;
     int radius, i, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z;
     std::srand (std::time(NULL));
+    minerals.resize(MINERALS_AMOUNT);
     for (i = 0; i < minerals.size(); i++) {
         std::ostringstream o;
         o << "Mineral" << i;
@@ -270,9 +280,7 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
                     this->destroyScene();
                     this->createCamera();
                     this->createViewports();
-                    this->createPlayer();
-                    this->createRoom();
-                    this->setLighting();
+                    this->createScene();
                     startTime = prevTime = std::time(0);
                 }
             }
@@ -499,7 +507,10 @@ std::string GalactiCombat::getCurrentTime(void)
     if (min == 0 && sec <= 10) {
         if (sec == 0) {
             mGUIMgr->gameOver(spaceShips[0]->getSize());
-            // FIXME: RECREATE SCENE
+            this->destroyScene();
+            this->createCamera();
+            this->createViewports();
+            this->createScene();
         }
         mGUIMgr->countDown(sec, OVER_CODE);
     }

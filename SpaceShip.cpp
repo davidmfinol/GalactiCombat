@@ -37,6 +37,13 @@ void SpaceShip::setupSpaceShip()
     m << "SpaceShip" << (int)size;
     mShapeName = m.str();
 }
+//-------------------------------------------------------------------------------------
+void SpaceShip::reset(void)
+{
+    adjustEnergy(STARTING_ENERGY - energy);
+    adjustSize(300 - size);
+}
+//-------------------------------------------------------------------------------------
 void SpaceShip::attachCamera(Ogre::Camera* camera)
 {
     //Ogre::SceneNode* camPitchNode = mNode->createChildSceneNode("CameraPitchNode"); // Traditional Camera

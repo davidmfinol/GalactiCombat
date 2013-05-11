@@ -627,6 +627,11 @@ void GalactiCombatServer::receiveReadyPacket(int clientIndex, Packet& incoming)
     }
     else if(!strcmp(incoming.message, "START")) {
         state = PLAY;
+        for(int i = 0; i < spaceShips.size(); ++i) {
+            physicsSimulator->removeGameObject(spaceShips[i]);
+            spaceShips[i]->reset();
+            physicsSimulator->addGameObject(spaceShips[i]);
+        }
     }
     if(verbose) std::cout << "Exiting receiveReadyPacket" << std::endl << std::endl;
 }
@@ -641,19 +646,19 @@ void GalactiCombatServer::receiveWallsPacket(int clientIndex, Packet& incoming)
 void GalactiCombatServer::receiveScorePacket(int clientIndex, Packet& incoming)
 {
     if(verbose) std::cout << "Entering receiveScorePacket" << std::endl;
-	if(incoming.type != SCORE)
+    if(incoming.type != SCORE)
     {   
-    	std::cerr<<"Error. This isn't a score. Skipping."<<std::endl;
-		return;
+        std::cerr<<"Error. This isn't a score. Skipping."<<std::endl;
+        return;
     }   
-	if(verbose) std::cout<<clients[clientIndex]->name<<" ended the game with a score of "<<incoming.message<<"!"<<std::endl;
+    if(verbose) std::cout<<clients[clientIndex]->name<<" ended the game with a score of "<<incoming.message<<"!"<<std::endl;
     std::string scoreboard = "";
-	std::stringstream potato;
-	for(int i = 0; i < spaceShips.size(); i++) {
-		potato <<spaceShips[i]->getName()<<","<<spaceShips[i]->getSize()<< ";";
-	}
-	scoreboard = potato.str();
-	/*
+    std::stringstream potato;
+    for(int i = 0; i < spaceShips.size(); i++) {
+            potato <<spaceShips[i]->getName()<<","<<spaceShips[i]->getSize()<< ";";
+    }
+    scoreboard = potato.str();
+    /*
     std::stringstream ss; 
     std::string name(clients[clientIndex].name);
     std::string score = incoming.message.c_str();
@@ -664,11 +669,12 @@ void GalactiCombatServer::receiveScorePacket(int clientIndex, Packet& incoming)
     outgoing.message = const_cast<char*>(scoreboard.c_str());
     char *out = NetworkUtil::PacketToCharArray(outgoing);
     if(NetworkUtil::TCPSend(clients[clientIndex]->sock, out))
-    	if(verbose) std::cout<<"Sent back scoreboard: "<<out<<std::endl;
+        if(verbose) std::cout<<"Sent back scoreboard: "<<out<<std::endl;
     else
-    	printf("Didn't send scoreboard\n");
+        std::cerr << "Didn't send scoreboard" << std::endl;
+    
+    free(out);
     if(verbose) std::cout << "Exiting receiveScorePacket" << std::endl;
-	free(out);
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32

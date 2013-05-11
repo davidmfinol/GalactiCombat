@@ -170,7 +170,7 @@ bool GUIManager::isMainMenuOpened(void)
 }
 
 void GUIManager::gameOver(double size) {
-	std::cout<<"Entering gameOver."<<std::endl;
+    //std::cout<<"Entering gameOver."<<std::endl;
     if (isMainMenuOpened()) // Close the menu
     {
         mTrayMgr->destroyWidget(menuLabel); menuLabel = 0;
@@ -192,16 +192,16 @@ void GUIManager::gameOver(double size) {
         lobbyPanel = mTrayMgr->createTextBox(OgreBites::TL_CENTER, "lobby_panel", "Game Lobby", 500, 300);
         lobbyReadyButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_ready_button", "Ready", 200);
         lobbyQuitButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_quit_button", "Quit", 200);
-		///////////////////////// Add the online scores
+        ///////////////////////// Add the online scores
         std::multimap<double, std::string, std::greater<double> > topScores;
         std::map<std::string, double> playerScores;
         mNetworkMgr->sendPlayerScore(size);
         std::string scores = mNetworkMgr->getPlayerScores();
-		std::stringstream o;
+        std::stringstream o;
         o << "Scoreboard:\n";
-		std::cout<<"Starting while loop."<<std::endl;
+        //std::cout<<"Starting while loop."<<std::endl;
         while(scores != "") {
-			std::cout<<"Inside while loop."<<std::endl;
+            //std::cout<<"Inside while loop."<<std::endl;
             size_t pos = scores.find(",");
             if(pos == -1) 
                 break;
@@ -217,12 +217,12 @@ void GUIManager::gameOver(double size) {
             scores = scores.substr(pos + 1); 
         //for(std::map<std::string, double>::iterator it = playerScores.begin(); it != playerScores.end(); ++it) 
         //    o << (it->first) << ": " << (it->second) << "\n";
-    	}
+        }
         for(std::multimap<double, std::string>::iterator it = topScores.begin(); it != topScores.end(); ++it) 
             o << (it->first) << ": " << (it->second) << "\n";
-		std::cout<<"Ending while loop."<<std::endl;
+        //std::cout<<"Ending while loop."<<std::endl;
         mTrayMgr->showOkDialog("Scoreboard", o.str());
-		/////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////
     }
     else {
         finalState = true;
@@ -234,7 +234,7 @@ void GUIManager::gameOver(double size) {
         gameoverBox->setText(o.str());
         gameoverQuitButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "gameover_quit_button", "Quit Game", 200);
     }
-	std::cout<<"Exiting gameOver."<<std::endl;
+    //std::cout<<"Exiting gameOver."<<std::endl;
 }
 
 bool GUIManager::isGameOver(void)
