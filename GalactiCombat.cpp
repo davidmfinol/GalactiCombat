@@ -403,13 +403,16 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateBullets(void)
 {
-    for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it) {
+	//FIXME: Access violation
+    for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end();) {
         if( (*it)->isLifeOver() ) {
             physicsSimulator->removeGameObject(*it);
             physicsSimulator->deleteGameObject(*it);
             delete *it;
             it = bullets.erase(it);
         }
+		else
+			++it;
     }
 }
 //-------------------------------------------------------------------------------------

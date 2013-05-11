@@ -191,7 +191,10 @@ void GUIManager::gameOver(double size) {
         isReady = false;
         notifyResetTimer = true;
         mNetworkMgr->resetReadyState();
-
+        lobbyPanel = mTrayMgr->createTextBox(OgreBites::TL_CENTER, "lobby_panel", "Game Lobby", 500, 300);
+        lobbyReadyButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_ready_button", "Ready", 200);
+        lobbyQuitButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_quit_button", "Quit", 200);
+		/*
 		///////////////////////// Add the online scores
         std::multimap<double, std::string, std::greater<double> > topScores;
         std::map<std::string, double> playerScores;
@@ -223,6 +226,7 @@ void GUIManager::gameOver(double size) {
 		std::cout<<"Ending while loop."<<std::endl;
         mTrayMgr->showOkDialog("Scoreboard", o.str());
 		/////////////////////////////////////////////////////////////
+		*/
     }
     else {
         finalState = true;
@@ -273,9 +277,6 @@ void GUIManager::okDialogClosed(const Ogre::DisplayString& message)
     }
 	else if (message.substr(0, 10) == "Scoreboard")
 	{
-        lobbyPanel = mTrayMgr->createTextBox(OgreBites::TL_CENTER, "lobby_panel", "Game Lobby", 500, 300);
-        lobbyReadyButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_ready_button", "Ready", 200);
-        lobbyQuitButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_quit_button", "Quit", 200);
 	}
 }
 
