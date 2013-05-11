@@ -22,14 +22,14 @@ Bullet::~Bullet(void)
 //-------------------------------------------------------------------------------------
 void Bullet::collidedWith(GameObject* other)
 {
-    if(other->getInternalType() == "SpaceShip")
-    {
+    if(other->getInternalType() == "SpaceShip") {
         _hasHit = true;
-        ((SpaceShip*)other)->adjustSize(LOSS);
-        _owner->adjustSize(GAIN);
+        if( (SpaceShip*)other != _owner ) {
+            ((SpaceShip*)other)->adjustSize(LOSS);
+            _owner->adjustSize(GAIN);
+        }
     }
-    if(other->getInternalType() == "Mineral")
-    {
+    if(other->getInternalType() == "Mineral") {
         _hasHit = true;
         ((Mineral*)other)->adjustRadius(LOSS);
         _owner->adjustEnergy(GAIN);

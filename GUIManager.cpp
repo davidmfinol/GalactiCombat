@@ -61,14 +61,12 @@ void GUIManager::displayWelcomeMsg(void)
     msg += " you rotate the camera with your mouse. The goal of this game is to absorb ";
     msg += "mass by shooting other ships, and eventually be the biggest ship in subspace.";
     msg += "Plan your movements carefully and shots carefully, because both moving and shooting will consume ";
-    msg += "\"energy\", and you need energy to do those actions.\n\n\nTips:\n\n";
+    msg += "\"energy\", and you need energy to do those actions.\n\n\nQuick Notes:\n\n";
     msg += "1) Collide into minerals smaller than you to gain energy.\n\n"; 
     msg += "2). Yellow minerals are the same size as you, red ones are larger, and blue ones ";
     msg += "are smaller.\n\n";
     msg += "3). Getting shot by a bullet OR colliding into colliding into object bigger than you";
     msg += " will cause you to decrease in size.\n\n";
-    msg += "4). In order to keep the motion going, there will be a Crazy Energy Injection ";
-    msg += "every minute. Watch out for that.\n";
     welcomeBox = mTrayMgr->createTextBox(OgreBites::TL_CENTER, "welcome_widget", "Welcome!", 400, 300);
     welcomeBox->setText(msg);
     startSingle = mTrayMgr->createButton(OgreBites::TL_CENTER, "start_single", "Start Single-Player Game", 300);
@@ -271,14 +269,12 @@ void GUIManager::passWelcomeStateAfterFailure(bool fromEsc)
 
 void GUIManager::okDialogClosed(const Ogre::DisplayString& message)
 {    
-    if (message.substr(0, 10) == "Connection")
-    {
+    if (message.substr(0, 10) == "Connection") {
         passWelcomeStateAfterFailure(false);
     }
-	else if (message.substr(0, 10) == "Scoreboard")
-	{
-        
-	}
+    else if (message.substr(0, 10) == "Scoreboard") {
+    
+    }
 }
 
 void GUIManager::lobby(void)
