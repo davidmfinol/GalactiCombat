@@ -90,11 +90,13 @@ void GalactiCombat::createScene(void)
 void GalactiCombat::createPlayer(void)
 {
     // create player
+	/*
     if(spaceShips.size() > 0 && spaceShips[0]) {
         physicsSimulator->removeGameObject(spaceShips[0]);
         physicsSimulator->deleteGameObject(spaceShips[0]);
         delete spaceShips[0];
     }
+	*/
     spaceShips.resize(1);
     spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
                                   mSceneMgr->getRootSceneNode(), 200, 200, 200);
@@ -221,7 +223,7 @@ void GalactiCombat::createFrameListener(void)
 //-------------------------------------------------------------------------------------
 bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-    std::cout << "Entering frameRenderingQueued" << std::endl;
+//    std::cout << "Entering frameRenderingQueued" << std::endl;
     static std::time_t startTime;
     static std::time_t prevTime;
     // Handle essential events
@@ -237,16 +239,24 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
             char* request = const_cast<char*>("15LIST_REQUEST");
             char *list = NULL;
             if(NetworkUtil::TCPSend(mNetworkMgr->getSocket(), request) && NetworkUtil::TCPReceive(mNetworkMgr->getSocket(), &list)) {
+				std::cout<<"Received message."<<std::endl;
                 mGUIMgr->setLobbyList(list);
                 std::string allReady(list);
                 if (allReady.find("All players ready") != std::string::npos) {
+					std::cout<<"All players ready."<<std::endl;
                     mGUIMgr->startCountingDown();
                     this->destroyScene();
+					std::cout<<"destroyScene"<<std::endl;
                     this->createCamera();
+					std::cout<<"createCamera"<<std::endl;
                     this->createViewports();
+					std::cout<<"createViewports"<<std::endl;
                     this->createPlayer();
+					std::cout<<"createPlayer"<<std::endl;
                     this->createRoom();
+					std::cout<<"createRoom"<<std::endl;
                     this->setLighting();
+					std::cout<<"setLighting"<<std::endl;
                     startTime = prevTime = std::time(0);
                 }
             }
@@ -276,7 +286,7 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
         // Background music
         this->loopBackgroundMusic();
     }
-    std::cout << "Exiting frameRenderingQueued" << std::endl;
+//    std::cout << "Exiting frameRenderingQueued" << std::endl;
     return true;
 }
 //-------------------------------------------------------------------------------------
@@ -416,7 +426,7 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
     else if (mineral->getRadius() > spaceShips[0]->getSize())
         mineral->getEntity()->setMaterialName("Examples/SphereMappedRustySteel");
     else
-        mineral->getEntity()->setMaterialName("Examples/SphereYellow");v
+        mineral->getEntity()->setMaterialName("Examples/SphereYellow");
     std::cout << "Exiting adjustMineralMaterial" << std::endl;
 }
 //-------------------------------------------------------------------------------------
