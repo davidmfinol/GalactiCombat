@@ -45,7 +45,7 @@ protected:
     UDPsocket UDPServerSock;            //server socket for UDP messages
     
     int state;                          //whether the server is currently running the game
-    std::string scoreboard;             //of the format "Name,Score;"
+//	std::string scoreboard;             //of the format "Name,Score;"
     bool verbose;                       //whether to output print statements
 
 private:

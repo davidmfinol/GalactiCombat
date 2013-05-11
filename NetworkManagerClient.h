@@ -33,6 +33,9 @@ class NetworkManagerClient {
 public:
     NetworkManagerClient();
     virtual ~NetworkManagerClient();
+	
+	std::string getPlayerScores();
+	void sendPlayerScore(double score);
     
     // Connection Data
     int connect(char *host, char *name);
@@ -48,6 +51,7 @@ public:
     void requestGameState(Ogre::SceneManager*, std::vector<Mineral*>&, std::vector<SpaceShip*>&, std::list<Bullet*>&);
     
 protected:
+	std::string scores;
     TCPsocket TCPServerSock;
     UDPsocket UDPServerSock;
     IPaddress serverIP;

@@ -103,6 +103,47 @@ bool NetworkManagerClient::isOnline()
     return connected;
 }
 //-------------------------------------------------------------------------------------
+void NetworkManagerClient::sendPlayerScore(double score)
+{
+    Packet outgoing;
+    std::stringstream ss; 
+    std::string s;
+    ss << score;
+    s = ss.str();
+    outgoing.type = SCORE;
+    outgoing.message = const_cast<char*>(s.c_str());
+    
+    char *incoming = NULL;
+    char *out = NetworkUtil::PacketToCharArray(outgoing);
+
+    if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) 
+	{
+        printf("Receving: %s\n", incoming);
+        Packet pack = NetworkUtil::charArrayToPacket(incoming);
+        if(pack.type != SCORE)
+        {   
+            printf("Error in sendPlayerScore() in NetworkManagerClient.cpp. Score not received from server.\n");
+            scores = ""; 
+        }   
+        else{
+            //printf("Received message: %s\n", pack.message);
+            scores = pack.message;
+        }   
+    }   
+    else {
+        connected = false;
+        scores = ""; 
+    }
+	free(out);   
+}
+
+//-------------------------------------------------------------------------------------
+std::string NetworkManagerClient::getPlayerScores()
+{
+    return scores; //"name,score;"
+}
+
+//-------------------------------------------------------------------------------------
 void NetworkManagerClient::resetReadyState()
 {
     //std::cout << "Entering resetReadyState" << std::endl << std::endl;

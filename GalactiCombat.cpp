@@ -201,7 +201,7 @@ void GalactiCombat::loopBackgroundMusic(void)
     std::time_t currentTime = std::time(0);
     std::time_t diff = currentTime - startTime;
     if (diff != 0 && diff % 130 == 0) {
-        mSoundMgr->playMusic("media/sounds/cautious-path.wav");
+        mSoundMgr->playMusic("media/sounds/Level1_destination.wav");
         startTime = currentTime;
     }
 }
@@ -263,14 +263,9 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
         if(mNetworkMgr->isOnline())
             updateFromServer();
         
-        // These parts always need to be updated
-        this->updateMinerals();
-        this->updateSpaceShips();
-        this->updateBullets();
-        
         // Update GUI
         mGUIMgr->setTimeLabel(getCurrentTime()); // FIXME: TIME FROM SERVER
-        mGUIMgr->informEnergy(spaceShips[0]->getEnergy());
+        mGUIMgr->informEnergy(spaceShips[0]->getEnergy());// FIXME: ENERGY FROM SERVER
         
         // Background music
         this->loopBackgroundMusic();
@@ -280,8 +275,14 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
-    //mNetworkMgr->receiveData();
+    // Contact server
+//    mNetworkMgr->receiveData();
     mNetworkMgr->requestGameState(mSceneMgr, minerals, spaceShips, bullets);
+
+    // Update visual components
+    this->updateMinerals();
+    this->updateSpaceShips();
+    this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
@@ -330,29 +331,34 @@ void GalactiCombat::gameLoop(float elapsedTime)
     
     // Step the physics simulator
     physicsSimulator->stepSimulation(elapsedTime, MAX_SUB_STEPS, TIME_STEP);
+    
+    // Update after physics
+    this->updateMinerals();
+    this->updateSpaceShips();
+    this->updateBullets();
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
 {
-    Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
-    Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
-    Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
-    pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
-    velocity += orientation*Ogre::Vector3(0, 0, -5000);
-    
-    static int bulletID = 0;
-    std::string bulletName("Bullet");
-    char idChar[4];
-    sprintf(idChar, "%d", bulletID);
-    bulletName += idChar;
-    if(!isServer)
-        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
-    else
-        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
-    physicsSimulator->addGameObject(bullets.back());
-    physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
-    physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
-    bulletID++;
+        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
+        Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
+        Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
+        pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
+        velocity += orientation*Ogre::Vector3(0, 0, -5000);
+        
+        static int bulletID = 0;
+        std::string bulletName("Bullet");
+        char idChar[4];
+        sprintf(idChar, "%d", bulletID);
+        bulletName += idChar;
+        if(!isServer)
+            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
+        else
+            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
+        physicsSimulator->addGameObject(bullets.back());
+        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
+        physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
+        bulletID++;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateSpaceShips(void)
@@ -397,18 +403,14 @@ void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateBullets(void)
 {
-	//FIXME: Visual C++ assertion failure: list iterator not incrementable
-    for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end();/**/) {
+    for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it) {
         if( (*it)->isLifeOver() ) {
             physicsSimulator->removeGameObject(*it);
             physicsSimulator->deleteGameObject(*it);
             delete *it;
             it = bullets.erase(it);
         }
-		else
-			++it;
     }
-
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::crazyEnergyInjection(void)
@@ -429,14 +431,20 @@ std::string GalactiCombat::getCurrentTime(void)
     static std::time_t startTime = std::time(0);
     static std::time_t prevTime = startTime;
     std::time_t currentTime = std::time(0);
-    static int min = 4;
+    static int min = 0;
     static int sec = 59;
     if (mGUIMgr->resetTimer()) {
         startTime = std::time(0);
         prevTime = startTime;
-        min = 4;
+        min = 0;
         sec = 59;
         mGUIMgr->resetTimerDone();
+    }
+    if (min != 0 && sec <= 10) {
+        if (sec == 0) {
+            crazyEnergyInjection();
+        }
+        mGUIMgr->countDown(sec, INJECT_CODE);
     }
     if (min == 0 && sec <= 10) {
         if (sec == 0) {

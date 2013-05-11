@@ -183,10 +183,9 @@ void GUIManager::gameOver(double size) {
     mTrayMgr->showCursor();
     
     
+
+
     if (mNetworkMgr->isOnline()) {
-        lobbyPanel = mTrayMgr->createTextBox(OgreBites::TL_CENTER, "lobby_panel", "Game Lobby", 500, 300);
-        lobbyReadyButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_ready_button", "Ready", 200);
-        lobbyQuitButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_quit_button", "Quit", 200);
         countdown = false;
         inLobby = true;
         initialState = true;    
@@ -194,6 +193,34 @@ void GUIManager::gameOver(double size) {
         isReady = false;
         notifyResetTimer = true;
         mNetworkMgr->resetReadyState();
+		///////////////////////// Add the online scores
+        std::multimap<double, std::string, std::greater<double> > topScores;
+        std::map<std::string, double> playerScores;
+        mNetworkMgr->sendPlayerScore(size);
+        std::string scores = mNetworkMgr->getPlayerScores();
+		std::stringstream o;
+        while(scores != "") {
+            size_t pos = scores.find(",");
+            if(pos == -1) 
+                break;
+            std::string name = scores.substr(0, pos);
+            scores = scores.substr(pos + 1); 
+            pos = scores.find(";");
+            if(pos == -1) 
+                break;
+            double score = atof(scores.substr(0, pos).c_str());
+            topScores.insert(std::pair<double, std::string>(score, name));
+            if(score > playerScores[name])
+                playerScores[name] = score;
+            scores = scores.substr(pos + 1); 
+        	o << "Scoreboard:\n";
+        //for(std::map<std::string, double>::iterator it = playerScores.begin(); it != playerScores.end(); ++it) 
+        //    o << (it->first) << ": " << (it->second) << "\n";
+        	for(std::multimap<double, std::string>::iterator it = topScores.begin(); it != topScores.end(); ++it) 
+            	o << (it->first) << ": " << (it->second) << "\n";
+    	}   
+        mTrayMgr->showOkDialog("Scoreboard", o.str());
+		/////////////////////////////////////////////////////////////
     }
     else {
         finalState = true;
@@ -201,7 +228,7 @@ void GUIManager::gameOver(double size) {
         std::ostringstream o;
         o << std::fixed << std::setprecision(2);
         o << "Well done\n\nYour final size is: " << size << "\n\nHope you had fun!\n\n\n";
-        nextLevelButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "next_level_button", "Next Level", 200);
+        nextLevelButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "next_level_button", "Restart", 200);
         gameoverBox->setText(o.str());
         gameoverQuitButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "gameover_quit_button", "Quit Game", 200);
     }
@@ -241,6 +268,12 @@ void GUIManager::okDialogClosed(const Ogre::DisplayString& message)
     {
         passWelcomeStateAfterFailure(false);
     }
+	else if (message.substr(0, 10) == "Scoreboard")
+	{
+        lobbyPanel = mTrayMgr->createTextBox(OgreBites::TL_CENTER, "lobby_panel", "Game Lobby", 500, 300);
+        lobbyReadyButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_ready_button", "Ready", 200);
+        lobbyQuitButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_quit_button", "Quit", 200);
+	}
 }
 
 void GUIManager::lobby(void)
