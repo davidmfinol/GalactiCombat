@@ -1,7 +1,7 @@
 #include "GalactiCombatServer.h"
 
 //-------------------------------------------------------------------------------------
-GalactiCombatServer::GalactiCombatServer(bool v) : clients(0), state(PAUSE), scoreboard(), verbose(v)
+GalactiCombatServer::GalactiCombatServer(bool v) : clients(0), state(PAUSE), verbose(v)
 {
     if(SDL_Init(0) != 0)
     {
@@ -641,7 +641,34 @@ void GalactiCombatServer::receiveScorePacket(int clientIndex, Packet& incoming)
 {
     if(verbose) std::cout << "Entering receiveScorePacket" << std::endl;
     //TODO: THIS PACKET TYPE NEEDS TO BE REDONE
+	if(incoming.type != SCORE)
+    {   
+    	std::cerr<<"Error. This isn't a score. Skipping."<<std::endl;
+		return;
+    }   
+//    if(verbose) printf("%s ended the game with a score of %s!\n", clients[clientIndex]->name, incoming.message);
+    std::string scoreboard = "";
+	std::stringstream potato;
+	for(int i = 0; i < spaceShips.size(); i++) {
+		potato <<spaceShips[i]->getName()<<","<<spaceShips[i]->getSize()<< ";";
+	}
+	scoreboard = potato.str();
+	/*
+    std::stringstream ss; 
+    std::string name(clients[clientIndex].name);
+    std::string score = incoming.message.c_str();
+    ss << scoreboard << name << "," << score << ";";
+    */
+    Packet outgoing;
+    outgoing.type = SCORE;
+    outgoing.message = const_cast<char*>(scoreboard.c_str());
+    char *out = NetworkUtil::PacketToCharArray(outgoing);
+    if(NetworkUtil::TCPSend(clients[clientIndex]->sock, out))
+    	printf("Sent back scoreboard: %s\n", out);
+    else
+    	printf("Didn't sent scoreboard\n");
     if(verbose) std::cout << "Exiting receiveScorePacket" << std::endl;
+	free(out);
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
