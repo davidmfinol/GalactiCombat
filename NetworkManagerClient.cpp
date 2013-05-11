@@ -20,11 +20,11 @@ NetworkManagerClient::~NetworkManagerClient(void)
 //-------------------------------------------------------------------------------------
 int NetworkManagerClient::connect(char *host, char *name)
 {
-    //std::cout << "Entering connect" << std::endl << std::endl;
+    ////std::cout << "Entering connect" << std::endl << std::endl;
     Uint16 port = (Uint16) TCP_PORT;
     
     // Resolve the argument into an IPaddress type 
-    //std::cout << "Connecting to " << host << " port " << port << std::endl;
+    ////std::cout << "Connecting to " << host << " port " << port << std::endl;
     IPaddress ip;
     if(NetworkUtil::ResolveHost(&ip, host, port)==-1) {
         SDLNet_Quit();
@@ -34,7 +34,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     }
     
     // open the TCP socket
-    //std::cout << "Opening TCP server socket." << std::endl;
+    ////std::cout << "Opening TCP server socket." << std::endl;
     TCPServerSock = NetworkUtil::TCPOpen(&ip);
     if(!TCPServerSock) {
         SDLNet_Quit();
@@ -59,7 +59,7 @@ int NetworkManagerClient::connect(char *host, char *name)
 	*/	
    /* 
     // open the UDP socket
-    //std::cout << "Opening UDP server socket." << std::endl;
+    ////std::cout << "Opening UDP server socket." << std::endl;
     UDPServerSock = NetworkUtil::UDPOpen(0);
     if(!UDPServerSock)
     {
@@ -79,14 +79,14 @@ int NetworkManagerClient::connect(char *host, char *name)
         std::cerr<<"Something done goofed when trying to connect to server."<<std::endl;
         exit(8);
     }
-    //std::cout << "Sent " << out << std::endl;
+    ////std::cout << "Sent " << out << std::endl;
     free(out);
     
     // store our connection info
     mName = name;
     serverIP = ip;
     connected = true;
-    //std::cout << "Exiting TCPConnect" << std::endl << std::endl;
+    ////std::cout << "Exiting TCPConnect" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
 TCPsocket& NetworkManagerClient::getSocket()
@@ -113,14 +113,14 @@ void NetworkManagerClient::sendPlayerScore(double score)
     char *out = NetworkUtil::PacketToCharArray(outgoing);
 
     if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
-        //std::cout << "Receving: " << incoming << std::endl;
+        ////std::cout << "Receving: " << incoming << std::endl;
         Packet pack = NetworkUtil::charArrayToPacket(incoming);
         if(pack.type != SCORE) {   
-            //std::cout << "Error in sendPlayerScore() in NetworkManagerClient.cpp. Score not received from server." << std::endl;
+            ////std::cout << "Error in sendPlayerScore() in NetworkManagerClient.cpp. Score not received from server." << std::endl;
             scores = ""; 
         }   
         else{
-            //std::cout << "Received message: " << pack.message << std::endl;
+            ////std::cout << "Received message: " << pack.message << std::endl;
             scores = pack.message;
             free(pack.message); 
         }
@@ -141,7 +141,7 @@ std::string NetworkManagerClient::getPlayerScores()
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::resetReadyState()
 {
-    //std::cout << "Entering resetReadyState" << std::endl << std::endl;
+    ////std::cout << "Entering resetReadyState" << std::endl << std::endl;
     Packet outgoing;
     outgoing.type = READY;
     outgoing.message = const_cast<char*>("RESET");
@@ -151,12 +151,12 @@ void NetworkManagerClient::resetReadyState()
     NetworkUtil::TCPSend(TCPServerSock, out);
     free(out);
     
-    //std::cout << "Exiting resetReadyState" << std::endl << std::endl;
+    ////std::cout << "Exiting resetReadyState" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::quit()
 {
-    //std::cout << "Entering quit" << std::endl << std::endl << std::endl;
+    ////std::cout << "Entering quit" << std::endl << std::endl << std::endl;
     Packet outgoing;
     outgoing.type = CONNECTION;
     outgoing.message = const_cast<char*>("QUIT");
@@ -166,12 +166,12 @@ void NetworkManagerClient::quit()
     free(out);
 
     connected = false;
-    //std::cout << "Exiting quit" << std::endl << std::endl << std::endl;
+    ////std::cout << "Exiting quit" << std::endl << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
 {
-    //std::cout << "Entering sendPlayerInput" << std::endl << std::endl;
+    ////std::cout << "Entering sendPlayerInput" << std::endl << std::endl;
     Packet outgoing;
     
     bool left = controller->left();
@@ -194,9 +194,9 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     outgoing.message = &result;
     char* out = NetworkUtil::PacketToCharArray(outgoing);
 
-    //std::cout << "Sending input" << std::endl;
+    ////std::cout << "Sending input" << std::endl;
     NetworkUtil::TCPSend(TCPServerSock, out);
-    //std::cout << "Sent input" << std::endl;
+    ////std::cout << "Sent input" << std::endl;
 /*	//TODO: Use TCP to send input instead?
     UDPpacket *UDPPack = NetworkUtil::AllocPacket(sizeof(int)+1);
     if(!UDPPack) return;
@@ -205,16 +205,16 @@ void NetworkManagerClient::sendPlayerInput(ISpaceShipController* controller)
     UDPPack->len = strlen(out) + 1;
     UDPPack->address = serverIP;
     NetworkUtil::UDPSend(UDPServerSock, -1, UDPPack);
-    //std::cout << "UDPSend player input." << std::endl;
+    ////std::cout << "UDPSend player input." << std::endl;
     SDLNet_FreePacket(UDPPack);
 */
     free(out);
-    //std::cout << "Exiting sendPlayerInput" << std::endl << std::endl;
+    ////std::cout << "Exiting sendPlayerInput" << std::endl << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::sendPlayerRotation(const Ogre::Quaternion& rotation)
 {
-    //std::cout << "Entering sendPlayerRotation" << std::endl << std::endl;
+    ////std::cout << "Entering sendPlayerRotation" << std::endl << std::endl;
     Packet outgoing;
     outgoing.type = PLAYERROTATION;
     
@@ -226,31 +226,31 @@ void NetworkManagerClient::sendPlayerRotation(const Ogre::Quaternion& rotation)
     NetworkUtil::TCPSend(TCPServerSock, out);
     
     free(out);
-    //std::cout << "Exiting sendPlayerRotation" << std::endl << std::endl;
+    ////std::cout << "Exiting sendPlayerRotation" << std::endl << std::endl;
 }
 
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::receiveData()
 {
     if(!NetworkUtil::CheckSockets(set, 0)) return;
-    //std::cout<<"Entering receiveData."<<std::endl;
+    ////std::cout<<"Entering receiveData."<<std::endl;
     char *inc = NULL;
     Packet incoming;
     NetworkUtil::TCPReceive(TCPServerSock, &inc);
     incoming = NetworkUtil::charArrayToPacket(inc);
     if(incoming.type == CONNECTION)
     {
-        //std::cout << incoming.message << std::endl;
+        ////std::cout << incoming.message << std::endl;
     }
     free(inc);
     if(incoming.message)
         free(incoming.message);
-    //std::cout<<"Exiting receiveData."<<std::endl;
+    ////std::cout<<"Exiting receiveData."<<std::endl;
 }
 //-------------------------------------------------------------------------------------
 void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, std::vector<Mineral*>& minerals, std::vector<SpaceShip*>& spaceships, std::list<Bullet*>& bullets)
 {
-    //std::cout << "Entering requestGameState" << std::endl << std::endl;
+    ////std::cout << "Entering requestGameState" << std::endl << std::endl;
     static int iii = 0;
     Packet outgoing;
     Packet infoPacket;
@@ -265,7 +265,7 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
 
 	if(NetworkUtil::UDPReceive(UDPServerSock, UDPPack) > 0)
 	{
-		//std::cout << "Received UDP Packet." << std::endl;
+		////std::cout << "Received UDP Packet." << std::endl;
 		infoPacket = NetworkUtil::charArrayToPacket((char*)UDPPack->data);
 		SDLNet_FreePacket(UDPPack);
 	}
@@ -274,7 +274,7 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
 */
     if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
         infoPacket = NetworkUtil::charArrayToPacket(incoming);
-        //std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
+        ////std::cout << iii++ << ": " << infoPacket.message << std::endl << std::endl;
         std::string message(infoPacket.message);
 
         // Minerals
@@ -304,10 +304,10 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
             bool found = false;
             for(int j = 0; j < minerals.size(); ++j)
             {
-                //std::cout << "Checking to see if " << name << " already exists." << std::endl;
+                ////std::cout << "Checking to see if " << name << " already exists." << std::endl;
                 if(minerals[j]->getName() == name)
                 {
-                    //std::cout << "Exists." << std::endl;
+                    ////std::cout << "Exists." << std::endl;
                     found = true;
                     minerals[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
                     minerals[j]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
@@ -317,7 +317,7 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
             }
             if(!found)
             {
-                //std::cout << "Doesn't exist, create it." << std::endl;
+                ////std::cout << "Doesn't exist, create it." << std::endl;
                 minerals.push_back(new Mineral(name, sceneManager->getRootSceneNode(), pos_x, pos_y, pos_z, radius));
                 minerals.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
             }
@@ -357,10 +357,10 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
             }
             for(int j = 0; j < spaceships.size(); ++j)
             {
-                //std::cout << "Checking to see if " << name << " already exists." << std::endl;
+                ////std::cout << "Checking to see if " << name << " already exists." << std::endl;
                 if(spaceships[j]->getName() == name)
                 {
-                    //std::cout << "Exists." << std::endl;
+                    ////std::cout << "Exists." << std::endl;
                     found = true;
                     spaceships[j]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
                     spaceships[j]->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
@@ -369,7 +369,7 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
                 }
             }
             if(!found) {
-                //std::cout << "Doesn't exist, create it." << std::endl;
+                ////std::cout << "Doesn't exist, create it." << std::endl;
                 ISpaceShipController* controller = new ClientSpaceShipController();
                 spaceships.push_back(new SpaceShip(name, controller, sceneManager->getRootSceneNode()->createChildSceneNode(), pos_x, pos_y, pos_z, size));
                 spaceships.back()->getSceneNode()->setOrientation(rot_w, rot_x, rot_y, rot_z);
@@ -395,9 +395,9 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
             // FIXME: THIS IS BAD, oh well
             bool found = false;
             for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it) {
-                //std::cout << "Checking to see if " << name << " already exists." << std::endl;
+                ////std::cout << "Checking to see if " << name << " already exists." << std::endl;
                 if((*it)->getName() == name) {
-                    //std::cout << "Exists." << std::endl;
+                    ////std::cout << "Exists." << std::endl;
                     found = true;
                     (*it)->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
                     (*it)->setExist(true);
@@ -405,7 +405,7 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
                 }
             }
             if(!found) {
-                //std::cout << "Doesn't exist, create it." << std::endl;
+                ////std::cout << "Doesn't exist, create it." << std::endl;
                 Bullet* newBullet = new Bullet(name, sceneManager->getRootSceneNode(), NULL, pos_x, pos_y, pos_z);		
                 newBullet->setExist(true);
                 bullets.push_back(newBullet);
@@ -421,6 +421,6 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
     if(infoPacket.message)
         free(infoPacket.message);
 
-    //std::cout << "Exiting requestGameState" << std::endl << std::endl;
+    ////std::cout << "Exiting requestGameState" << std::endl << std::endl;
 }
 
