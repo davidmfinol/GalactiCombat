@@ -3,35 +3,36 @@
 //-------------------------------------------------------------------------------------
 bool ComputerSpaceShipController::left() const
 {
-    return false;
+	
+    return rand()%100 < 25;
 }
 //-------------------------------------------------------------------------------------
 bool ComputerSpaceShipController::right() const
 {
-    return true;
+    return rand()%100 < 25;
 }
 //-------------------------------------------------------------------------------------
 bool ComputerSpaceShipController::forward() const
 {
-    return true;
+    return rand()%100 < 25;
 }
 //-------------------------------------------------------------------------------------
 bool ComputerSpaceShipController::back() const
 {
-    return false;
+    return rand()%100 < 25;
 }
 //-------------------------------------------------------------------------------------
 bool ComputerSpaceShipController::up() const
 {
-    return true;
+    return rand()%100 < 25;
 }
 //-------------------------------------------------------------------------------------
 bool ComputerSpaceShipController::down() const
 {
-    return false;
+    return rand()%100 < 25;
 }
 //-------------------------------------------------------------------------------------
 bool ComputerSpaceShipController::shoot() const
 {
-    return false;
+    return rand()%100 < 25;
 }

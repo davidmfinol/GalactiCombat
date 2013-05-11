@@ -3,7 +3,10 @@
 const double SpaceShip::ACCELERATION = 300;
 const double SpaceShip::ENERGY_CONSUMPTION = -0.1;
 const double SpaceShip::BULLET_COST = -2;
-const double SpaceShip::ENERGY_MINING = 10.0;
+const double SpaceShip::SIZE_LOSS = -5.0;
+const double SpaceShip::SIZE_GAIN = 5.0;
+const double SpaceShip::RADIUS_LOSS = -2.0;
+const double SpaceShip::ENERGY_GAIN = 10.0;
 const double SpaceShip::STARTING_ENERGY = 50;
 const double SpaceShip::MIN_ENERGY = 0;
 const double SpaceShip::MAX_ENERGY = 100;
@@ -139,7 +142,8 @@ void SpaceShip::collidedWith(GameObject* other)
         std::time_t currentTimeStamp = std::time(0);
         if (currentTimeStamp != mCollisionTimeStamp) { 
             if(((Mineral*)other)->getRadius() <= size) { // the mineral is smaller than us; we can mine it
-                energy += ENERGY_MINING;
+                energy += ENERGY_GAIN;
+                ((Mineral*)other)->adjustRadius(RADIUS_LOSS);
                 energy = energy > MAX_ENERGY ? MAX_ENERGY : energy;
             }
             mCollisionTimeStamp = currentTimeStamp;
@@ -150,9 +154,9 @@ void SpaceShip::collidedWith(GameObject* other)
         std::time_t currentTimeStamp = std::time(0);
         if (currentTimeStamp != mCollisionTimeStamp) { // We are bullies: bigger gets bigger, smaller gets smaller
             if(((SpaceShip*)other)->getSize() < size)
-                sizeDifference = 10;
+                sizeDifference = SIZE_GAIN;
             else if(((SpaceShip*)other)->getSize() > size)
-                sizeDifference = -10;
+                sizeDifference = SIZE_LOSS;
             mCollisionTimeStamp = currentTimeStamp;
         }
     }
