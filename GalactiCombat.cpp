@@ -429,7 +429,7 @@ std::string GalactiCombat::getCurrentTime(void)
     static std::time_t startTime = std::time(0);
     static std::time_t prevTime = startTime;
     std::time_t currentTime = std::time(0);
-    static int min = 4;
+    static int min = 0;
     static int sec = 59;
     if (mGUIMgr->resetTimer()) {
         startTime = std::time(0);
