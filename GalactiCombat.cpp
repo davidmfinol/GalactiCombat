@@ -221,6 +221,7 @@ void GalactiCombat::createFrameListener(void)
 //-------------------------------------------------------------------------------------
 bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
+    std::cout << "Entering frameRenderingQueued" << std::endl;
     static std::time_t startTime;
     static std::time_t prevTime;
     // Handle essential events
@@ -275,11 +276,13 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
         // Background music
         this->loopBackgroundMusic();
     }
+    std::cout << "Exiting frameRenderingQueued" << std::endl;
     return true;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
+    std::cout << "Entering updateFromServer" << std::endl;
     // Contact server
 //    mNetworkMgr->receiveData();
     mNetworkMgr->requestGameState(mSceneMgr, minerals, spaceShips, bullets);
@@ -288,10 +291,12 @@ void GalactiCombat::updateFromServer(void)
     this->updateMinerals();
     this->updateSpaceShips();
     this->updateBullets();
+    std::cout << "Exiting updateFromServer" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
 {
+    std::cout << "Entering gameLoop" << std::endl;
     // Update the ships
     for (int i = 0; i < spaceShips.size(); ++i) {
         // Orientation is handled by Ogre
@@ -341,33 +346,37 @@ void GalactiCombat::gameLoop(float elapsedTime)
     this->updateMinerals();
     this->updateSpaceShips();
     this->updateBullets();
+    std::cout << "Exiting gameLoop" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
 {
-        Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
-        Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
-        Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
-        pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
-        velocity += orientation*Ogre::Vector3(0, 0, -5000);
-        
-        static int bulletID = 0;
-        std::string bulletName("Bullet");
-        char idChar[4];
-        sprintf(idChar, "%d", bulletID);
-        bulletName += idChar;
-        if(!isServer)
-            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
-        else
-            bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
-        physicsSimulator->addGameObject(bullets.back());
-        physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
-        physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
-        bulletID++;
+    std::cout << "Entering createBullet" << std::endl;
+    Ogre::Vector3 pos = physicsSimulator->getGameObjectPosition(ship);
+    Ogre::Vector3 velocity = physicsSimulator->getGameObjectVelocity(ship);
+    Ogre::Quaternion orientation = physicsSimulator->getGameObjectOrientation(ship);
+    pos += orientation*Ogre::Vector3(0, 0, -2*ship->getSize());
+    velocity += orientation*Ogre::Vector3(0, 0, -5000);
+    
+    static int bulletID = 0;
+    std::string bulletName("Bullet");
+    char idChar[4];
+    sprintf(idChar, "%d", bulletID);
+    bulletName += idChar;
+    if(!isServer)
+        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), ship, pos.x, pos.y, pos.z));
+    else
+        bullets.push_back(new Bullet(bulletName, mSceneMgr->getRootSceneNode(), NULL, ship, pos.x, pos.y, pos.z));
+    physicsSimulator->addGameObject(bullets.back());
+    physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
+    physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
+    bulletID++;
+    std::cout << "Exiting createBullet" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateSpaceShips(void)
 {
+    std::cout << "Entering updateSpaceShips" << std::endl;
     for (int i = 0; i < spaceShips.size(); ++i) {
         double diff = spaceShips[i]->getSizeDifference();
         if(diff!=0) {
@@ -380,10 +389,12 @@ void GalactiCombat::updateSpaceShips(void)
     //if(!isServer) {
     //if (camera) mSoundMgr->playSound("media/sounds/bell.wav");
     //if (camera) mSoundMgr->playSound("media/sounds/bounce.wav");}
+    std::cout << "Exiting updateSpaceShips" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateMinerals(void)
 {
+    std::cout << "Entering updateMinerals" << std::endl;
     for (int i = 0; i < minerals.size(); ++i) {
         double diff = minerals[i]->getRadiusDifference();
         if(diff!=0) {
@@ -394,20 +405,24 @@ void GalactiCombat::updateMinerals(void)
         if(!isServer)
             adjustMineralMaterial(minerals[i]);
     }
+    std::cout << "Exiting updateMinerals" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 {
+    std::cout << "Entering adjustMineralMaterial" << std::endl;
     if (mineral->getRadius() < spaceShips[0]->getSize())
         mineral->getEntity()->setMaterialName("Examples/SphereBlue");
     else if (mineral->getRadius() > spaceShips[0]->getSize())
         mineral->getEntity()->setMaterialName("Examples/SphereMappedRustySteel");
     else
-        mineral->getEntity()->setMaterialName("Examples/SphereYellow");
+        mineral->getEntity()->setMaterialName("Examples/SphereYellow");v
+    std::cout << "Exiting adjustMineralMaterial" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateBullets(void)
 {
+    std::cout << "Entering updateBullets" << std::endl;
     for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); /*++it*/) {
         if( (*it)->isLifeOver() ) {
             physicsSimulator->removeGameObject(*it);
@@ -417,6 +432,7 @@ void GalactiCombat::updateBullets(void)
         }
         else ++it;
     }
+    std::cout << "Exiting updateBullets" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::crazyEnergyInjection(void)

@@ -20,7 +20,7 @@ GUIManager::~GUIManager(void)
     if(inputLabel) delete inputLabel;
     if(startSingle) delete startSingle;
     if(startMulti) delete startMulti;
-	if(submitButton) delete submitButton;
+    if(submitButton) delete submitButton;
     if(musicButton) delete musicButton;
     if(quitButton) delete quitButton;
     if(gameoverQuitButton) delete gameoverQuitButton;
@@ -30,8 +30,8 @@ GUIManager::~GUIManager(void)
     if(lobbyPanel) delete lobbyPanel;
     if(lobbyReadyButton) delete lobbyReadyButton;
     if(lobbyQuitButton) delete lobbyQuitButton;
-	if(mTrayMgr) delete mTrayMgr;
-	
+    if(mTrayMgr) delete mTrayMgr;
+    
 }
 
 void GUIManager::GUIsetup(NetworkManagerClient* network, SoundManager* sound, Ogre::RenderWindow* window, OIS::Mouse* mouse)

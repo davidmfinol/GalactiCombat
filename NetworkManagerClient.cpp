@@ -74,8 +74,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     pack.type = CONNECTION;
     pack.message = name; // FIXME: SHOULD USE? :char message[MAXLEN];
     char* out = NetworkUtil::PacketToCharArray(pack);
-    if(!NetworkUtil::TCPSend(TCPServerSock, out))
-    {
+    if(!NetworkUtil::TCPSend(TCPServerSock, out)) {
         SDLNet_TCP_Close(TCPServerSock);
         std::cerr<<"Something done goofed when trying to connect to server."<<std::endl;
         exit(8);
@@ -420,7 +419,6 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
     free(incoming);
     if(infoPacket.message)
         free(infoPacket.message);
-
 
     std::cout << "Exiting requestGameState" << std::endl << std::endl;
 }
