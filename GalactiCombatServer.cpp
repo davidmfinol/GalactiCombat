@@ -640,13 +640,12 @@ void GalactiCombatServer::receiveWallsPacket(int clientIndex, Packet& incoming)
 void GalactiCombatServer::receiveScorePacket(int clientIndex, Packet& incoming)
 {
     if(verbose) std::cout << "Entering receiveScorePacket" << std::endl;
-    //TODO: THIS PACKET TYPE NEEDS TO BE REDONE
 	if(incoming.type != SCORE)
     {   
     	std::cerr<<"Error. This isn't a score. Skipping."<<std::endl;
 		return;
     }   
-//    if(verbose) printf("%s ended the game with a score of %s!\n", clients[clientIndex]->name, incoming.message);
+	if(verbose) std::cout<<clients[clientIndex]->name<<" ended the game with a score of "<<incoming.message<<"!"<<std::endl;
     std::string scoreboard = "";
 	std::stringstream potato;
 	for(int i = 0; i < spaceShips.size(); i++) {
@@ -664,9 +663,9 @@ void GalactiCombatServer::receiveScorePacket(int clientIndex, Packet& incoming)
     outgoing.message = const_cast<char*>(scoreboard.c_str());
     char *out = NetworkUtil::PacketToCharArray(outgoing);
     if(NetworkUtil::TCPSend(clients[clientIndex]->sock, out))
-    	printf("Sent back scoreboard: %s\n", out);
+    	if(verbose) std::cout<<"Sent back scoreboard: "<<out<<std::endl;
     else
-    	printf("Didn't sent scoreboard\n");
+    	printf("Didn't send scoreboard\n");
     if(verbose) std::cout << "Exiting receiveScorePacket" << std::endl;
 	free(out);
 }
