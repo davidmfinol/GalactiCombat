@@ -82,10 +82,11 @@ void GalactiCombatServer::removeClient(int i)
         return;
     
     // FIXME: Remove THE SPACESHIP from the game
-    //physicsSimulator->removeGameObject(spaceShips[i]);
-    //delete spaceShips[i];
-    //delete clients[i]->ship->getController();
-    //spaceShips.erase(spaceShips.begin() + i);
+    physicsSimulator->removeGameObject(spaceShips[i]);
+    physicsSimulator->deleteGameObject(spaceShips[i]);
+    delete clients[i]->ship->getController();
+    delete spaceShips[i];
+    spaceShips.erase(spaceShips.begin() + i);
     
     //Unbind the UDP socket
     //SDLNet_UDP_Unbind(UDPServerSock, clients[i]->channel);
