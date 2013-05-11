@@ -405,8 +405,8 @@ void GalactiCombat::updateBullets(void)
             delete *it;
             it = bullets.erase(it);
         }
-		else
-			++it;
+        else
+            ++it;
     }
 
 }

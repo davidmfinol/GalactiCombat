@@ -2,7 +2,7 @@
 
 const int Mineral::MAX_RADIUS = 100;
 const int Mineral::MIN_RADIUS = 10;
-const double Mineral::RADIUS_INCREASE = 5.0;
+const double Mineral::RADIUS_INCREASE = 10.0;
 const double Mineral::RADIUS_DECREASE = -5.0;
 
 //-------------------------------------------------------------------------------------
