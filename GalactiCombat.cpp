@@ -200,7 +200,7 @@ void GalactiCombat::loopBackgroundMusic(void)
 {
     std::time_t currentTime = std::time(0);
     std::time_t diff = currentTime - startTime;
-    if (diff != 0 && diff % 130 == 0) {
+    if (diff != 0 && diff % 115 == 0) {
         mSoundMgr->playMusic("media/sounds/Level1_destination.wav");
         startTime = currentTime;
     }
