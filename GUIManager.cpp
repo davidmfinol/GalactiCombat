@@ -192,13 +192,13 @@ void GUIManager::gameOver(double size) {
         lobbyPanel = mTrayMgr->createTextBox(OgreBites::TL_CENTER, "lobby_panel", "Game Lobby", 500, 300);
         lobbyReadyButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_ready_button", "Ready", 200);
         lobbyQuitButton = mTrayMgr->createButton(OgreBites::TL_CENTER, "lobby_quit_button", "Quit", 200);
-		/*
 		///////////////////////// Add the online scores
         std::multimap<double, std::string, std::greater<double> > topScores;
         std::map<std::string, double> playerScores;
         mNetworkMgr->sendPlayerScore(size);
         std::string scores = mNetworkMgr->getPlayerScores();
 		std::stringstream o;
+        o << "Scoreboard:\n";
 		std::cout<<"Starting while loop."<<std::endl;
         while(scores != "") {
 			std::cout<<"Inside while loop."<<std::endl;
@@ -215,16 +215,14 @@ void GUIManager::gameOver(double size) {
             if(score > playerScores[name])
                 playerScores[name] = score;
             scores = scores.substr(pos + 1); 
-        	o << "Scoreboard:\n";
         //for(std::map<std::string, double>::iterator it = playerScores.begin(); it != playerScores.end(); ++it) 
         //    o << (it->first) << ": " << (it->second) << "\n";
-        	for(std::multimap<double, std::string>::iterator it = topScores.begin(); it != topScores.end(); ++it) 
-            	o << (it->first) << ": " << (it->second) << "\n";
     	}
+        for(std::multimap<double, std::string>::iterator it = topScores.begin(); it != topScores.end(); ++it) 
+            o << (it->first) << ": " << (it->second) << "\n";
 		std::cout<<"Ending while loop."<<std::endl;
         mTrayMgr->showOkDialog("Scoreboard", o.str());
 		/////////////////////////////////////////////////////////////
-		*/
     }
     else {
         finalState = true;
