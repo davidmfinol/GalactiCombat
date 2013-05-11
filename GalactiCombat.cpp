@@ -90,6 +90,11 @@ void GalactiCombat::createScene(void)
 void GalactiCombat::createPlayer(void)
 {
     // create player
+    if(spaceShips.size() > 0 && spaceShips[0]) {
+        physicsSimulator->removeGameObject(spaceShips[0]);
+        physicsSimulator->deleteGameObject(spaceShips[0]);
+        delete spaceShips[0];
+    }
     spaceShips.resize(1);
     spaceShips[0] = new SpaceShip("PlayerSpaceShip", dynamic_cast<ISpaceShipController*>(mInputMgr), 
                                   mSceneMgr->getRootSceneNode(), 200, 200, 200);
@@ -236,11 +241,11 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
                 if (allReady.find("All players ready") != std::string::npos) {
                     mGUIMgr->startCountingDown();
                     this->destroyScene();
-                    this->createRoom();
                     this->createCamera();
                     this->createViewports();
-                    this->setLighting();
                     this->createPlayer();
+                    this->createRoom();
+                    this->setLighting();
                     startTime = prevTime = std::time(0);
                 }
             }
@@ -449,6 +454,10 @@ std::string GalactiCombat::getCurrentTime(void)
     if (min == 0 && sec <= 10) {
         if (sec == 0) {
             mGUIMgr->gameOver(spaceShips[0]->getSize());
+            if(!mNetworkMgr->isOnline()) {
+                this->destroyScene();
+                this->createScene();
+            }
         }
         mGUIMgr->countDown(sec, OVER_CODE);
     }
