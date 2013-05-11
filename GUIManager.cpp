@@ -277,6 +277,7 @@ void GUIManager::okDialogClosed(const Ogre::DisplayString& message)
     }
 	else if (message.substr(0, 10) == "Scoreboard")
 	{
+        
 	}
 }
 

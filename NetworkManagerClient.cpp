@@ -26,8 +26,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     // Resolve the argument into an IPaddress type 
     std::cout << "Connecting to " << host << " port " << port << std::endl;
     IPaddress ip;
-    if(NetworkUtil::ResolveHost(&ip, host, port)==-1)
-    {
+    if(NetworkUtil::ResolveHost(&ip, host, port)==-1) {
         SDLNet_Quit();
         //SDL_Quit();
         std::string exception = "fail_to_connect";
@@ -37,8 +36,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     // open the TCP socket
     std::cout << "Opening TCP server socket." << std::endl;
     TCPServerSock = NetworkUtil::TCPOpen(&ip);
-    if(!TCPServerSock)
-    {
+    if(!TCPServerSock) {
         SDLNet_Quit();
         //SDL_Quit();
         std::string exception = "fail_to_connect";
@@ -115,27 +113,25 @@ void NetworkManagerClient::sendPlayerScore(double score)
     char *incoming = NULL;
     char *out = NetworkUtil::PacketToCharArray(outgoing);
 
-    if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) 
-	{
-        printf("Receving: %s\n", incoming);
+    if(NetworkUtil::TCPSend(TCPServerSock, out) && NetworkUtil::TCPReceive(TCPServerSock, &incoming)) {
+        std::cout << "Receving: " << incoming << std::endl;
         Packet pack = NetworkUtil::charArrayToPacket(incoming);
-        if(pack.type != SCORE)
-        {   
-            printf("Error in sendPlayerScore() in NetworkManagerClient.cpp. Score not received from server.\n");
+        if(pack.type != SCORE) {   
+            std::cout << "Error in sendPlayerScore() in NetworkManagerClient.cpp. Score not received from server." << std::endl;
             scores = ""; 
         }   
         else{
-            //printf("Received message: %s\n", pack.message);
+            std::cout << "Received message: " << pack.message << std::endl;
             scores = pack.message;
-        }  
-		free(pack.message); 
+            free(pack.message); 
+        }
     }   
     else {
         connected = false;
         scores = ""; 
     }
-	free(incoming);
-	free(out);   
+    free(incoming);
+    free(out);   
 }
 
 //-------------------------------------------------------------------------------------
@@ -372,8 +368,7 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
                     break;
                 }
             }
-            if(!found)
-            {
+            if(!found) {
                 std::cout << "Doesn't exist, create it." << std::endl;
                 ISpaceShipController* controller = new ClientSpaceShipController();
                 spaceships.push_back(new SpaceShip(name, controller, sceneManager->getRootSceneNode()->createChildSceneNode(), pos_x, pos_y, pos_z, size));
@@ -387,8 +382,7 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
         
         message = message.substr(message.find(",") + 1);
         int bulletsAmount = atoi(message.substr(message.find(":") + 1, message.find(",")).c_str());
-        for (int i = 0; i < bulletsAmount; ++i)
-        {
+        for (int i = 0; i < bulletsAmount; ++i) {
             message = message.substr(message.find(",") + 1);
             std::string name = message.substr(0, message.find(","));
             message = message.substr(message.find(",") + 1);
@@ -400,11 +394,9 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
 
             // FIXME: THIS IS BAD, oh well
             bool found = false;
-            for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it)
-            {
+            for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); ++it) {
                 std::cout << "Checking to see if " << name << " already exists." << std::endl;
-                if((*it)->getName() == name)
-                {
+                if((*it)->getName() == name) {
                     std::cout << "Exists." << std::endl;
                     found = true;
                     (*it)->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
@@ -412,8 +404,7 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
                     break;
                 }
             }
-            if(!found)
-            {
+            if(!found) {
                 std::cout << "Doesn't exist, create it." << std::endl;
                 Bullet* newBullet = new Bullet(name, sceneManager->getRootSceneNode(), NULL, pos_x, pos_y, pos_z);		
                 newBullet->setExist(true);
