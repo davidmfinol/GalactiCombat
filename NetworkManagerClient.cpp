@@ -91,7 +91,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     serverIP = ip;
     connected = true;
     //std::cout << "Exiting TCPConnect" << std::endl << std::endl;
-}
+
 //-------------------------------------------------------------------------------------
 TCPsocket& NetworkManagerClient::getSocket()
 {
@@ -128,12 +128,14 @@ void NetworkManagerClient::sendPlayerScore(double score)
         else{
             //printf("Received message: %s\n", pack.message);
             scores = pack.message;
-        }   
+        }  
+		free(pack.message); 
     }   
     else {
         connected = false;
         scores = ""; 
     }
+	free(incoming);
 	free(out);   
 }
 
