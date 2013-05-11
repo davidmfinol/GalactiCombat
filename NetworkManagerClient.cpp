@@ -352,6 +352,7 @@ void NetworkManagerClient::requestGameState(Ogre::SceneManager* sceneManager, st
             if(name == mName)
             {
                 spaceships[0]->getSceneNode()->setPosition(pos_x, pos_y, pos_z);
+                spaceships[0]->adjustSize(size - spaceships[0]->getSize());
                 continue;
             }
             for(int j = 0; j < spaceships.size(); ++j)

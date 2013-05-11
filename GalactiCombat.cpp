@@ -12,15 +12,18 @@ const float GalactiCombat::TIME_STEP = 1.0f/60.0f;
 //-------------------------------------------------------------------------------------
 GalactiCombat::GalactiCombat(void) : minerals(MINERALS_AMOUNT), walls(6), spaceShips(0), bullets(0), isServer(false), startTime(0)
 {
+    std::cout << "Entering GalactiCombat" << std::endl;
     physicsSimulator = new PhysicsSimulator(Mineral::MAX_RADIUS, SpaceShip::MAX_SIZE);
     mSoundMgr = new SoundManager();
     mGUIMgr = new GUIManager(SpaceShip::MIN_ENERGY, SpaceShip::MAX_ENERGY);
     mNetworkMgr = new NetworkManagerClient();
     mInputMgr = new InputManager(mNetworkMgr);
+    std::cout << "Exiting GalactiCombat" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 GalactiCombat::~GalactiCombat(void)
 {
+    std::cout << "Entering ~GalactiCombat" << std::endl;
     if(spaceShips.size() > 0 && spaceShips[0])
         delete spaceShips[0];
     delete mInputMgr;
@@ -28,10 +31,12 @@ GalactiCombat::~GalactiCombat(void)
     delete mGUIMgr;
     delete mSoundMgr;
     delete physicsSimulator;
+    std::cout << "Exiting ~GalactiCombat" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createCamera(void)
 {
+    std::cout << "Entering createCamera" << std::endl;
     // create the camera
     mCamera = mSceneMgr->createCamera("PlayerCam");
     // set its position, direction  
@@ -40,20 +45,24 @@ void GalactiCombat::createCamera(void)
     // set the near clip distance
     mCamera->setNearClipDistance(5);
     mCamera->setFarClipDistance(500);
+    std::cout << "Exiting createCamera" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createViewports(void)
 {
+    std::cout << "Entering createViewports" << std::endl;
     // create one viewport, entire window
     mWindow->removeAllViewports();
     Ogre::Viewport* vp = mWindow->addViewport(mCamera);
     vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
     // alter the camera aspect ratio to match the viewport
     mCamera->setAspectRatio(Ogre::Real(vp->getActualWidth()) / Ogre::Real(vp->getActualHeight())); 
+    std::cout << "Exiting createViewports" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::destroyScene(void)
 {
+    std::cout << "Entering destroyScene" << std::endl;
     while(spaceShips.size()>1) delete spaceShips.back(), spaceShips.pop_back();
     while(!walls.empty()) delete walls.back(), walls.pop_back();
     while(!minerals.empty()) delete minerals.back(), minerals.pop_back();
@@ -61,10 +70,12 @@ void GalactiCombat::destroyScene(void)
     mSceneMgr->destroyAllCameras();
     mSceneMgr->destroyAllLights();
     mSceneMgr->clearScene();
+    std::cout << "Exiting destroyScene" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createScene(void)
 {
+    std::cout << "Entering createScene" << std::endl;
     // create player
     createPlayer();
     
@@ -84,11 +95,13 @@ void GalactiCombat::createScene(void)
     
     // set the ambiance for the game
     this->setLighting();
-    mSoundMgr->playMusic("media/sounds/Level1_destination.wav");   
+    mSoundMgr->playMusic("media/sounds/Level1_destination.wav"); 
+    std::cout << "Exiting createScene" << std::endl;  
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createPlayer(void)
 {
+    std::cout << "Entering createPlayer" << std::endl;
     // create player
 	/* //FIXME: MEMORY LEAK
     if(spaceShips.size() > 0 && spaceShips[0]) {
@@ -105,10 +118,12 @@ void GalactiCombat::createPlayer(void)
     // set camera to player
     spaceShips[0]->attachCamera(mCamera);
     mInputMgr->setPlayerCamera(spaceShips[0]->getSceneNode(), mCamera->getParentSceneNode());
+    std::cout << "Exiting createPlayer" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createMinerals(void)
 {
+    std::cout << "Entering createMinerals" << std::endl;
     int radius, i, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z;
     std::srand (std::time(NULL));
     for (i = 0; i < minerals.size(); i++) {
@@ -126,10 +141,12 @@ void GalactiCombat::createMinerals(void)
         physicsSimulator->addGameObject(minerals[i], RESTITUTION);
         physicsSimulator->setGameObjectVelocity(minerals[i], Ogre::Vector3(vel_x, vel_y, vel_z));
     }
+    std::cout << "Exiting createMinerals" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createRoom(void)
 {
+    std::cout << "Entering createRoom" << std::endl;
     // create planes
     Ogre::Plane ground(Ogre::Vector3::UNIT_Y, 0);
     Ogre::Plane ceiling(Ogre::Vector3::NEGATIVE_UNIT_Y, 0);
@@ -191,38 +208,46 @@ void GalactiCombat::createRoom(void)
     entRight->setCastShadows(false);
     walls[5] = new GameObject ("right", mSceneMgr->getRootSceneNode(), entRight, 0, ROOM_SIZE/2, ROOM_SIZE/2, 0, "NEGATIVE_UNIT_Z");
     physicsSimulator->addGameObject(walls[5]);
+    std::cout << "Exiting createRoom" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::setLighting(void)
 {
+    std::cout << "Entering setLighting" << std::endl;
     // set light attributes
     mSceneMgr->setAmbientLight(Ogre::ColourValue(0.4, 0.4, 0.4));
     mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
     
     // draw the skybox
     mSceneMgr->setSkyBox(true, "Examples/SpaceSkyBox2");
+    std::cout << "Exiting setLighting" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::loopBackgroundMusic(void)
 {
+    std::cout << "Entering loopBackgroundMusic" << std::endl;
     std::time_t currentTime = std::time(0);
     std::time_t diff = currentTime - startTime;
     if (diff != 0 && diff % 115 == 0) {
         mSoundMgr->playMusic("media/sounds/Level1_destination.wav");
         startTime = currentTime;
     }
+    std::cout << "Exiting loopBackgroundMusic" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createFrameListener(void)
 {
+    std::cout << "Entering createFrameListener" << std::endl;
     mInputMgr->inputSetup(mWindow, mGUIMgr);
     mGUIMgr->GUIsetup(mNetworkMgr, mSoundMgr, mWindow, mInputMgr->getMouse());
     mGUIMgr->displayWelcomeMsg();
     mRoot->addFrameListener(this);
+    std::cout << "Exiting createFrameListener" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
+    std::cout << "Entering frameRenderingQueued" << std::endl;
     static std::time_t startTime;
     static std::time_t prevTime;
     // Handle essential events
@@ -277,11 +302,13 @@ bool GalactiCombat::frameRenderingQueued(const Ogre::FrameEvent& evt)
         // Background music
         this->loopBackgroundMusic();
     }
+    std::cout << "Exiting frameRenderingQueued" << std::endl;
     return true;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateFromServer(void)
 {
+    std::cout << "Entering updateFromServer" << std::endl;
     // Contact server
 //    mNetworkMgr->receiveData();
     mNetworkMgr->requestGameState(mSceneMgr, minerals, spaceShips, bullets);
@@ -290,10 +317,12 @@ void GalactiCombat::updateFromServer(void)
     this->updateMinerals();
     this->updateSpaceShips();
     this->updateBullets();
+    std::cout << "Exiting updateFromServer" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::gameLoop(float elapsedTime)
 {
+    std::cout << "Entering gameLoop" << std::endl;
     // Update the ships
     for (int i = 0; i < spaceShips.size(); ++i) {
         // Orientation is handled by Ogre
@@ -343,6 +372,7 @@ void GalactiCombat::gameLoop(float elapsedTime)
     this->updateMinerals();
     this->updateSpaceShips();
     this->updateBullets();
+    std::cout << "Exiting gameLoop" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::createBullet(SpaceShip* ship)
@@ -366,10 +396,12 @@ void GalactiCombat::createBullet(SpaceShip* ship)
     physicsSimulator->setGameObjectOrientation(bullets.back(), orientation);
     physicsSimulator->setGameObjectVelocity(bullets.back(), velocity);
     bulletID++;
+    std::cout << "Exiting createBullet" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateSpaceShips(void)
 {
+    std::cout << "Entering updateSpaceShips" << std::endl;
     for (int i = 0; i < spaceShips.size(); ++i) {
         double diff = spaceShips[i]->getSizeDifference();
         if(diff!=0) {
@@ -382,10 +414,12 @@ void GalactiCombat::updateSpaceShips(void)
     //if(!isServer) {
     //if (camera) mSoundMgr->playSound("media/sounds/bell.wav");
     //if (camera) mSoundMgr->playSound("media/sounds/bounce.wav");}
+    std::cout << "Exiting updateSpaceShips" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateMinerals(void)
 {
+    std::cout << "Entering updateMinerals" << std::endl;
     for (int i = 0; i < minerals.size(); ++i) {
         double diff = minerals[i]->getRadiusDifference();
         if(diff!=0) {
@@ -396,20 +430,24 @@ void GalactiCombat::updateMinerals(void)
         if(!isServer)
             adjustMineralMaterial(minerals[i]);
     }
+    std::cout << "Exiting updateMinerals" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::adjustMineralMaterial(Mineral* mineral)
 {
+    std::cout << "Entering adjustMineralMaterial" << std::endl;
     if (mineral->getRadius() < spaceShips[0]->getSize())
         mineral->getEntity()->setMaterialName("Examples/SphereBlue");
     else if (mineral->getRadius() > spaceShips[0]->getSize())
         mineral->getEntity()->setMaterialName("Examples/SphereMappedRustySteel");
     else
         mineral->getEntity()->setMaterialName("Examples/SphereYellow");
+    std::cout << "Exiting adjustMineralMaterial" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::updateBullets(void)
 {
+    std::cout << "Entering updateBullets" << std::endl;
     for(std::list<Bullet*>::iterator it = bullets.begin(); it != bullets.end(); /*++it*/) {
         if( (*it)->isLifeOver() ) {
             physicsSimulator->removeGameObject(*it);
@@ -419,10 +457,12 @@ void GalactiCombat::updateBullets(void)
         }
         else ++it;
     }
+    std::cout << "Exiting updateBullets" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 void GalactiCombat::crazyEnergyInjection(void)
 {
+    std::cout << "Entering crazyEnergyInjection" << std::endl;
     int i, vel_x, vel_y, vel_z;
     
     for (i = 0; i < minerals.size(); i++) {
@@ -431,10 +471,12 @@ void GalactiCombat::crazyEnergyInjection(void)
         vel_z = ((std::rand() % 500) + 500) * (std::rand() % 2 == 0 ? 1 : -1); 
         physicsSimulator->setGameObjectVelocity(minerals[i], Ogre::Vector3(vel_x, vel_y, vel_z));
     }
+    std::cout << "Exiting crazyEnergyInjection" << std::endl;
 }
 //-------------------------------------------------------------------------------------
 std::string GalactiCombat::getCurrentTime(void)
 {
+    std::cout << "Entering getCurrentTime" << std::endl;
     std::ostringstream o;
     static std::time_t startTime = std::time(0);
     static std::time_t prevTime = startTime;
@@ -478,5 +520,6 @@ std::string GalactiCombat::getCurrentTime(void)
         o << min << ":0" << sec;
     else
         o << min << ":" << sec;
+    std::cout << "Exiting getCurrentTime" << std::endl;
     return o.str();
 }
