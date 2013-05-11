@@ -128,12 +128,14 @@ void NetworkManagerClient::sendPlayerScore(double score)
         else{
             //printf("Received message: %s\n", pack.message);
             scores = pack.message;
-        }   
+        }  
+		free(pack.message); 
     }   
     else {
         connected = false;
         scores = ""; 
     }
+	free(incoming);
 	free(out);   
 }
 

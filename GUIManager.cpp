@@ -182,9 +182,6 @@ void GUIManager::gameOver(double size) {
     }
     mTrayMgr->showCursor();
     
-    
-
-
     if (mNetworkMgr->isOnline()) {
         countdown = false;
         inLobby = true;
@@ -193,6 +190,7 @@ void GUIManager::gameOver(double size) {
         isReady = false;
         notifyResetTimer = true;
         mNetworkMgr->resetReadyState();
+
 		///////////////////////// Add the online scores
         std::multimap<double, std::string, std::greater<double> > topScores;
         std::map<std::string, double> playerScores;
