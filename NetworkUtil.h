@@ -17,7 +17,7 @@
 #include "SDL/SDL_net.h"
 #endif
 
-#define ERROR 0xff
+//#define ERROR 0xff
 #define TIMEOUT 5000 //five seconds
 
 #define TCP_PORT 5172

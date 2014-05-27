@@ -34,10 +34,12 @@ GUIManager::~GUIManager(void)
     
 }
 
-void GUIManager::GUIsetup(NetworkManagerClient* network, SoundManager* sound, Ogre::RenderWindow* window, OIS::Mouse* mouse)
+void GUIManager::GUIsetup(NetworkManagerClient* network, SoundManager* sound, Ogre::RenderWindow* window, OIS::Mouse* mouse, OIS::Keyboard* keyboard)
 {
     // Create the tray manager
-    mTrayMgr = new OgreBites::SdkTrayManager("InterfaceName", window, mouse, this);
+    mInputContext.mMouse = mouse;
+	mInputContext.mKeyboard = keyboard;
+    mTrayMgr = new OgreBites::SdkTrayManager("InterfaceName", window, mInputContext, this);
     // load the fonts
     Ogre::FontManager::getSingleton().getByName("SdkTrays/Caption")->load();
     Ogre::FontManager::getSingleton().getByName("SdkTrays/Value")->load();
@@ -218,7 +220,7 @@ void GUIManager::gameOver(double size) {
         //for(std::map<std::string, double>::iterator it = playerScores.begin(); it != playerScores.end(); ++it) 
         //    o << (it->first) << ": " << (it->second) << "\n";
         }
-        for(std::multimap<double, std::string>::iterator it = topScores.begin(); it != topScores.end(); ++it) 
+        for(std::multimap<double, std::string, std::greater<double> >::iterator it = topScores.begin(); it != topScores.end(); ++it) 
             o << (it->first) << ": " << (it->second) << "\n";
         //std::cout<<"Ending while loop."<<std::endl;
         mTrayMgr->showOkDialog("Scoreboard", o.str());

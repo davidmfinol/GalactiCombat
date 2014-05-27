@@ -87,6 +87,7 @@ int NetworkManagerClient::connect(char *host, char *name)
     serverIP = ip;
     connected = true;
     ////std::cout << "Exiting TCPConnect" << std::endl << std::endl;
+	return 0;
 }
 //-------------------------------------------------------------------------------------
 TCPsocket& NetworkManagerClient::getSocket()

@@ -254,7 +254,7 @@ void GalactiCombat::createFrameListener(void)
 {
     //std::cout<< "Entering createFrameListener" << std::endl;
     mInputMgr->inputSetup(mWindow, mGUIMgr);
-    mGUIMgr->GUIsetup(mNetworkMgr, mSoundMgr, mWindow, mInputMgr->getMouse());
+    mGUIMgr->GUIsetup(mNetworkMgr, mSoundMgr, mWindow, mInputMgr->getMouse(), mInputMgr->getKeyboard());
     mGUIMgr->displayWelcomeMsg();
     mRoot->addFrameListener(this);
     //std::cout<< "Exiting createFrameListener" << std::endl;

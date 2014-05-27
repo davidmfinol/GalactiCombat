@@ -38,7 +38,7 @@
 #define INJECT_CODE 2
 #define OVER_CODE 3
 
-class GalactiCombat : public BaseApplication, public Ogre::FrameListener {
+class GalactiCombat : public BaseApplication {
     
 public:
     GalactiCombat(void);

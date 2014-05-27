@@ -21,7 +21,7 @@ class GUIManager : public OgreBites::SdkTrayListener {
 public:
     GUIManager(double, double);
     virtual ~GUIManager(void);
-    void GUIsetup(NetworkManagerClient*, SoundManager*, Ogre::RenderWindow*, OIS::Mouse*);
+    void GUIsetup(NetworkManagerClient*, SoundManager*, Ogre::RenderWindow*, OIS::Mouse*, OIS::Keyboard*);
     OgreBites::SdkTrayManager* getTrayMgr(void);
     
     // Intro 
@@ -68,6 +68,7 @@ protected:
     virtual void sliderMoved(OgreBites::Slider*);
     virtual void okDialogClosed(const Ogre::DisplayString&);
     OgreBites::SdkTrayManager* mTrayMgr;
+	OgreBites::InputContext mInputContext;
     
     // Menu items
     OgreBites::TextBox* welcomeBox;
