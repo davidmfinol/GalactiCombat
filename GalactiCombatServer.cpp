@@ -693,6 +693,7 @@ extern "C" {
     #endif
     {   
         bool verbose = false;
+    #if OGRE_PLATFORM != OGRE_PLATFORM_WIN32
         if(argc > 1)
         {
             if(strcmp(argv[1],"-v") || strcmp(argv[1],"--verbose"))
@@ -710,6 +711,7 @@ extern "C" {
             }
             */
         }
+    #endif
         GalactiCombatServer *server = new GalactiCombatServer(verbose);
         server->startServer(TCP_PORT);
         server->~GalactiCombatServer();
