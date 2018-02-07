@@ -1,5 +1,5 @@
-Three environment variables must be defined for VS2010 to build
-the project: $(OGRE_HOME), $(BULLET_HOME), and $(SDL_HOME).
+For Visual Studio to build the project, 3 environment variables 
+must be defined: $(OGRE_HOME), $(BULLET_HOME), and $(SDL_HOME).
 
 -----------------------------------------------------------
 $(OGRE_HOME):
