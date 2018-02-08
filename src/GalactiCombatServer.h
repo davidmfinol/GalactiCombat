@@ -1,6 +1,8 @@
 #ifndef __GalactiCombatServer_h_
 #define __GalactiCombatServer_h_
 
+#include <iostream>
+#include <string>
 #include <vector>
 #include "GalactiCombat.h"
 #include "NetworkUtil.h"

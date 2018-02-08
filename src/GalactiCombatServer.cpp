@@ -259,12 +259,43 @@ void GalactiCombatServer::startServer(long portNo)
     std::cout<<"Ready!"<<std::endl;
     serverLoop();
 }
+
+#define BILLION                             (1E9)
+
+static BOOL g_first_time = 1;
+static LARGE_INTEGER g_counts_per_sec;
+
+int clock_gettime(int dummy, struct timespec *ct)
+{
+	LARGE_INTEGER count;
+
+	if (g_first_time)
+	{
+		g_first_time = 0;
+
+		if (0 == QueryPerformanceFrequency(&g_counts_per_sec))
+		{
+			g_counts_per_sec.QuadPart = 0;
+		}
+	}
+
+	if ((NULL == ct) || (g_counts_per_sec.QuadPart <= 0) ||
+		(0 == QueryPerformanceCounter(&count)))
+	{
+		return -1;
+	}
+
+	ct->tv_sec = count.QuadPart / g_counts_per_sec.QuadPart;
+	ct->tv_nsec = ((count.QuadPart % g_counts_per_sec.QuadPart) * BILLION) / g_counts_per_sec.QuadPart;
+
+	return 0;
+}
 //-------------------------------------------------------------------------------------
 void GalactiCombatServer::serverLoop(void)
 {
     if(verbose) std::cout << "Entering serverLoop" << std::endl;
     timespec prevTime, currTime;
-    clock_gettime(CLOCK_MONOTONIC, &prevTime);
+    clock_gettime(1, &prevTime);
     while(1)
     {
         if(verbose) std::cout << "==============Server Loop Run=============" << std::endl;
@@ -272,7 +303,7 @@ void GalactiCombatServer::serverLoop(void)
         //run the game loop
         if(state == PLAY)
         {
-            clock_gettime(CLOCK_MONOTONIC, &currTime);
+            clock_gettime(1, &currTime);
             float elapsedTime = (currTime.tv_sec*1000000000 + currTime.tv_nsec) - (prevTime.tv_sec*1000000000 + prevTime.tv_nsec);
             elapsedTime /= 1000000000; //convert from nanoseconds to seconds
             //if(elapsedTime < TIME_STEP/2) std::cerr << "Elapsed time between iterations of game loop too small.... Skipping iteration." << std::endl;
@@ -458,7 +489,7 @@ void GalactiCombatServer::receiveConnectionPacket(int clientIndex, Packet& incom
     {
         std::stringstream ss;
         ss << clients[clientIndex]->name << " has quit the game!";
-        if(verbose) std::cout<<ss<<std::endl;
+        if(verbose) std::cout<<ss.str()<<std::endl;
         this->removeClient(clientIndex);
             /*
             //FIXME:Cause of segfault?
@@ -711,6 +742,8 @@ extern "C" {
             }
             */
         }
+#else
+		verbose = true;
     #endif
         GalactiCombatServer *server = new GalactiCombatServer(verbose);
         server->startServer(TCP_PORT);

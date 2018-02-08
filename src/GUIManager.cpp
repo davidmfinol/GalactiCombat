@@ -11,6 +11,7 @@ startSingle(0), startMulti(0), inputLabel(0), multiLabel(0), musicControl(0), so
 GUIManager::~GUIManager(void)
 {
 	//FIXME: Segfault
+	/*
     if(welcomeBox) delete welcomeBox;
     if(gameoverBox) delete gameoverBox;
     if(menuLabel) delete menuLabel;
@@ -30,6 +31,7 @@ GUIManager::~GUIManager(void)
     if(lobbyPanel) delete lobbyPanel;
     if(lobbyReadyButton) delete lobbyReadyButton;
     if(lobbyQuitButton) delete lobbyQuitButton;
+	*/
     if(mTrayMgr) delete mTrayMgr;
     
 }

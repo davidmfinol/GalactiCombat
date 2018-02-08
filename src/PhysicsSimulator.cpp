@@ -20,10 +20,12 @@ PhysicsSimulator::PhysicsSimulator(int maxSphereSize, int maxShipSize)
 PhysicsSimulator::~PhysicsSimulator(void) 
 {
     // Destroy the game objects
+	/*
     for(std::map<GameObject*, btRigidBody*>::iterator it=gameObjects.begin(); it!=gameObjects.end(); ++it) {
         this->removeGameObject(it->first);
         this->deleteGameObject(it->first);
     }
+	*/
     gameObjects.clear();
     rigidBodies.clear();
     

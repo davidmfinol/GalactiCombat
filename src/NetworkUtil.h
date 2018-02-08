@@ -59,7 +59,7 @@ namespace NetworkUtil {
         //std::cout << "Entering charArrayToPacket" << std::endl;
         Packet pack;
         
-        char* typeFinder = (char*)malloc(3);
+        char* typeFinder = (char*)malloc(4);
         memmove(typeFinder, msg, 2);
         *(typeFinder+3) = 0;
         int type = atoi(typeFinder);
@@ -74,8 +74,9 @@ namespace NetworkUtil {
             messageFinder[i-2] = msg[i];
         }
         pack.message = messageFinder;
-        
-        free(typeFinder);
+
+		if (typeFinder)
+			free(typeFinder);
         
         //std::cout << "Exiting charArrayToPacket" << std::endl;
         return pack;

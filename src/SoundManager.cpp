@@ -91,8 +91,9 @@ void SoundManager::close(void)
 {
     SDL_PauseAudio(1);
     SDL_CloseAudio();
-    for(int i = 0; i < NUM_SOUNDS; i++)
+    /*for(int i = 0; i < NUM_SOUNDS; i++)
         if(sounds[i].data) SDL_FreeWAV(sounds[i].data);
+		*/
     memset(sounds, 0, sizeof(sounds));
 }
 
